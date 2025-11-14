@@ -1,26 +1,23 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
 
-<!-- PROJECT SHIELDS -->
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
-<!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://joeldettinger.de">
-    <img src="public/favicon-home-dark.svg" alt="Logo" width="80" height="80">
+  <a href="#">
+    <img src="public/favicon-software-dark.svg" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Dual-Purpose Portfolio | Software & Photography</h3>
+<h3 align="center">Software Portfolio | Next.js & Strapi</h3>
 
   <p align="center">
-    A personal portfolio showcasing professional work in software development and photography, built with a modern hub-and-spoke architecture.
+    A personal portfolio showcasing software development projects, built with Next.js and a Strapi Headless CMS.
     <br />
     <a href="#about-the-project"><strong>Explore the Features »</strong></a>
     <br />
     <br />
-    <a href="https://joeldettinger.de">View Demo</a>
+    <a href="https://{process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}">View Demo</a>
     ·
     <a href="https://github.com/dettinjo/portfolio_frontend/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
@@ -28,7 +25,6 @@
   </p>
 </div>
 
-<!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -46,31 +42,26 @@
         <li><a href="#frontend-setup-nextjs">Frontend Setup (Next.js)</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://joeldettinger.de)
-
-This repository contains a full-stack personal portfolio designed to showcase two distinct professional areas: software development and photography. The project uses a modern "hub-and-spoke" architecture where a central landing page directs users to specialized sub-sites.
+This repository contains the frontend for a full-stack personal software portfolio. All content, from project details to skill lists, is managed through a flexible Strapi Headless CMS, allowing for easy updates without redeploying the frontend.
 
 Here's why this architecture is effective:
-*   **Separation of Concerns:** Each portfolio is tailored to its specific audience with relevant layouts and content, providing a focused user experience.
-*   **Headless & Dynamic:** All content, from project details to photo albums, is managed through a flexible Strapi Headless CMS, allowing for easy updates without redeploying the frontend.
-*   **Modern User Experience:** The entire site supports internationalization (EN/DE) and features a dynamic light/dark theme that respects user preferences.
+* **Headless & Dynamic:** Built with Strapi, all project data is fetched at build-time (SSG) or request-time (SSR/ISR) for excellent performance and maintainability.
+* **Modern User Experience:** The site is fully responsive, supports internationalization (EN/DE), and features a dynamic light/dark theme that respects user preferences.
+* **Scalable:** Using Next.js provides a robust foundation for Server-Side Rendering, Static Site Generation, and a great developer experience.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
 
-This project is built with a modern, decoupled architecture using the latest industry-standard tools for a fast, scalable, and developer-friendly experience.
+This project is built with a modern, decoupled architecture using the latest industry-standard tools.
 
 * [![Next][Next.js]][Next-url]
 * [![React][React.js]][React-url]
@@ -81,23 +72,22 @@ This project is built with a modern, decoupled architecture using the latest ind
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running, you will need to set up both the backend (Strapi) and the frontend (Next.js) services.
+To get a local copy up and running, you will need to set up both the backend (Strapi) and this frontend (Next.js) service.
 
 ### Prerequisites
 
 Ensure you have the following software installed on your machine.
-*   [Node.js](https://nodejs.org/) (v18 or higher recommended)
-*   npm
+* [Node.js](https://nodejs.org/) (v18 or higher recommended)
+* npm
     ```sh
     npm install npm@latest -g
     ```
 
 ### Backend Setup (Strapi)
 
-The backend must be running first, as the frontend depends on its API. This project is a monorepo; these instructions assume you are running them from the `/backend` directory of the original project.
+The backend must be running first. These instructions assume you are running them from the `/backend` directory of the original project monorepo.
 
 1.  Navigate into the `backend` directory.
     ```sh
@@ -115,7 +105,7 @@ The backend must be running first, as the frontend depends on its API. This proj
     ```sh
     npm run develop
     ```
-5.  **Admin Setup & Permissions:** Navigate to `http://localhost:1337/admin` to create your administrator account. Then, go to **Settings > Roles > Public** and grant `find`, `findOne`, and `create` permissions for all your content types.
+5.  **Admin Setup & Permissions:** Navigate to `http://localhost:1337/admin` to create your admin account. Then, go to **Settings > Roles > Public** and grant `find` and `findOne` permissions for all your software-related content types (projects, skills, etc.).
 
 ### Frontend Setup (Next.js)
 
@@ -125,9 +115,10 @@ These instructions should be run from the root directory of this codebase.
     ```sh
     npm install
     ```
-2.  Create an environment file. In the root directory, create a new file named `.env.local` and add the following line to connect to your local Strapi instance:
+2.  Create an environment file. Copy `.env.example` to a new file named `.env.local` and fill in your variables. At a minimum, you need:
     ```env
     NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
+    NEXT_PUBLIC_SOFTWARE_DOMAIN=localhost:3000
     ```
 3.  Start the Next.js development server (runs on `http://localhost:3000`).
     ```sh
@@ -136,63 +127,35 @@ These instructions should be run from the root directory of this codebase.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-A live demo of this project is running at **[joeldettinger.de](https://joeldettinger.de)**.
-
-Locally, once both services are running, you can access the application at `http://localhost:3000`. The multi-domain architecture is handled by a middleware that rewrites requests to the appropriate internal Next.js routes, allowing you to see all parts of the portfolio through a single domain.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [x] Separate Software & Photography portfolios
-- [x] Headless CMS integration with Strapi
-- [x] Internationalization (EN/DE)
-- [x] Dynamic Light/Dark mode theming
-- [ ] Add a blog/articles section managed from Strapi
-- [ ] Implement more advanced animations and page transitions
-
-See the [open issues](https://github.com/dettinjo/portfolio_frontend/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See the `LICENSE` file for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
 ## Contact
 
 Project Link: [https://github.com/dettinjo/portfolio_frontend](https://github.com/dettinjo/portfolio_frontend)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
 This project was made possible by these incredible tools and libraries.
 
-*   [shadcn/ui](https://ui.shadcn.com/)
-*   [next-intl](https://next-intl.dev/)
-*   [Framer Motion](https://www.framer.com/motion/)
-*   [Lucide React](https://lucide.dev/)
-*   [Devicon](https://devicon.dev/)
-*   [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+* [shadcn/ui](https://ui.shadcn.com/)
+* [next-intl](https://next-intl.dev/)
+* [Framer Motion](https://www.framer.com/motion/)
+* [Lucide React](https://lucide.dev/)
+* [Devicon](https://devicon.dev/)
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- MARKDOWN LINKS & IMAGES -->
 [issues-shield]: https://img.shields.io/github/issues/dettinjo/portfolio_frontend.svg?style=for-the-badge
 [issues-url]: https://github.com/dettinjo/portfolio_frontend/issues
 [license-shield]: https://img.shields.io/github/license/dettinjo/portfolio_frontend.svg?style=for-the-badge
 [license-url]: https://github.com/dettinjo/portfolio_frontend/blob/main/LICENSE
-[product-screenshot]: src/res/screenshots/portfolio_home.svg
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB

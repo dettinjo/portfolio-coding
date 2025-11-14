@@ -7,18 +7,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: t("title"),
-    icons: [
-      {
-        media: "(prefers-color-scheme: light)",
-        url: "/favicon-imprint-light.svg",
-        href: "/favicon-imprint-light.svg",
-      },
-      {
-        media: "(prefers-color-scheme: dark)",
-        url: "/favicon-imprint-dark.svg",
-        href: "/favicon-imprint-dark.svg",
-      },
-    ],
   };
 }
 

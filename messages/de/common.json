@@ -1,22 +1,13 @@
 {
-  "PhotographyHeader": {
-    "galleries": "Galerie",
-    "services": "Services",
-    "contact": "Kontakt"
-  },
   "Footer": {
     "made_with": "Mit",
     "by_me": "von mir entwickelt",
     "imprint": "Impressum",
     "privacy": "Datenschutz"
   },
-  "HomePage": {
-    "code": "Code",
-    "photos": "Fotos"
-  },
   "HomePageSEO": {
-    "title": "{name} - Software & Fotografie",
-    "description": "Der zentrale Portfolio-Hub von {name}, der professionelle Arbeiten in der Softwareentwicklung und Fotografie präsentiert."
+    "title": "Code von {name}",
+    "description": "Entdecken eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
   },
   "GalleryLightbox": {
     "dialogTitle": "{prefix} - Bild {index}",
@@ -68,53 +59,7 @@
     "section3_analytics_content": "Wir nutzen die Dienste Vercel Analytics und Speed Insights von unserem Hoster Vercel Inc. Diese Dienste sind datenschutzfreundlich konzipiert, erheben keine personenbezogenen Daten, die eine Identifizierung des Nutzers ermöglichen und verwenden keine Cookies. Die Rechtsgrundlage ist unser berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) an der Analyse und Optimierung unserer Website.",
     "section3_contact_title": "Kontaktformular via Formspree",
     "section3_contact_content": "Wenn Sie unser Kontaktformular nutzen, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage an den Dienstleister Formspree, Inc., 1201 Orange St, Ste 600, Wilmington, DE 19801, USA, übermittelt und dort verarbeitet. Die Verarbeitung dieser Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).",
-    "section3_recaptcha_title": "Spamschutz durch Google reCAPTCHA",
-    "section3_recaptcha_content": "Zum Schutz von Übermittlungsformularen auf dieser Seite nutzen wir den Dienst reCAPTCHA von Google LLC. Dieser Dienst stellt fest, ob eine Eingabe durch einen Menschen oder missbräuchlich durch eine automatisierte Verarbeitung erfolgt. Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses (Art. 6 Abs. 1 lit. f DSGVO) an der Vermeidung von Spam und Missbrauch. Zu diesem Zweck können Ihre IP-Adresse und weitere für den Dienst reCAPTCHA benötigte Daten an Google übertragen werden.",
-    "section3_testimonials_title": "Einreichung von Bewertungen/Testimonials",
-    "section3_testimonials_content": "Wenn Sie unser Formular zur Einreichung einer Bewertung nutzen, werden die von Ihnen bereitgestellten Daten (Name, Organisation/Event, Ihre Bewertung, Detailbewertungen und optional ein hochgeladenes Foto) an unser Backend-System (Strapi CMS) übermittelt und dort gespeichert. Dies geschieht zum Zweck der Prüfung und Veröffentlichung Ihres Feedbacks auf unserer Webseite. Die Verarbeitung dieser Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die Sie durch das Absenden des Formulars erteilen. Sie können diese Einwilligung jederzeit widerrufen, indem Sie uns kontaktieren; Ihre Bewertung wird dann entfernt.",
     "section4_title": "3. Ihre Rechte als Betroffener",
     "section4_content": "Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über Ihre gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der Datenverarbeitung und ggf. ein Recht auf Berichtigung oder Löschung dieser Daten."
-  },
-  "Auth": {
-    "LoginPage": {
-      "title": "Anmelden",
-      "description": "Greifen Sie auf Ihre persönlichen Fotoalben zu.",
-      "emailLabel": "E-Mail",
-      "passwordLabel": "Passwort",
-      "submitButton": "Mit E-Mail anmelden",
-      "googleButton": "Mit Google anmelden",
-      "noAccount": "Haben Sie noch kein Konto?",
-      "registerLink": "Registrieren",
-      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten."
-    },
-    "RegisterPage": {
-      "title": "Registrieren",
-      "description": "Erstellen Sie Ihr Kundenkonto.",
-      "usernameLabel": "Benutzername",
-      "emailLabel": "E-Mail",
-      "passwordLabel": "Passwort",
-      "submitButton": "Konto erstellen",
-      "googleButton": "Mit Google registrieren",
-      "hasAccount": "Haben Sie bereits ein Konto?",
-      "loginLink": "Anmelden",
-      "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut."
-    },
-    "CallbackPage": {
-      "title": "Verbinde...",
-      "message": "Verbindung wird hergestellt, bitte warten..."
-    },
-    "DashboardPage": {
-      "title": "Dashboard",
-      "welcome": "Willkommen, {username}!",
-      "logout": "Abmelden",
-      "albumsTitle": "Ihre Alben",
-      "noAlbums": "Ihnen sind noch keine Alben zugewiesen.",
-      "loading": "Ihr Dashboard wird geladen...",
-      "albumStatus": "Status: {status}",
-      "status": {
-        "unknown": "Ausstehend"
-      },
-      "viewAlbum": "Album ansehen"
-    }
   }
 }

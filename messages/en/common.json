@@ -5,13 +5,9 @@
     "imprint": "Imprint",
     "privacy": "Privacy Policy"
   },
-  "HomePage": {
-    "code": "Code",
-    "photos": "Photos"
-  },
   "HomePageSEO": {
-    "title": "{name} - Software & Photography",
-    "description": "The central portfolio hub for {name}, showcasing professional work in software development and photography."
+    "title": "Code by {name}",
+    "description": "Explore a collection of my software development projects showcasing my skills in modern web technologies."
   },
   "GalleryLightbox": {
     "dialogTitle": "{prefix} - Image {index}",
@@ -63,53 +59,7 @@
     "section3_analytics_content": "We use the services Vercel Analytics and Speed Insights from our host, Vercel Inc. These services are designed to be privacy-friendly, do not collect personal data that would allow for user identification, and do not use cookies. The legal basis is our legitimate interest (Art. 6(1)(f) GDPR) in the analysis and optimization of our website.",
     "section3_contact_title": "Contact Form via Formspree",
     "section3_contact_content": "When you use our contact form, your provided information is transmitted to and processed by the service provider Formspree, Inc., 1201 Orange St, Ste 600, Wilmington, DE 19801, USA, to handle your request. The processing of this data is based on your consent (Art. 6(1)(a) GDPR).",
-    "section3_recaptcha_title": "Spam Protection via Google reCAPTCHA",
-    "section3_recaptcha_content": "To protect submission forms on this site, we use the reCAPTCHA service provided by Google LLC. This service determines whether a given submission was made by a human or by an automated process. This processing is based on our legitimate interest (Art. 6(1)(f) GDPR) in preventing spam and abuse. For this purpose, your IP address and other data required by the reCAPTCHA service may be transferred to Google.",
-    "section3_testimonials_title": "Submission of Testimonials/Reviews",
-    "section3_testimonials_content": "If you use our form to submit a testimonial, the data you provide (name, organization/event, your review, ratings, and optionally an uploaded photo) will be transmitted to and stored in our backend system (Strapi CMS) for the purpose of reviewing and publishing your feedback on our website. This data is processed based on your consent (Art. 6(1)(a) GDPR), which you give by submitting the form. You can withdraw this consent at any time by contacting us, and your testimonial will be removed.",
     "section4_title": "3. Your Rights as a Data Subject",
     "section4_content": "Within the framework of the applicable legal provisions, you have the right at any time to free information about your stored personal data, its origin and recipients, and the purpose of the data processing, and, if applicable, a right to correction or deletion of this data."
-  },
-  "Auth": {
-    "LoginPage": {
-      "title": "Login",
-      "description": "Access your personal photo albums.",
-      "emailLabel": "Email",
-      "passwordLabel": "Password",
-      "submitButton": "Login with Email",
-      "googleButton": "Login with Google",
-      "noAccount": "Don't have an account?",
-      "registerLink": "Register",
-      "loginFailed": "Login failed. Please check your credentials and try again."
-    },
-    "RegisterPage": {
-      "title": "Register",
-      "description": "Create your customer account.",
-      "usernameLabel": "Username",
-      "emailLabel": "Email",
-      "passwordLabel": "Password",
-      "submitButton": "Create Account",
-      "googleButton": "Register with Google",
-      "hasAccount": "Already have an account?",
-      "loginLink": "Login",
-      "registrationFailed": "Registration failed. Please try again."
-    },
-    "CallbackPage": {
-      "title": "Connecting...",
-      "message": "Connecting, please wait..."
-    },
-    "DashboardPage": {
-      "title": "Dashboard",
-      "welcome": "Welcome, {username}!",
-      "logout": "Logout",
-      "albumsTitle": "Your Albums",
-      "noAlbums": "You don't have any albums assigned to you yet.",
-      "loading": "Loading your dashboard...",
-      "albumStatus": "Status: {status}",
-      "status": {
-        "unknown": "Pending"
-      },
-      "viewAlbum": "View Album"
-    }
   }
 }

@@ -1,24 +1,13 @@
-import { getTranslations } from "next-intl/server";
-import { Metadata } from "next"; // 1. Metadaten-Typ importieren
+// src/app/[locale]/privacy_policy/page.tsx
 
-// 2. Diese Funktion für dynamische Metadaten hinzufügen
+import { getTranslations } from "next-intl/server";
+import { Metadata } from "next";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("PrivacyPage");
 
   return {
     title: t("title"),
-    icons: [
-      {
-        media: "(prefers-color-scheme: light)",
-        url: "/favicon-privacy-light.svg",
-        href: "/favicon-privacy-light.svg",
-      },
-      {
-        media: "(prefers-color-scheme: dark)",
-        url: "/favicon-privacy-dark.svg",
-        href: "/favicon-privacy-dark.svg",
-      },
-    ],
   };
 }
 
@@ -75,18 +64,6 @@ export default async function PrivacyPolicyPage() {
                 {t("section3_contact_title")}
               </h3>
               <p>{t("section3_contact_content")}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">
-                {t("section3_recaptcha_title")}
-              </h3>
-              <p>{t("section3_recaptcha_content")}</p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">
-                {t("section3_testimonials_title")}
-              </h3>
-              <p>{t("section3_testimonials_content")}</p>
             </div>
           </div>
         </div>

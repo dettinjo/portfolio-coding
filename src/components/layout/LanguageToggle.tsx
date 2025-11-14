@@ -1,48 +1,58 @@
+// src/components/layout/LanguageToggle.tsx
 "use client";
 
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import React from "react";
+// --- ADD THIS IMPORT BACK ---
 import { useAlternateLinks } from "@/context/AlternateLinksProvider";
 
 export function LanguageToggle() {
   const currentLocale = useLocale();
+  // --- ADD THIS HOOK BACK ---
   const { alternateSlugs } = useAlternateLinks();
-
   const nextLocale = currentLocale === "de" ? "en" : "de";
 
   const handleLanguageSwitch = () => {
-    // --- THIS IS THE DEFINITIVE FIX ---
+    // --- THIS IS THE CORRECT LOGIC ---
+    const isLocal = window.location.hostname === "localhost";
+    const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
 
-    // 1. Prepare cookie attributes
+    // Find the correct path for the new language (e.g., /mein-projekt or just /)
+    const alternatePath =
+      alternateSlugs && alternateSlugs[nextLocale]
+        ? alternateSlugs[nextLocale]
+        : "/";
+
+    // 1. Set the cookie
     const date = new Date();
-    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000); // Expires in 1 year
+    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
     const expires = `expires=${date.toUTCString()}`;
-    const path = "path=/";
 
-    // 2. Get the root domain from environment variables
-    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "";
+    let cookieString = `NEXT_LOCALE=${nextLocale};${expires};path=/`;
 
-    // 3. Construct the base cookie string
-    let cookieString = `NEXT_LOCALE=${nextLocale};${expires};${path}`;
-
-    // 4. IMPORTANT: Add the Domain attribute ONLY if not on localhost.
-    // Browsers will reject cookies with a `domain` attribute for localhost.
-    // We check if the current hostname ends with the root domain.
-    if (window.location.hostname.endsWith(rootDomain)) {
-      // The leading dot makes the cookie valid for the root domain and all subdomains.
-      cookieString += `;domain=.${rootDomain}`;
+    if (!isLocal) {
+      // Set domain attribute for production so subdomains can read it
+      cookieString += `;domain=.${softwareDomain}`;
     }
 
-    // 5. Set the final, correctly scoped cookie.
     document.cookie = cookieString;
 
-    // 6. Navigate as before.
-    if (alternateSlugs && alternateSlugs[nextLocale]) {
-      window.location.href = alternateSlugs[nextLocale];
-    } else {
+    // 2. Handle the redirect
+    if (isLocal) {
+      // On localhost, just reload. Middleware will read the new cookie.
       window.location.reload();
+    } else {
+      // On production, redirect to the correct subdomain + slug
+      let newUrl = "";
+      if (nextLocale === "de") {
+        newUrl = `https://de.${softwareDomain}${alternatePath}`;
+      } else {
+        newUrl = `https://${softwareDomain}${alternatePath}`;
+      }
+      window.location.href = newUrl;
     }
+    // --- END ---
   };
 
   return (

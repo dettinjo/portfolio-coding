@@ -1,12 +1,15 @@
+// src/components/layout/Footer.tsx
 "use client";
 
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
+// --- THIS IS THE FIX (PART 1) ---
+// Import the Link component
+import { Link } from "@/i18n/navigation";
 
 export function Footer() {
   const t = useTranslations("Footer");
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
 
   return (
     <footer className="border-t">
@@ -18,18 +21,22 @@ export function Footer() {
         </div>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <a
-            href={`https://${rootDomain}/imprint`}
+          {/* --- THIS IS THE FIX (PART 2) --- */}
+          {/* Changed <a> to <Link> */}
+          <Link
+            href="/imprint"
             className="transition-colors hover:text-foreground"
           >
             {t("imprint")}
-          </a>
-          <a
-            href={`https://${rootDomain}/privacy_policy`}
+          </Link>
+          {/* --- THIS IS THE FIX (PART 3) --- */}
+          {/* Changed <a> to <Link> */}
+          <Link
+            href="/privacy_policy"
             className="transition-colors hover:text-foreground"
           >
             {t("privacy")}
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

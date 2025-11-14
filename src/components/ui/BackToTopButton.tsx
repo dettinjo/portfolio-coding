@@ -3,14 +3,10 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from "next-intl";
 import { ArrowUp } from "lucide-react";
-// The <Button> component is no longer needed
-// import { Button } from "./button";
 
 export function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
-  const t = useTranslations("photography.PhotoGridSection");
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -21,10 +17,13 @@ export function BackToTopButton() {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      const scrollPosition = window.pageYOffset + window.innerHeight;
-      const pageHeight = document.documentElement.scrollHeight;
+      // --- THIS IS THE FIX (PART 1) ---
+      // Removed unused variables
+      // const scrollPosition = window.pageYOffset + window.innerHeight;
+      // const pageHeight = document.documentElement.scrollHeight;
 
-      if (scrollPosition >= pageHeight - 1) {
+      // Show button when user has scrolled 1/4 of the page
+      if (window.pageYOffset > window.innerHeight / 4) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -42,8 +41,6 @@ export function BackToTopButton() {
   return (
     <AnimatePresence>
       {isVisible && (
-        // --- THIS IS THE FIX (PART 1) ---
-        // Positioning is changed to be centered horizontally
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -51,11 +48,9 @@ export function BackToTopButton() {
           transition={{ duration: 0.3 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
         >
-          {/* --- THIS IS THE FIX (PART 2) --- */}
-          {/* The <Button> is replaced with the structure from ScrollIndicator */}
           <button
             onClick={scrollToTop}
-            aria-label={t("backToTop")}
+            aria-label="Back to Top"
             className="flex justify-center"
           >
             <motion.div

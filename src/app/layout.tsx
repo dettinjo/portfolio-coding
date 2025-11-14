@@ -1,3 +1,5 @@
+// src/app/layout.tsx
+
 import "./globals.css";
 import "devicon/devicon.min.css";
 import type { Metadata } from "next";
@@ -13,15 +15,18 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: {
     template: "%s",
-    default: "Personal Portfolio",
+    // --- THIS IS THE FIX ---
+    default: "Software Portfolio",
   },
-  description: "A personal portfolio showcasing software and photography.",
+  // --- THIS IS THE FIX ---
+  description: "A personal portfolio showcasing software development projects.",
   alternates: {
-    canonical: `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    // --- THIS IS THE FIX ---
+    canonical: `https://${process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}`,
     languages: {
-      en: `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-      de: `https://de.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-      "x-default": `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+      en: `https://${process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}`,
+      de: `https://de.${process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}`,
+      "x-default": `https://${process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}`,
     },
   },
 };
