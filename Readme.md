@@ -6,7 +6,7 @@
 <br />
 <div align="center">
   <a href="#">
-    <img src="public/favicon-software-dark.svg" alt="Logo" width="80" height="80">
+    <img src="public/favicon-dark.svg" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Software Portfolio | Next.js & Strapi</h3>

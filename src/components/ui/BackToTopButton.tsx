@@ -17,13 +17,10 @@ export function BackToTopButton() {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      // --- THIS IS THE FIX (PART 1) ---
-      // Removed unused variables
-      // const scrollPosition = window.pageYOffset + window.innerHeight;
-      // const pageHeight = document.documentElement.scrollHeight;
-
-      // Show button when user has scrolled 1/4 of the page
-      if (window.pageYOffset > window.innerHeight / 4) {
+      const totalPageHeight = document.documentElement.scrollHeight;
+      const currentScrollBottom = window.pageYOffset + window.innerHeight;
+      const bottomThreshold = 300;
+      if (currentScrollBottom >= totalPageHeight - bottomThreshold) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -31,7 +28,7 @@ export function BackToTopButton() {
     };
 
     window.addEventListener("scroll", toggleVisibility);
-    toggleVisibility();
+    toggleVisibility(); // Check visibility on initial load
 
     return () => {
       window.removeEventListener("scroll", toggleVisibility);

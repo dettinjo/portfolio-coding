@@ -19,13 +19,35 @@ export function ProficiencyBar({
   return (
     <div
       className={cn(
-        "h-1.5 w-16 rounded-full bg-background/20 group-data-[active=true]:bg-background/30",
+        "h-1.5 w-16 rounded-full transition-colors duration-200",
+        // --- THIS IS THE FIX (Track) ---
+        // Default State
+        "bg-foreground/20",
+        // Active State
+        "group-data-[active=true]:bg-background/30",
+        // Default + Hover State
+        "group-hover/skill:bg-background/20",
+        // Active + Hover State
+        "group-data-[active=true]:group-hover/skill:bg-foreground/30",
+        // -----------------------------
         className
       )}
       aria-label={`Proficiency: ${level} out of ${maxLevel}`}
     >
       <div
-        className="h-full rounded-full bg-background group-data-[active=true]:bg-foreground"
+        className={cn(
+          "h-full rounded-full transition-colors duration-200",
+          // --- THIS IS THE FIX (Fill) ---
+          // Default State
+          "bg-foreground",
+          // Active State
+          "group-data-[active=true]:bg-background",
+          // Default + Hover State
+          "group-hover/skill:bg-background",
+          // Active + Hover State
+          "group-data-[active=true]:group-hover/skill:bg-foreground"
+          // ----------------------------
+        )}
         style={{ width: `${percentage}%` }}
       />
     </div>

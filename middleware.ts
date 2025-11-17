@@ -50,5 +50,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // Match all paths to give the middleware full control
-  matcher: "/((?!api|_next/static|_next/image|favicon*).*)",
+  matcher: "/((?!api|_next/static|_next/image|favicon*.svg).*)",
 };

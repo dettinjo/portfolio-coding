@@ -1,3 +1,4 @@
+import React from "react";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
@@ -6,37 +7,75 @@ import {
 } from "next-intl/server";
 import { routing, isValidLocale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
-import React from "react";
 import { Metadata } from "next";
+
+// Imports from old src/app/layout.tsx
+import "../globals.css";
+import "devicon/devicon.min.css";
+import { Inter } from "next/font/google";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/Theme-Provider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-// UPDATED: The 'params' prop is now correctly typed as a Promise here too.
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  // Await the promise to get the locale.
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "HomePageSEO" });
   const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio";
   const firstName = fullName.split(" ")[0];
 
+  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
+
   return {
     title: t("title", { name: firstName }),
     description: t("description", { name: firstName }),
+    icons: {
+      icon: "/favicon.ico",
+      shortcut: { url: "/favicon.ico", type: "image/x-icon" },
+      apple: { url: "/favicon-light.svg", type: "image/svg+xml" },
+      other: [
+        {
+          rel: "icon",
+          url: "/favicon-light.svg",
+          media: "(prefers-color-scheme: light)",
+          type: "image/svg+xml",
+        },
+        {
+          rel: "icon",
+          url: "/favicon-dark.svg",
+          media: "(prefers-color-scheme: dark)",
+          type: "image/svg+xml",
+        },
+      ],
+    },
+    alternates: {
+      canonical: `https://${softwareDomain}`,
+      languages: {
+        en: `https://${softwareDomain}`,
+        de: `https://de.${softwareDomain}`,
+        "x-default": `https://${softwareDomain}`,
+      },
+    },
   };
 }
 
-type Props = {
+export default async function RootLocaleLayout({
+  children,
+  params,
+}: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
-};
-
-export default async function LocaleLayout({ children, params }: Props) {
+}) {
   const { locale } = await params;
 
   if (!isValidLocale(locale)) {
@@ -47,8 +86,23 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    // --- THIS IS THE FIX ---
+    // Changed suppressHydWarning to suppressHydrationWarning
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.className
+        )}
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   );
 }
