@@ -85,8 +85,6 @@ export function HeroSection() {
               className={cn(
                 "object-cover object-top scale-[1.2] origin-bottom transition-transform duration-500 ease-in-out",
                 "group-data-[active=true]:scale-[1.3]",
-                // --- THIS IS THE DEFINITIVE FIX ---
-                // Add a downward translation only when the parent group is active
                 "group-data-[active=true]:translate-y-4"
               )}
             />
