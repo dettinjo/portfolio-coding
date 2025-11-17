@@ -42,13 +42,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const languages: Record<string, string> = {};
   if (softwareDomain) {
-    languages[locale] = `https://${
-      locale === "de" ? "de." : ""
-    }${softwareDomain}/${slug}`;
+    languages[locale] = `https://${softwareDomain}${
+      locale === "de" ? "/de" : ""
+    }/${slug}`;
     localizations?.forEach((loc) => {
-      languages[loc.locale] = `https://${
-        loc.locale === "de" ? "de." : ""
-      }${softwareDomain}/${loc.slug}`;
+      languages[loc.locale] = `https://${softwareDomain}${
+        loc.locale === "de" ? "/de" : ""
+      }/${loc.slug}`;
     });
   }
 
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     alternates: {
       canonical: softwareDomain
-        ? `https://${locale === "de" ? "de." : ""}${softwareDomain}/${slug}`
+        ? `https://${softwareDomain}${locale === "de" ? "/de" : ""}/${slug}`
         : undefined,
       languages: languages,
     },

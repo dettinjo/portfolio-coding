@@ -1,11 +1,13 @@
-import {defineRouting} from 'next-intl/routing';
- 
+import { defineRouting } from "next-intl/routing";
+
 export const routing = defineRouting({
-  locales: ['en', 'de'] as const,
-  defaultLocale: 'en',
-  
-  // CRITICAL: We tell next-intl to NEVER touch the URL. Our middleware handles it all.
-  localePrefix: 'never'
+  locales: ["en", "de"] as const,
+  defaultLocale: "en",
+
+  // --- THIS IS THE FIX ---
+  // Change 'never' to 'as-needed'.
+  // This will use "/" for 'en' (default) and "/de" for 'de'.
+  localePrefix: "as-needed",
 });
 
 export type Locale = (typeof routing.locales)[number];

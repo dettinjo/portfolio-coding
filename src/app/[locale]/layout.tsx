@@ -62,7 +62,7 @@ export async function generateMetadata({
       canonical: `https://${softwareDomain}`,
       languages: {
         en: `https://${softwareDomain}`,
-        de: `https://de.${softwareDomain}`,
+        de: `https://${softwareDomain}/de`,
         "x-default": `https://${softwareDomain}`,
       },
     },
