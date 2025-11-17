@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
-  const avatarSrc = "/images/avatar.png";
+  const avatarSrc = "/images/avatar.webp";
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
 
