@@ -1,4 +1,3 @@
-// middleware.ts
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./src/i18n/routing";
 
@@ -10,10 +9,12 @@ export default createMiddleware({
 });
 
 export const config = {
-  // Match all paths except for
-  // - …api (API routes)
-  // - …_next/static (static files)
-  // - …_next/image (image optimization files)
-  // - …favicon* (favicon files)
-  matcher: ["/((?!api|_next/static|_next/image|favicon*).*)"],
+  // Match all paths except for:
+  // - api (API routes)
+  // - _next (Next.js internals)
+  // - _vercel (Vercel internals)
+  // - images (Your static images folder) <--- THIS IS THE FIX
+  // - favicon* (Favicons)
+  // - files with extensions (e.g. .png, .jpg, .css, .js) <--- ADDS ROBUSTNESS
+  matcher: ["/((?!api|_next|_vercel|images|favicon*|.*\\..*).*)"],
 };
