@@ -61,5 +61,16 @@
     "section3_contact_content": "When you use our contact form, your provided information is transmitted to and processed by the service provider Formspree, Inc., 1201 Orange St, Ste 600, Wilmington, DE 19801, USA, to handle your request. The processing of this data is based on your consent (Art. 6(1)(a) GDPR).",
     "section4_title": "3. Your Rights as a Data Subject",
     "section4_content": "Within the framework of the applicable legal provisions, you have the right at any time to free information about your stored personal data, its origin and recipients, and the purpose of the data processing, and, if applicable, a right to correction or deletion of this data."
+  },
+  "ResumePage": {
+    "downloadPdf": "Download PDF",
+    "resumeFilename": "Resume_Joel_Dettinger",
+    "home": "Home",
+    "summary": "Summary",
+    "experience": "Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "languages": "Languages",
+    "contact": "Contact"
   }
 }

@@ -31,6 +31,7 @@ export function SoftwareHeader({ showNavLinks = false }: SoftwareHeaderProps) {
   const navLinks = [
     { href: "#projekte", label: t("projects") },
     { href: "#skills", label: t("skills") },
+    { href: "#resume-cta", label: t("resume") },
     { href: "#kontakt", label: t("contact") },
   ];
 

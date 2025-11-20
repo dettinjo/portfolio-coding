@@ -2,12 +2,20 @@
   "SoftwareHeader": {
     "projects": "Projects",
     "skills": "Skills",
+    "resume": "Resume",
     "contact": "Contact"
   },
   "SoftwareHeroSection": {
     "greeting": "Hi, I'm {name}",
     "intro": "A Full-Stack Developer with a passion for designing and building robust, scalable, and user-friendly web applications.",
-    "button_projects": "See my Work"
+    "button_projects": "See my Work",
+    "button_resume": "View Resume"
+  },
+  "ResumeCTASection": {
+    "title": "Want to see my Resume?",
+    "description": "Get a detailed overview of my experience, education, and skills. You can view it online or download it as a PDF.",
+    "viewResume": "View Resume",
+    "downloadPdf": "Download PDF"
   },
   "SoftwareProjectsSection": {
     "title": "Projects",

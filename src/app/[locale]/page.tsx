@@ -7,6 +7,7 @@ import { ContactSection } from "@/components/sections/ContactSection";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 import { SkillsSection } from "@/components/sections/SkillsSection";
+import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/strapi";
@@ -117,6 +118,10 @@ export default async function DevPage({ params }: Props) {
           <div className="py-24">
             <SkillsSection skills={skillsForDisplay} />
           </div>
+          <div className="py-12">
+            <ScrollIndicator href="#resume-cta" />
+          </div>
+          <ResumeCTASection />
           <ScrollIndicator href="#kontakt" />
           <div className="pt-24 pb-64 md:pb-96">
             <ContactSection />

@@ -86,6 +86,34 @@
   }
 }
 
+@layer utilities {
+  @media print {
+    /* Hide headers, footers, and other non-resume elements */
+    header, footer, nav {
+      display: none !important;
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    /* Reset body margins */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: white !important;
+      color: black;
+    }
+
+    /* Force background colors (for badges, avatars) to print */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+}
+
 [class^="devicon-"] path,
 [class^="devicon-"] polygon,
 [class^="devicon-"] rect,

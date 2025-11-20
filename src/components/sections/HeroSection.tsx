@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { AnimatedGreeting } from "@/components/AnimatedGreeting";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
@@ -52,7 +53,10 @@ export function HeroSection() {
           </p>
           <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
             <Button asChild>
-              <a href="#projekte">{t("button_projects")}</a>
+              <Link href="#projekte">{t("button_projects")}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/resume">{t("button_resume")}</Link>
             </Button>
           </div>
         </motion.div>

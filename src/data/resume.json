@@ -1,0 +1,420 @@
+{
+  "basics": {
+    "name": "Joel Dettinger",
+    "headline": "Master's Student in Computer Science",
+    "email": "dettinger.joel@gmail.com",
+    "location": "08904 L'Hospitalet de Llobregat, Spain",
+    "url": {
+      "label": "",
+      "href": "https://codeby.joeldettinger.de"
+    },
+    "customFields": [],
+    "picture": {
+      "url": "http://localhost:9000/default/cmhwk812x0000c8ldcxvg0kx2/pictures/bx99ohszkij2rn5axhjlyio5.jpg",
+      "size": 200,
+      "aspectRatio": 1,
+      "borderRadius": 9999,
+      "effects": {
+        "hidden": false,
+        "border": true,
+        "grayscale": false
+      }
+    }
+  },
+  "sections": {
+    "summary": {
+      "name": "Summary",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "summary",
+      "content": "<p>I am a German master's student in computer science at Vrije University and the University of Amsterdam. I am currently completing an academic exchange at the Autonomous University of Barcelona. I have experience in project management, DevOps, infrastructure as code, and AI, and I specialize in mobile and web development.</p>"
+    },
+    "awards": {
+      "name": "Awards",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "awards",
+      "items": []
+    },
+    "certifications": {
+      "name": "Certifications",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "certifications",
+      "items": []
+    },
+    "education": {
+      "name": "Education",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "education",
+      "items": [
+        {
+          "id": "fx3lypkefwy8m68bcw1egysb",
+          "visible": true,
+          "institution": "University of Amsterdam & Vrije University Amsterdam",
+          "studyType": "Master of Science",
+          "area": "Computer Science (Joint Degree)",
+          "score": "8.1 GPA",
+          "date": "September, 2024 – Present",
+          "summary": "",
+          "url": {
+            "href": "https://www.uva.nl"
+          }
+        },
+        {
+          "id": "uzdfy1790xqzzn3cwfdt87og",
+          "visible": true,
+          "institution": "Autonomous University of Barcelona",
+          "studyType": "Academic Exchange",
+          "area": "Modelling for Science",
+          "score": "",
+          "date": "September, 2024 - Present",
+          "summary": "",
+          "url": {
+            "href": "https://www.uab.cat"
+          }
+        },
+        {
+          "id": "z1s656m79acl1pw55hjei4c8",
+          "visible": true,
+          "institution": "Media University",
+          "studyType": "Bachelor of Science",
+          "area": "Mobile Media",
+          "score": "1.6 (9 GPA)",
+          "date": "March, 2019 – August, 2023",
+          "summary": "",
+          "url": {
+            "href": "https://www.hdm-stuttgart.de"
+          }
+        },
+        {
+          "id": "qb4rsvbx500t4q728phnd20e",
+          "visible": true,
+          "institution": "University of the West of Scotland",
+          "studyType": "Academic Exchange",
+          "area": "Web & Mobile Development",
+          "score": "",
+          "date": "August, 2021 – December, 2021",
+          "summary": "",
+          "url": {
+            "href": "https://www.uws.ac.uk"
+          }
+        }
+      ]
+    },
+    "experience": {
+      "name": "Experience",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "experience",
+      "items": [
+        {
+          "id": "v61g0ytaa3ap8fbitzoy0lxz",
+          "visible": true,
+          "company": "MHP Management and IT Consulting",
+          "position": "Thesis Student",
+          "location": "Ludwigsburg (DE)",
+          "date": "March, 2023 – August, 2023",
+          "summary": "<p><em>Bachelor Thesis: Infrastructure recovery with Terraform (IaC) and CI/CD.</em></p>",
+          "url": {
+            "href": "https://www.mhp.com"
+          }
+        },
+        {
+          "id": "gwjn6nvfxi01w241txhlf1tg",
+          "visible": true,
+          "company": "Capgemini",
+          "position": "Working Student",
+          "location": "Stuttgart (DE)",
+          "date": "April, 2022 – September, 2022",
+          "summary": "<p><em>Frontend Development with AngularJS, UI Design, and MongoDB database management.</em></p>",
+          "url": {
+            "href": "https://www.capgemini.com"
+          }
+        },
+        {
+          "id": "wtmes6zm9b701ph60y7pwv41",
+          "visible": true,
+          "company": "MHP Management and IT Consulting",
+          "position": "Intern",
+          "location": "Ludwigsburg (DE)",
+          "date": "March, 2021 – August, 2021",
+          "summary": "<p><em>Frontend development, GraphQL concept implementation, Azure Platform.</em></p>",
+          "url": {
+            "href": "https://www.mhp.com"
+          }
+        }
+      ]
+    },
+    "volunteer": {
+      "name": "Volunteering",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": false,
+      "id": "volunteer",
+      "items": [
+        {
+          "id": "p17dyvedy8ed7bg61w6eu4yc",
+          "visible": true,
+          "organization": "Media University",
+          "position": "Volunteer Buddy Program",
+          "location": "",
+          "date": "2020-10-01 - 2021-02-01",
+          "summary": "Support for exchange students with registration, banking, housing, and activities.",
+          "url": {
+            "label": "",
+            "href": ""
+          }
+        }
+      ]
+    },
+    "interests": {
+      "name": "Interests",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": false,
+      "id": "interests",
+      "items": [
+        {
+          "id": "qq81bwos0407x0njx4qxoqci",
+          "visible": true,
+          "name": "Road Cycling",
+          "keywords": []
+        },
+        {
+          "id": "z6lsj77lulamoyw7rdvu082x",
+          "visible": true,
+          "name": "Climbing",
+          "keywords": []
+        },
+        {
+          "id": "aqhyyldji8zpwkbjvz215v8d",
+          "visible": true,
+          "name": "Photography",
+          "keywords": []
+        }
+      ]
+    },
+    "languages": {
+      "name": "Languages",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": false,
+      "id": "languages",
+      "items": [
+        {
+          "id": "h6kv2bq1c1he9ozsgnrv4vqz",
+          "visible": true,
+          "name": "English",
+          "description": "Proficient (C1/C2)",
+          "level": 5
+        },
+        {
+          "id": "e9kfdhzw531hq0vz0yrqzkvj",
+          "visible": true,
+          "name": "Spanish",
+          "description": "Basic/Independent (A2/B1)",
+          "level": 2
+        }
+      ]
+    },
+    "profiles": {
+      "name": "Profiles",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "profiles",
+      "items": [
+        {
+          "id": "a619bvaogcf4qg0p7v4jpsnt",
+          "visible": true,
+          "network": "LinkedIn",
+          "username": "joeldettinger",
+          "icon": "linkedin",
+          "url": {
+            "label": "",
+            "href": "https://www.linkedin.com/in/joeldettinger"
+          }
+        },
+        {
+          "id": "pv415d9waiub9soory41gncl",
+          "visible": true,
+          "network": "GitHub",
+          "username": "dettinjo",
+          "icon": "github",
+          "url": {
+            "label": "Portfolio",
+            "href": "https://github.com/dettinjo"
+          }
+        }
+      ]
+    },
+    "projects": {
+      "name": "Projects",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "projects",
+      "items": []
+    },
+    "publications": {
+      "name": "Publications",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "publications",
+      "items": []
+    },
+    "references": {
+      "name": "References",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "references",
+      "items": []
+    },
+    "skills": {
+      "name": "Skills",
+      "columns": 1,
+      "separateLinks": true,
+      "visible": true,
+      "id": "skills",
+      "items": [
+        {
+          "id": "hivo8a2kqvvfemolc0se5djf",
+          "visible": true,
+          "name": "Frontend",
+          "description": "",
+          "level": 4,
+          "keywords": [
+            "Angular",
+            "Framer Motion",
+            "Next.js",
+            "React",
+            "Tailwind CSS",
+            "TypeScript"
+          ]
+        },
+        {
+          "id": "pulx7631ag4ryf777tbgjm24",
+          "visible": true,
+          "name": "Mobile",
+          "description": "",
+          "level": 3,
+          "keywords": ["Android Jetpacks", "Core Data", "Kotlin", "Swift"]
+        },
+        {
+          "id": "zzmee963mdcm0mzq39ufi6cl",
+          "visible": true,
+          "name": "Backend",
+          "description": "",
+          "level": 3,
+          "keywords": [
+            "PHP",
+            "Express.js",
+            "Node.js",
+            "MySQL",
+            "PostgreSQL",
+            "MongoDB",
+            "Python",
+            "Bash",
+            "GraphQL",
+            "REST"
+          ]
+        },
+        {
+          "id": "rsjpyllckjzxcvcym084pddc",
+          "visible": true,
+          "name": "DevOps",
+          "description": "",
+          "level": 2,
+          "keywords": [
+            "CI/CD (Gitlab CI)",
+            "Git",
+            "Docker",
+            "Terraform",
+            "Nginx",
+            "Microsoft Azure",
+            "Kubernetes"
+          ]
+        },
+        {
+          "id": "kc37zigvasb492d13g7yasvj",
+          "visible": true,
+          "name": "AI & Data Science",
+          "description": "",
+          "level": 2,
+          "keywords": [
+            "Pandas",
+            "MathLab",
+            "R",
+            "PyTorch",
+            "spaCy",
+            "Meta Llama",
+            "Hugging Face Transformers"
+          ]
+        }
+      ]
+    },
+    "custom": {}
+  },
+  "metadata": {
+    "template": "glalie",
+    "layout": [
+      [
+        [
+          "profiles",
+          "summary",
+          "experience",
+          "education",
+          "projects",
+          "volunteer",
+          "references"
+        ],
+        [
+          "skills",
+          "certifications",
+          "awards",
+          "publications",
+          "languages",
+          "interests"
+        ]
+      ]
+    ],
+    "css": {
+      "value": "* {\n\toutline: 1px solid #000;\n\toutline-offset: 4px;\n}",
+      "visible": false
+    },
+    "page": {
+      "margin": 30,
+      "format": "a4",
+      "options": {
+        "breakLine": true,
+        "pageNumbers": false
+      }
+    },
+    "theme": {
+      "background": "#202A35",
+      "text": "#ffffff",
+      "primary": "#ffffff"
+    },
+    "typography": {
+      "font": {
+        "family": "Arial",
+        "subset": "greek",
+        "variants": ["regular"],
+        "size": 14.5
+      },
+      "lineHeight": 1.2,
+      "hideIcons": false,
+      "underlineLinks": false
+    },
+    "notes": ""
+  }
+}

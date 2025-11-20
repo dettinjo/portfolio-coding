@@ -61,5 +61,16 @@
     "section3_contact_content": "Wenn Sie unser Kontaktformular nutzen, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage an den Dienstleister Formspree, Inc., 1201 Orange St, Ste 600, Wilmington, DE 19801, USA, übermittelt und dort verarbeitet. Die Verarbeitung dieser Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).",
     "section4_title": "3. Ihre Rechte als Betroffener",
     "section4_content": "Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über Ihre gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der Datenverarbeitung und ggf. ein Recht auf Berichtigung oder Löschung dieser Daten."
+  },
+  "ResumePage": {
+    "downloadPdf": "PDF herunterladen",
+    "resumeFilename": "Lebenslauf_Joel_Dettinger",
+    "home": "Startseite",
+    "summary": "Zusammenfassung",
+    "experience": "Berufserfahrung",
+    "education": "Ausbildung",
+    "skills": "Fähigkeiten",
+    "languages": "Sprachen",
+    "contact": "Kontakt"
   }
 }

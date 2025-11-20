@@ -2,12 +2,20 @@
   "SoftwareHeader": {
     "projects": "Projekte",
     "skills": "Skills",
+    "resume": "Lebenslauf",
     "contact": "Kontakt"
   },
   "SoftwareHeroSection": {
     "greeting": "Hi, ich bin {name}",
     "intro": "Ein Full-Stack Entwickler mit einer Leidenschaft für die Gestaltung und Realisierung von robusten, skalierbaren und benutzerfreundlichen Webanwendungen.",
-    "button_projects": "Schau dir meine Arbeit an"
+    "button_projects": "Schau dir meine Arbeit an",
+    "button_resume": "Lebenslauf ansehen"
+  },
+  "ResumeCTASection": {
+    "title": "Möchtest du meinen Lebenslauf sehen?",
+    "description": "Erhalte einen detaillierten Überblick über meine Erfahrungen, Ausbildung und Fähigkeiten. Du kannst ihn online ansehen oder als PDF herunterladen.",
+    "viewResume": "Lebenslauf ansehen",
+    "downloadPdf": "PDF herunterladen"
   },
   "SoftwareProjectsSection": {
     "title": "Projekte",
