@@ -206,22 +206,22 @@ export default function ResumePage() {
             className="bg-zinc-950 px-8 pb-8 pt-0 md:px-12 md:pb-12 md:pt-0 print:px-8 print:pb-8 print:pt-6 dark:bg-white text-zinc-100 dark:text-zinc-900 h-full rounded-xl"
           >
             {/* Header: Name & Headline */}
-            <div className="mb-4">
+            <div className="mb-2">
               {/* Text uses explicit dark colors for white background */}
               <h1 className="text-5xl font-extrabold tracking-tight mb-2 mt-0 leading-none">
                 {basics.name}
               </h1>
-              <p className="text-xl font-medium opacity-80">
+              <p className="text-xl font-medium opacity-80 whitespace-nowrap">
                 {basics.headline}
               </p>
             </div>
 
             {/* Experience */}
-            <section className="mb-4">
-              <h2 className="text-xl font-bold mb-4 uppercase tracking-wider">
+            <section className="mb-2">
+              <h2 className="text-xl font-bold mb-3 uppercase tracking-wider border-b pb-1 border-zinc-200 dark:border-zinc-700 max-w-md">
                 {t("experience")}
               </h2>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {data.sections.experience.items.map((item) => (
                   <ResumeEntry key={item.id} item={item} type="work" />
                 ))}
@@ -230,10 +230,10 @@ export default function ResumePage() {
 
             {/* Education */}
             <section>
-              <h2 className="text-xl font-bold mb-4 uppercase tracking-wider">
+              <h2 className="text-xl font-bold mb-3 uppercase tracking-wider border-b pb-1 border-zinc-200 dark:border-zinc-700 max-w-md">
                 {t("education")}
               </h2>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {data.sections.education.items.map((item) => (
                   <ResumeEntry key={item.id} item={item} type="education" />
                 ))}
