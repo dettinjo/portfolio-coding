@@ -1,6 +1,6 @@
 // src/app/sitemap.ts
 import { MetadataRoute } from "next";
-import { fetchAllProjectSlugs } from "@/lib/strapi";
+import { fetchAllProjectSlugs } from "@/lib/payload";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN;

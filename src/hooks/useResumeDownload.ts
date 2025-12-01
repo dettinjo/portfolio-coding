@@ -1,12 +1,16 @@
 "use client";
 
 import { useCallback } from "react";
+import { useLocale } from "next-intl";
 
 export function useResumeDownload() {
+  const locale = useLocale();
+
   const downloadResume = useCallback(() => {
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
-    iframe.src = "/resume?print=true";
+    // Use the current locale for the resume path
+    iframe.src = `/${locale}/resume?print=true`;
     document.body.appendChild(iframe);
 
     // Clean up the iframe after a reasonable amount of time
@@ -14,7 +18,7 @@ export function useResumeDownload() {
     setTimeout(() => {
       document.body.removeChild(iframe);
     }, 5000); // 5 seconds should be enough for the print dialog to appear and the print to start
-  }, []);
+  }, [locale]);
 
   return { downloadResume };
 }

@@ -11,9 +11,9 @@ import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
 import {
   fetchSoftwareProjectBySlug,
   fetchAllProjectSlugs,
-  getStrapiMedia,
   getTechDetailsMap,
-} from "@/lib/strapi";
+} from "@/lib/payload";
+import { getMediaUrl } from "@/lib/payload-helpers";
 import { cn } from "@/lib/utils";
 import { LongTextRenderer } from "@/components/LongTextRenderer";
 import { AlternateLinksProvider } from "@/context/AlternateLinksProvider";
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: "Project Not Found" };
 
   const { title, description, coverImage, localizations } = project;
-  const imageUrl = getStrapiMedia(coverImage?.url);
+  const imageUrl = getMediaUrl(coverImage);
   const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN;
 
   const languages: Record<string, string> = {};
@@ -152,8 +152,8 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const galleryImages = showGallery
     ? ((gallery && gallery.length > 0
-        ? gallery.map((img) => getStrapiMedia(img.url))
-        : [getStrapiMedia(coverImage?.url)]
+        ? gallery.map((img) => getMediaUrl(img))
+        : [getMediaUrl(coverImage)]
       ).filter(Boolean) as string[])
     : [];
 
@@ -180,7 +180,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               }}
             />
             <Button asChild variant="ghost" className="-ml-4 mb-8">
-              <Link href="/">
+              <Link href="/" locale={locale}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 {t("back_button")}
               </Link>
@@ -210,7 +210,9 @@ export default async function ProjectDetailPage({ params }: Props) {
                   {t("about_title")}
                 </h2>
                 <div className="mt-4">
-                  <LongTextRenderer content={longDescription} />
+                  <LongTextRenderer
+                    content={longDescription as string | null | undefined}
+                  />
                 </div>
               </div>
 

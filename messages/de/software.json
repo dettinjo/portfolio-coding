@@ -47,7 +47,7 @@
     "success_message": "Ihre Nachricht wurde erfolgreich gesendet. Ich melde mich in Kürze.",
     "error_message": "Etwas ist schiefgelaufen. Bitte versuchen es erneut."
   },
-    "ProjectDetailsPage": {
+  "ProjectDetailsPage": {
     "back_button": "Zurück zu den Projekten",
     "about_title": "Über dieses Projekt",
     "details_title": "Details",
@@ -58,7 +58,7 @@
     "not_available": "Nicht verfügbar",
     "developed_in_label": "Entwickelt im"
   },
-   "SoftwarePageSEO": {
+  "SoftwarePageSEO": {
     "siteName": "Code von {name}",
     "description": "Entdecken eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
   },

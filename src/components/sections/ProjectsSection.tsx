@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import type { SoftwareProject } from "@/lib/strapi";
+import type { SoftwareProject } from "@/lib/payload-types-shared";
 import { AnimatedProjectCard } from "./AnimatedProjectCard";
 
 interface ProjectsSectionProps {
@@ -14,7 +14,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
   const t = useTranslations("software.SoftwareProjectsSection");
   const [activeCardId, setActiveCardId] = useState<number | null>(null);
 
-  const scrollProgressRef = useRef<{ [key: number]: number }>({});
+  const scrollProgressRef = useRef<Record<string, number>>({});
   const ticking = useRef(false);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             index={index}
             isActive={project.id === activeCardId}
             onScrollProgressChange={(progress) => {
-              scrollProgressRef.current[project.id] = progress;
+              scrollProgressRef.current[String(project.id)] = progress;
             }}
           />
         ))}

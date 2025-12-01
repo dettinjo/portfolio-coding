@@ -10,7 +10,7 @@ import { SkillsSection } from "@/components/sections/SkillsSection";
 import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
-import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/strapi";
+import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/payload";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -63,10 +63,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DevPage({ params }: Props) {
   const { locale } = await params;
 
-  const [projectsData, skillsDataForDisplay] = await Promise.all([
-    fetchSoftwareProjects(locale),
-    fetchSkillCategories(locale),
-  ]);
+  const projects = await fetchSoftwareProjects(locale);
+  const skillCategories = await fetchSkillCategories(locale);
+
+  const projectsData = projects;
+  const skillsDataForDisplay = skillCategories;
+  // const projectsData: any[] = [];
+  // const skillsDataForDisplay: any[] = [];
 
   const t = await getTranslations({
     locale: locale,

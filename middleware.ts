@@ -13,8 +13,9 @@ export const config = {
   // - api (API routes)
   // - _next (Next.js internals)
   // - _vercel (Vercel internals)
-  // - images (Your static images folder) <--- THIS IS THE FIX
+  // - admin (Payload admin UI)
+  // - images (Your static images folder)
   // - favicon* (Favicons)
-  // - files with extensions (e.g. .png, .jpg, .css, .js) <--- ADDS ROBUSTNESS
-  matcher: ["/((?!api|_next|_vercel|images|favicon*|.*\\..*).*)"],
+  // - files with extensions (e.g. .png, .jpg, .css, .js)
+  matcher: ["/((?!api|_next|_vercel|admin|images|favicon*|.*\\..*).*)"],
 };

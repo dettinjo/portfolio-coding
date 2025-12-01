@@ -10,7 +10,7 @@ import {
   useTransform,
   useMotionValueEvent,
 } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AnimatedGreeting } from "@/components/AnimatedGreeting";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { Link } from "@/i18n/navigation";
 
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
+  const locale = useLocale();
   const avatarSrc = "/images/avatar.webp";
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
@@ -55,8 +56,14 @@ export function HeroSection() {
             <Button asChild>
               <Link href="#projekte">{t("button_projects")}</Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href="/resume">{t("button_resume")}</Link>
+            <Button
+              asChild
+              variant="outline"
+              className="hover:bg-foreground hover:text-background transition-colors"
+            >
+              <Link href="/resume" locale={locale}>
+                {t("button_resume")}
+              </Link>
             </Button>
           </div>
         </motion.div>

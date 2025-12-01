@@ -58,11 +58,11 @@
     "not_available": "Not Available",
     "developed_in_label": "Developed in"
   },
-   "SoftwarePageSEO": {
+  "SoftwarePageSEO": {
     "siteName": "Code by {name}",
     "description": "Explore a collection of my software development projects showcasing my skills in modern web technologies."
   },
-    "ProjectGallery": {
+  "ProjectGallery": {
     "thumbnailAlt": "{prefix} - Screenshot {index}",
     "scrollLeft": "Scroll left",
     "scrollRight": "Scroll right"

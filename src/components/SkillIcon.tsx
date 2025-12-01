@@ -1,6 +1,6 @@
 "use client";
 
-import { getStrapiMedia } from "@/lib/strapi";
+import { getMediaUrl } from "@/lib/payload-helpers";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -22,7 +22,7 @@ export function SkillIcon({
 
   useEffect(() => {
     if (svgIconUrl) {
-      const fullUrl = getStrapiMedia(svgIconUrl);
+      const fullUrl = getMediaUrl(svgIconUrl);
       if (fullUrl) {
         // Fetch the raw SVG content from the URL
         fetch(fullUrl)
@@ -58,7 +58,7 @@ export function SkillIcon({
   // If an SVG URL is provided but not yet loaded, show a placeholder or an Image fallback.
   // Using Next/Image here is a good fallback for non-SVG files or loading states.
   if (svgIconUrl) {
-    const fullUrl = getStrapiMedia(svgIconUrl);
+    const fullUrl = getMediaUrl(svgIconUrl);
     return fullUrl ? (
       <Image
         src={fullUrl}

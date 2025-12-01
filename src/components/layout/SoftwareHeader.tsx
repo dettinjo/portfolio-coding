@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { Link } from "@/i18n/navigation";
@@ -15,6 +15,7 @@ interface SoftwareHeaderProps {
 
 export function SoftwareHeader({ showNavLinks = false }: SoftwareHeaderProps) {
   const t = useTranslations("software.SoftwareHeader");
+  const locale = useLocale();
 
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);
@@ -48,6 +49,7 @@ export function SoftwareHeader({ showNavLinks = false }: SoftwareHeaderProps) {
       <nav className="container mx-auto flex h-14 items-center justify-between relative">
         <Link
           href="/"
+          locale={locale}
           className="flex items-center gap-3 font-bold text-lg transition-opacity hover:opacity-80"
         >
           <Terminal className="h-6 w-6" />
