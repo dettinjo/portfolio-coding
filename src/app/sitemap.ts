@@ -6,10 +6,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN;
 
   // --- FETCH DYNAMIC SLUGS FOR BOTH LOCALES ---
-  const [enProjectSlugs, deProjectSlugs] = await Promise.all([
-    fetchAllProjectSlugs("en"),
-    fetchAllProjectSlugs("de"),
-  ]);
+  let enProjectSlugs: { slug: string }[] = [];
+  let deProjectSlugs: { slug: string }[] = [];
+
+  try {
+    const results = await Promise.all([
+      fetchAllProjectSlugs("en"),
+      fetchAllProjectSlugs("de"),
+    ]);
+    enProjectSlugs = results[0] as { slug: string }[];
+    deProjectSlugs = results[1] as { slug: string }[];
+  } catch (error) {
+    console.warn(
+      "Database not available or empty, skipping sitemap generation for projects.",
+      error
+    );
+  }
 
   // --- MAP SLUGS TO SITEMAP ENTRIES ---
   const enSoftwareProjectPages = enProjectSlugs.map(({ slug }) => ({

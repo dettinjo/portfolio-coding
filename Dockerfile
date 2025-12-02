@@ -50,7 +50,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy media folder if it exists, or create it and set permissions
 # This is important for Payload CMS media uploads
-RUN mkdir -p media && chown nextjs:nodejs media
+RUN mkdir -p media data && chown nextjs:nodejs media data
 
 USER nextjs
 

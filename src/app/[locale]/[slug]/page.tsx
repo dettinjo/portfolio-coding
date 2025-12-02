@@ -21,8 +21,16 @@ import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 
 export async function generateStaticParams() {
-  const projects = await fetchAllProjectSlugs();
-  return projects.map((project) => ({ slug: project.slug }));
+  try {
+    const projects = await fetchAllProjectSlugs();
+    return projects.map((project) => ({ slug: project.slug }));
+  } catch (error) {
+    console.warn(
+      "Database not available or empty, skipping static params generation for projects.",
+      error
+    );
+    return [];
+  }
 }
 
 // UPDATED: 'params' prop is now correctly typed as a Promise.
