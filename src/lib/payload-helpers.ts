@@ -1,14 +1,14 @@
 // Client-safe helper functions for Payload CMS
 // These don't import any Payload modules and can be used in client components
 
-import type { StrapiImage } from "./payload-types-shared";
+import type { MediaImage } from "./payload-types-shared";
 
 /**
  * Generate media URL from Payload image object
  * This is a client-safe version that just constructs URLs
  */
 export function getMediaUrl(
-  image: StrapiImage | string | null | undefined
+  image: MediaImage | string | null | undefined
 ): string | null {
   if (!image) return null;
 

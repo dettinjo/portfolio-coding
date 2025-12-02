@@ -1,7 +1,7 @@
 // Shared types for Payload CMS
 // This file contains only type definitions and can be safely imported by both client and server components
 
-export interface StrapiImage {
+export interface MediaImage {
   id: number | string;
   url: string;
   alternativeText: string | null;
@@ -40,8 +40,8 @@ export interface SoftwareProject {
   liveUrl?: string;
   repoUrl?: string;
   tags: string[];
-  coverImage: StrapiImage | null;
-  gallery: StrapiImage[] | null;
+  coverImage: MediaImage | null;
+  gallery: MediaImage[] | null;
   localizations?: Array<{
     id: number | string;
     slug: string;

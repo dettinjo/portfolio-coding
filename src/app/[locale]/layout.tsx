@@ -39,6 +39,7 @@ export async function generateMetadata({
   return {
     title: t("title", { name: firstName }),
     description: t("description", { name: firstName }),
+    metadataBase: new URL(`https://${softwareDomain || "localhost:3000"}`),
     icons: {
       icon: "/favicon.ico",
       shortcut: { url: "/favicon.ico", type: "image/x-icon" },

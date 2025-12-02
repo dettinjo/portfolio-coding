@@ -10,7 +10,7 @@ export const getPayloadClient = async () => {
 
 // Re-export types from shared file
 export type {
-  StrapiImage,
+  MediaImage,
   Skill,
   SkillCategory,
   SoftwareProject,
