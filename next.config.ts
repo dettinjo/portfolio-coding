@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  serverExternalPackages: ["libsql", "@payloadcms/db-sqlite"],
 };
 
 export default withPayload(withNextIntl(nextConfig));
