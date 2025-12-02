@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-portfolio-app
+    container_name: my-portfolio-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+      - DATABASE_URI=file:/app/payload.db
+      # Add other environment variables here as needed, or use an env_file
+      - NEXT_PUBLIC_FULL_NAME=${NEXT_PUBLIC_FULL_NAME}
+      - NEXT_PUBLIC_EMAIL_ADDRESS=${NEXT_PUBLIC_EMAIL_ADDRESS}
+      - NEXT_PUBLIC_SOFTWARE_DOMAIN=${NEXT_PUBLIC_SOFTWARE_DOMAIN}
+    volumes:
+      - ./payload.db:/app/payload.db
+      - ./media:/app/media
+    env_file:
+      - .env.local

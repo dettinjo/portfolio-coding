@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  output: "standalone",
 };
 
 export default withPayload(withNextIntl(nextConfig));
