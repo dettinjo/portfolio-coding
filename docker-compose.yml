@@ -17,7 +17,7 @@ services:
     environment:
       - NODE_ENV=production
       - PAYLOAD_SECRET=${PAYLOAD_SECRET}
-      - DATABASE_URI=file:/app/data/payload.db
+      - DATABASE_URI=file:///app/data/payload.db
       # Add other environment variables here as needed, or use an env_file
       - NEXT_PUBLIC_FULL_NAME=${NEXT_PUBLIC_FULL_NAME}
       - NEXT_PUBLIC_EMAIL_ADDRESS=${NEXT_PUBLIC_EMAIL_ADDRESS}
