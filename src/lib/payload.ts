@@ -98,7 +98,7 @@ export const fetchSoftwareProjectBySlug = cache(
 
       if (project) {
         // Fetch slugs for all locales to populate localizations
-        const { id } = docs[0];
+        const { id } = project;
         const localizedDoc = await payload.findByID({
           collection: "software-projects",
           id,
