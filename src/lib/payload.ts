@@ -67,7 +67,34 @@ export const fetchSoftwareProjectBySlug = cache(
         locale: locale as "en" | "de" | undefined,
         depth: 2,
       });
-      const project = (docs[0] as unknown as SoftwareProject) || null;
+      let project = (docs[0] as unknown as SoftwareProject) || null;
+
+      if (!project && locale !== "en") {
+        // Fallback: Try to find the project by slug in the default locale (en)
+        // This handles cases where the slug is not localized or missing in the requested locale
+        // but Payload falls back to English when reading.
+        const { docs: fallbackDocs } = await payload.find({
+          collection: "software-projects",
+          where: {
+            slug: {
+              equals: slug,
+            },
+          },
+          locale: "en",
+          depth: 0, // We only need the ID
+        });
+
+        if (fallbackDocs.length > 0) {
+          const { id } = fallbackDocs[0];
+          const localizedDoc = await payload.findByID({
+            collection: "software-projects",
+            id,
+            locale: locale as "en" | "de",
+            depth: 2,
+          });
+          project = localizedDoc as unknown as SoftwareProject;
+        }
+      }
 
       if (project) {
         // Fetch slugs for all locales to populate localizations

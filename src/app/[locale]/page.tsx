@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { CollectionPage, WithContext } from "schema-dts";
 import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
@@ -18,6 +18,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({
     locale: locale,
     namespace: "software.SoftwarePageSEO",
@@ -62,6 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DevPage({ params }: Props) {
   const { locale } = await params;
+  setRequestLocale(locale);
 
   const projects = await fetchSoftwareProjects(locale);
   const skillCategories = await fetchSkillCategories(locale);

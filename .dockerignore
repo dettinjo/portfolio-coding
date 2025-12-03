@@ -7,5 +7,5 @@ README.md
 .git
 .env.local
 .env
-payload.db
+
 media

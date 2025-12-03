@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
-import { getTranslations, getFormatter } from "next-intl/server";
+import {
+  getTranslations,
+  getFormatter,
+  setRequestLocale,
+} from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +45,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // UPDATED: Await the promise to safely access slug and locale.
   const { slug, locale } = await params;
+  setRequestLocale(locale);
   const project = await fetchSoftwareProjectBySlug(slug, locale);
   if (!project) return { title: "Project Not Found" };
 
