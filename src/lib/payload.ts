@@ -22,97 +22,122 @@ import type { SoftwareProject, SkillCategory } from "./payload-types-shared";
 // Fetch functions matching the Strapi interface
 
 export const fetchSoftwareProjects = cache(async (locale: string = "en") => {
-  const payload = await getPayloadClient();
-  const { docs } = await payload.find({
-    collection: "software-projects",
-    locale: locale as "en" | "de" | undefined,
-    depth: 2,
-    sort: "-developedAt",
-  });
-  return docs as unknown as SoftwareProject[];
+  try {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: "software-projects",
+      locale: locale as "en" | "de" | undefined,
+      depth: 2,
+      sort: "-developedAt",
+    });
+    return docs as unknown as SoftwareProject[];
+  } catch (error) {
+    console.error("Error fetching software projects:", error);
+    return [];
+  }
 });
 
 export const fetchSkillCategories = cache(async (locale: string = "en") => {
-  const payload = await getPayloadClient();
-  const { docs } = await payload.find({
-    collection: "skill-categories",
-    locale: locale as "en" | "de" | undefined,
-    depth: 2,
-    sort: "order",
-  });
-  return docs as unknown as SkillCategory[];
+  try {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: "skill-categories",
+      locale: locale as "en" | "de" | undefined,
+      depth: 2,
+      sort: "order",
+    });
+    return docs as unknown as SkillCategory[];
+  } catch (error) {
+    console.error("Error fetching skill categories:", error);
+    return [];
+  }
 });
 
 export const fetchSoftwareProjectBySlug = cache(
   async (slug: string, locale: string = "en") => {
-    const payload = await getPayloadClient();
-    const { docs } = await payload.find({
-      collection: "software-projects",
-      where: {
-        slug: {
-          equals: slug,
-        },
-      },
-      locale: locale as "en" | "de" | undefined,
-      depth: 2,
-    });
-    const project = (docs[0] as unknown as SoftwareProject) || null;
-
-    if (project) {
-      // Fetch slugs for all locales to populate localizations
-      const { id } = docs[0];
-      const localizedDoc = await payload.findByID({
+    try {
+      const payload = await getPayloadClient();
+      const { docs } = await payload.find({
         collection: "software-projects",
-        id,
-        locale: "all",
+        where: {
+          slug: {
+            equals: slug,
+          },
+        },
+        locale: locale as "en" | "de" | undefined,
+        depth: 2,
       });
+      const project = (docs[0] as unknown as SoftwareProject) || null;
 
-      const slugs = localizedDoc.slug as Record<string, string>;
+      if (project) {
+        // Fetch slugs for all locales to populate localizations
+        const { id } = docs[0];
+        const localizedDoc = await payload.findByID({
+          collection: "software-projects",
+          id,
+          locale: "all",
+        });
 
-      project.localizations = Object.entries(slugs).map(([loc, slug]) => ({
-        id: id as string,
-        slug,
-        locale: loc,
-      }));
+        const slugs = localizedDoc.slug as Record<string, string>;
+
+        project.localizations = Object.entries(slugs).map(([loc, slug]) => ({
+          id: id as string,
+          slug,
+          locale: loc,
+        }));
+      }
+
+      return project;
+    } catch (error) {
+      console.error(`Error fetching project by slug "${slug}":`, error);
+      return null;
     }
-
-    return project;
   }
 );
 
 export const fetchAllProjectSlugs = cache(async (locale: string = "en") => {
-  const payload = await getPayloadClient();
-  const { docs } = await payload.find({
-    collection: "software-projects",
-    locale: locale as "en" | "de" | undefined,
-    depth: 0,
-    select: {
-      slug: true,
-    },
-  });
-  return docs.map((doc) => ({ slug: doc.slug }));
+  try {
+    const payload = await getPayloadClient();
+    const { docs } = await payload.find({
+      collection: "software-projects",
+      locale: locale as "en" | "de" | undefined,
+      depth: 0,
+      select: {
+        slug: true,
+      },
+    });
+    return docs.map((doc) => ({ slug: doc.slug }));
+  } catch (error) {
+    console.error("Error fetching project slugs:", error);
+    return [];
+  }
 });
 
 export const getTechDetailsMap = cache(async () => {
-  const payload = await getPayloadClient();
-  const { docs: allSkills } = await payload.find({
-    collection: "skills",
-    pagination: false,
-  });
+  try {
+    const payload = await getPayloadClient();
+    const { docs: allSkills } = await payload.find({
+      collection: "skills",
+      pagination: false,
+    });
 
-  const techDetailsMap: {
-    [key: string]: { iconClassName: string | null; url: string | null };
-  } = {};
+    const techDetailsMap: {
+      [key: string]: { iconClassName: string | null; url: string | null };
+    } = {};
 
-  if (Array.isArray(allSkills)) {
-    for (const skill of allSkills) {
-      if (skill.name) {
-        techDetailsMap[skill.name.toLowerCase()] = {
-          iconClassName: skill.iconClassName || null,
-          url: skill.url || null,
-        };
+    if (Array.isArray(allSkills)) {
+      for (const skill of allSkills) {
+        if (skill.name) {
+          techDetailsMap[skill.name.toLowerCase()] = {
+            iconClassName: skill.iconClassName || null,
+            url: skill.url || null,
+          };
+        }
       }
     }
+    return techDetailsMap;
+  } catch (error) {
+    console.error("Error fetching tech details map:", error);
+    return {};
   }
-  return techDetailsMap;
 });
