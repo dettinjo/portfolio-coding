@@ -9,14 +9,15 @@
     "payload:importmap": "payload generate:importmap",
     "lint": "eslint"
   },
-  "overrides": {
-    "undici": "6.13.0"
-  },
   "dependencies": {
-    "@payloadcms/db-sqlite": "^3.64.0",
-    "@payloadcms/next": "^3.64.0",
-    "@payloadcms/richtext-lexical": "^3.64.0",
-    "@payloadcms/ui": "^3.64.0",
+    "@aws-sdk/client-s3": "^3.943.0",
+    "@payloadcms/db-postgres": "^3.65.0",
+    "@payloadcms/db-sqlite": "^3.65.0",
+    "@payloadcms/next": "^3.65.0",
+    "@payloadcms/plugin-cloud-storage": "^3.65.0",
+    "@payloadcms/richtext-lexical": "^3.65.0",
+    "@payloadcms/storage-s3": "^3.65.0",
+    "@payloadcms/ui": "^3.65.0",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -50,7 +51,7 @@
     "next-intl": "^4.5.5",
     "next-themes": "^0.4.6",
     "otplib": "^12.0.1",
-    "payload": "^3.64.0",
+    "payload": "^3.65.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

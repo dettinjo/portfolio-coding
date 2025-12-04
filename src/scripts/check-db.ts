@@ -1,5 +1,5 @@
 import { getPayload } from "payload";
-import configPromise from "./payload.config";
+import configPromise from "@payload-config";
 
 const checkImages = async () => {
   const payload = await getPayload({ config: configPromise });
@@ -15,6 +15,7 @@ const checkImages = async () => {
   for (const collection of collections) {
     try {
       const { docs } = await payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         collection: collection as any,
         limit: 1000,
         depth: 5,
@@ -37,7 +38,7 @@ const checkImages = async () => {
       } else {
         console.log(`No localhost:1337 found in ${collection}`);
       }
-    } catch (e) {
+    } catch {
       console.log(
         `Skipping collection ${collection} (might not exist or error)`
       );

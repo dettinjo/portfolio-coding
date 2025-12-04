@@ -1,4 +1,4 @@
-import { getMediaUrl } from "./src/lib/payload-helpers";
+import { getMediaUrl } from "@/lib/payload-helpers";
 
 const test = () => {
   const input = "/api/media/file/huggingface.svg";

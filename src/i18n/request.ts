@@ -1,13 +1,13 @@
-import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { isValidLocale, routing } from "./routing";
+import { routing } from "./routing";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // This typically corresponds to the `[locale]` segment
   let locale = await requestLocale;
 
   // Ensure that a valid locale is used
-  if (!locale || !isValidLocale(locale)) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!locale || !routing.locales.includes(locale as any)) {
     locale = routing.defaultLocale;
   }
 

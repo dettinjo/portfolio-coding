@@ -7,12 +7,7 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "active-confidence-ee4dbe67cf.media.strapiapp.com",
-      },
-    ],
+    remotePatterns: [],
   },
   output: "standalone",
   serverExternalPackages: ["libsql", "@payloadcms/db-sqlite"],

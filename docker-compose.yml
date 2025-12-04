@@ -19,6 +19,6 @@ services:
       - DATABASE_URI=file:///app/data/payload.db
     volumes:
       - ./data:/app/data
-      - ./media:/app/media
+      - ./media:/app/public/media # In production (Coolify), map Host path /mnt/storagebox/portfolio-media/coding to Container path /app/public/media
     env_file:
       - .env.local
