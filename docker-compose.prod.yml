@@ -16,7 +16,6 @@ services:
         NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
         PAYLOAD_SECRET: ${PAYLOAD_SECRET}
     image: my-portfolio-app
-    container_name: my-portfolio-app
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -34,3 +33,9 @@ services:
       - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
     volumes:
       - /mnt/storagebox/portfolio-media/coding:/app/public/media
+    networks:
+      - coolify
+
+networks:
+  coolify:
+    external: true
