@@ -80,13 +80,15 @@ export default async function DevPage({ params }: Props) {
   });
 
   const skillsForDisplay = skillsDataForDisplay
-    .filter((cat) => cat && Array.isArray(cat.skills))
-    .map((cat) => ({
-      category: cat.name,
-      skills: [...cat.skills].sort((a, b) => b.level - a.level),
-    }));
+    ? skillsDataForDisplay
+        .filter((cat) => cat && Array.isArray(cat.skills))
+        .map((cat) => ({
+          category: cat.name,
+          skills: [...cat.skills].sort((a, b) => b.level - a.level),
+        }))
+    : null;
 
-  const cleanProjectsData = projectsData.filter(Boolean);
+  const cleanProjectsData = projectsData ? projectsData.filter(Boolean) : null;
 
   const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
 
@@ -98,7 +100,7 @@ export default async function DevPage({ params }: Props) {
     url: `${serverUrl}`,
     mainEntity: {
       "@type": "ItemList",
-      itemListElement: cleanProjectsData.map((project, index) => ({
+      itemListElement: (cleanProjectsData || []).map((project, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: project.title,

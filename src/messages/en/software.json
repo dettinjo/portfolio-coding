@@ -20,7 +20,11 @@
   "SoftwareProjectsSection": {
     "title": "Projects",
     "subtitle": "An insight into my problem-solving skills and technical execution.",
-    "button_details": "View Details"
+    "button_details": "View Details",
+    "connectionFailedTitle": "Connection Failed",
+    "connectionFailedMessage": "Could not load projects. Please check the database connection.",
+    "emptyTitle": "No Projects Found",
+    "emptyMessage": "Please add some projects in the CMS to see them here."
   },
   "SoftwareSkillsSection": {
     "title": "Technologies & Skills",
@@ -29,7 +33,11 @@
     "category_backend": "Backend",
     "category_devops": "DevOps & Tools",
     "legend_beginner": "Familiar",
-    "legend_expert": "Expert"
+    "legend_expert": "Expert",
+    "connectionFailedTitle": "Connection Failed",
+    "connectionFailedMessage": "Could not load skills. Please check the database connection.",
+    "emptyTitle": "No Skills Found",
+    "emptyMessage": "Please add some skills in the CMS to see them here."
   },
   "SoftwareContactSection": {
     "title": "Get in Touch",

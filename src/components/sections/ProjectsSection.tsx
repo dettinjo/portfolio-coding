@@ -7,7 +7,7 @@ import type { SoftwareProject } from "@/lib/payload-types-shared";
 import { AnimatedProjectCard } from "./AnimatedProjectCard";
 
 interface ProjectsSectionProps {
-  projects: SoftwareProject[];
+  projects: SoftwareProject[] | null;
 }
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
@@ -47,10 +47,6 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeCardId]);
 
-  if (!projects || projects.length === 0) {
-    return null;
-  }
-
   return (
     <section id="projekte">
       <div className="text-center mb-16">
@@ -60,21 +56,35 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         </p>
       </div>
 
-      {/* UPDATED: We use a simple div here as the wrapper */}
-      <div className="grid grid-cols-1 gap-16">
-        {projects.map((project, index) => (
-          // The AnimatedProjectCard component itself will handle its own scaling
-          <AnimatedProjectCard
-            key={project.id}
-            project={project}
-            index={index}
-            isActive={project.id === activeCardId}
-            onScrollProgressChange={(progress) => {
-              scrollProgressRef.current[String(project.id)] = progress;
-            }}
-          />
-        ))}
-      </div>
+      {projects === null ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8 text-center">
+          <h3 className="text-xl font-semibold text-destructive">
+            {t("connectionFailedTitle")}
+          </h3>
+          <p className="mt-2 text-muted-foreground">
+            {t("connectionFailedMessage")}
+          </p>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <h3 className="text-xl font-semibold">{t("emptyTitle")}</h3>
+          <p className="mt-2 text-muted-foreground">{t("emptyMessage")}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-16">
+          {projects.map((project, index) => (
+            <AnimatedProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              isActive={project.id === activeCardId}
+              onScrollProgressChange={(progress) => {
+                scrollProgressRef.current[String(project.id)] = progress;
+              }}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

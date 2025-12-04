@@ -20,11 +20,43 @@ interface SkillCategory {
   skills: Skill[];
 }
 interface SkillsSectionProps {
-  skills: SkillCategory[];
+  skills: SkillCategory[] | null;
 }
 
 export function SkillsSection({ skills }: SkillsSectionProps) {
   const t = useTranslations("software.SoftwareSkillsSection");
+
+  return (
+    <section id="skills">
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-bold tracking-tight">{t("title")}</h2>
+        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+          {t("subtitle")}
+        </p>
+      </div>
+
+      {skills === null ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8 text-center">
+          <h3 className="text-xl font-semibold text-destructive">
+            {t("connectionFailedTitle")}
+          </h3>
+          <p className="mt-2 text-muted-foreground">
+            {t("connectionFailedMessage")}
+          </p>
+        </div>
+      ) : skills.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <h3 className="text-xl font-semibold">{t("emptyTitle")}</h3>
+          <p className="mt-2 text-muted-foreground">{t("emptyMessage")}</p>
+        </div>
+      ) : (
+        <SkillsContent skills={skills} />
+      )}
+    </section>
+  );
+}
+
+function SkillsContent({ skills }: { skills: SkillCategory[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
 
@@ -38,16 +70,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
   });
 
   return (
-    <section id="skills" ref={sectionRef}>
-      {/* UPDATED: Adjusted margin-bottom from mb-12 to mb-8 */}
-      <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold tracking-tight">{t("title")}</h2>
-        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-          {t("subtitle")}
-        </p>
-        {/* The legend has been moved from here */}
-      </div>
-
+    <div ref={sectionRef}>
       <motion.div
         data-active={isActive}
         className={cn(
@@ -60,10 +83,9 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
         <SkillsGrid skills={skills} />
       </motion.div>
 
-      {/* NEW: The legend is now placed here, underneath the skills grid */}
       <div className="mt-8">
         <ProficiencyLegend />
       </div>
-    </section>
+    </div>
   );
 }

@@ -5,7 +5,12 @@ import { cache } from "react";
 
 // Helper to get Payload client
 export const getPayloadClient = async () => {
-  return await getPayload({ config: configPromise });
+  try {
+    return await getPayload({ config: configPromise });
+  } catch (error) {
+    console.error("Failed to initialize Payload:", error);
+    return null;
+  }
 };
 
 // Re-export types from shared file
@@ -24,6 +29,7 @@ import type { SoftwareProject, SkillCategory } from "./payload-types-shared";
 export const fetchSoftwareProjects = cache(async (locale: string = "en") => {
   try {
     const payload = await getPayloadClient();
+    if (!payload) return null;
     const { docs } = await payload.find({
       collection: "software-projects",
       locale: locale as "en" | "de" | undefined,
@@ -33,13 +39,14 @@ export const fetchSoftwareProjects = cache(async (locale: string = "en") => {
     return docs as unknown as SoftwareProject[];
   } catch (error) {
     console.error("Error fetching software projects:", error);
-    return [];
+    return null;
   }
 });
 
 export const fetchSkillCategories = cache(async (locale: string = "en") => {
   try {
     const payload = await getPayloadClient();
+    if (!payload) return null;
     const { docs } = await payload.find({
       collection: "skill-categories",
       locale: locale as "en" | "de" | undefined,
@@ -49,7 +56,7 @@ export const fetchSkillCategories = cache(async (locale: string = "en") => {
     return docs as unknown as SkillCategory[];
   } catch (error) {
     console.error("Error fetching skill categories:", error);
-    return [];
+    return null;
   }
 });
 
@@ -57,6 +64,7 @@ export const fetchSoftwareProjectBySlug = cache(
   async (slug: string, locale: string = "en") => {
     try {
       const payload = await getPayloadClient();
+      if (!payload) return null;
       const { docs } = await payload.find({
         collection: "software-projects",
         where: {
@@ -125,6 +133,7 @@ export const fetchSoftwareProjectBySlug = cache(
 export const fetchAllProjectSlugs = cache(async (locale: string = "en") => {
   try {
     const payload = await getPayloadClient();
+    if (!payload) return [];
     const { docs } = await payload.find({
       collection: "software-projects",
       locale: locale as "en" | "de" | undefined,
@@ -143,6 +152,7 @@ export const fetchAllProjectSlugs = cache(async (locale: string = "en") => {
 export const getTechDetailsMap = cache(async () => {
   try {
     const payload = await getPayloadClient();
+    if (!payload) return {};
     const { docs: allSkills } = await payload.find({
       collection: "skills",
       pagination: false,

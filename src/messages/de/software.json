@@ -20,7 +20,11 @@
   "SoftwareProjectsSection": {
     "title": "Projekte",
     "subtitle": "Ein Einblick in meine Problemlösungsfähigkeiten und meine technische Umsetzung.",
-    "button_details": "Details ansehen"
+    "button_details": "Details ansehen",
+    "connectionFailedTitle": "Verbindung fehlgeschlagen",
+    "connectionFailedMessage": "Konnte Projekte nicht laden. Bitte überprüfen Sie die Datenbankverbindung.",
+    "emptyTitle": "Keine Projekte gefunden",
+    "emptyMessage": "Bitte fügen Sie Projekte im CMS hinzu, um sie hier zu sehen."
   },
   "SoftwareSkillsSection": {
     "title": "Technologien & Kompetenzen",
@@ -29,7 +33,11 @@
     "category_backend": "Backend",
     "category_devops": "DevOps & Tools",
     "legend_beginner": "Grundlagen",
-    "legend_expert": "Experte"
+    "legend_expert": "Experte",
+    "connectionFailedTitle": "Verbindung fehlgeschlagen",
+    "connectionFailedMessage": "Konnte Skills nicht laden. Bitte überprüfen Sie die Datenbankverbindung.",
+    "emptyTitle": "Keine Skills gefunden",
+    "emptyMessage": "Bitte fügen Sie Skills im CMS hinzu, um sie hier zu sehen."
   },
   "SoftwareContactSection": {
     "title": "Kontakt aufnehmen",
