@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-portfolio-app
+    container_name: my-portfolio-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/en"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      - NODE_ENV=production
+      # DATABASE_URI is injected by Coolify
+      # PAYLOAD_SECRET should be set in Coolify environment variables
+      # NEXT_PUBLIC_SERVER_URL should be set in Coolify environment variables
+    volumes:
+      - /mnt/storagebox/media:/app/public/media

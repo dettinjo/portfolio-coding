@@ -39,17 +39,22 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  db: process.env.POSTGRES_URL
-    ? postgresAdapter({
-        pool: {
-          connectionString: process.env.POSTGRES_URL,
-        },
-      })
-    : sqliteAdapter({
-        client: {
-          url: process.env.DATABASE_URI || "file:./payload.db",
-        },
-      }),
+  db:
+    process.env.POSTGRES_URL ||
+    (process.env.DATABASE_URI &&
+      (process.env.DATABASE_URI.startsWith("postgres://") ||
+        process.env.DATABASE_URI.startsWith("postgresql://")))
+      ? postgresAdapter({
+          pool: {
+            connectionString:
+              process.env.POSTGRES_URL || process.env.DATABASE_URI,
+          },
+        })
+      : sqliteAdapter({
+          client: {
+            url: process.env.DATABASE_URI || "file:./payload.db",
+          },
+        }),
   localization: {
     locales: ["en", "de"],
     defaultLocale: "en",

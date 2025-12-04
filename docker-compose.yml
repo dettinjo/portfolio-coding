@@ -1,8 +1,36 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: my-portfolio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-payload}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-payload}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.local
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_FULL_NAME: ${NEXT_PUBLIC_FULL_NAME}
+        NEXT_PUBLIC_EMAIL_ADDRESS: ${NEXT_PUBLIC_EMAIL_ADDRESS}
+        NEXT_PUBLIC_PHONE_NUMBER: ${NEXT_PUBLIC_PHONE_NUMBER}
+        NEXT_PUBLIC_STREET_ADDRESS: ${NEXT_PUBLIC_STREET_ADDRESS}
+        NEXT_PUBLIC_CITY_ADDRESS: ${NEXT_PUBLIC_CITY_ADDRESS}
+        NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
+        NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
+        NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
+        NEXT_PUBLIC_FORMSPREE_ID: ${NEXT_PUBLIC_FORMSPREE_ID}
+        NEXT_PUBLIC_SOFTWARE_DOMAIN: ${NEXT_PUBLIC_SOFTWARE_DOMAIN}
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
     image: my-portfolio-app
     container_name: my-portfolio-app
     restart: unless-stopped
@@ -15,10 +43,14 @@ services:
       retries: 5
       start_period: 30s
     environment:
-      - NODE_ENV=production
-      - DATABASE_URI=file:///app/data/payload.db
+      - NODE_ENV=development
+      - DATABASE_URI=postgres://${POSTGRES_USER:-payload}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-payload}
+    depends_on:
+      - postgres
     volumes:
-      - ./data:/app/data
-      - ./media:/app/public/media # In production (Coolify), map Host path /mnt/storagebox/portfolio-media/coding to Container path /app/public/media
+      - ./public/media:/app/public/media
     env_file:
       - .env.local
+
+volumes:
+  postgres_data:

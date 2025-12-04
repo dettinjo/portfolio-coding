@@ -45,3 +45,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .repomix-output.xml
+
+# database
+*.db
+*.sqlite
+*.sqlite3
+
+# logs
+*.log
+
+# migration
+migration-data.json

@@ -12,13 +12,13 @@ import { Metadata } from "next";
 // Imports from old src/app/layout.tsx
 import "../globals.css";
 import "devicon/devicon.min.css";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/Theme-Provider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -92,8 +92,8 @@ export default async function RootLocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          inter.className
+          "min-h-screen bg-background font-sans antialiased"
+          // inter.className
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
