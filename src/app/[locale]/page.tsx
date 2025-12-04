@@ -30,8 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const firstName = fullName.split(" ")[0];
   const siteTitle = t("siteName", { name: firstName });
 
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "";
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
 
   return {
     title: siteTitle,
@@ -39,11 +38,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: siteTitle,
       description: t("description"),
-      url: `https://${softwareDomain}`,
+      url: `${serverUrl}`,
       siteName: siteTitle,
       images: [
         {
-          url: `https://${rootDomain}/og-software.png`,
+          url: `${serverUrl}/og-software.png`,
           width: 1200,
           height: 630,
           alt: `An overview of software projects by ${fullName}`,
@@ -53,11 +52,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale,
     },
     alternates: {
-      canonical: `https://${softwareDomain}`,
+      canonical: `${serverUrl}`,
       languages: {
-        en: `https://${softwareDomain}`,
-        de: `https://de.${softwareDomain}`,
-        "x-default": `https://${softwareDomain}`,
+        en: `${serverUrl}`,
+        de: `${serverUrl}/de`,
+        "x-default": `${serverUrl}`,
       },
     },
   };
@@ -89,21 +88,21 @@ export default async function DevPage({ params }: Props) {
 
   const cleanProjectsData = projectsData.filter(Boolean);
 
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
 
   const jsonLd: WithContext<CollectionPage> = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: t("title"),
     description: t("subtitle"),
-    url: `https://${softwareDomain}`,
+    url: `${serverUrl}`,
     mainEntity: {
       "@type": "ItemList",
       itemListElement: cleanProjectsData.map((project, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: project.title,
-        url: `https://${softwareDomain}/${project.slug}`,
+        url: `${serverUrl}/${project.slug}`,
       })),
     },
   };

@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
 
   return {
     rules: [
@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: [`https://${softwareDomain}/sitemap.xml`],
+    sitemap: [`${serverUrl}/sitemap.xml`],
   };
 }

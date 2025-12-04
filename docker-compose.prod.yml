@@ -3,6 +3,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_FULL_NAME: ${NEXT_PUBLIC_FULL_NAME}
+        NEXT_PUBLIC_EMAIL_ADDRESS: ${NEXT_PUBLIC_EMAIL_ADDRESS}
+        NEXT_PUBLIC_PHONE_NUMBER: ${NEXT_PUBLIC_PHONE_NUMBER}
+        NEXT_PUBLIC_STREET_ADDRESS: ${NEXT_PUBLIC_STREET_ADDRESS}
+        NEXT_PUBLIC_CITY_ADDRESS: ${NEXT_PUBLIC_CITY_ADDRESS}
+        NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
+        NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
+        NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
+        NEXT_PUBLIC_FORMSPREE_ID: ${NEXT_PUBLIC_FORMSPREE_ID}
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
     image: my-portfolio-app
     container_name: my-portfolio-app
     restart: unless-stopped
@@ -16,8 +28,9 @@ services:
       start_period: 30s
     environment:
       - NODE_ENV=production
-      # DATABASE_URI is injected by Coolify
-      # PAYLOAD_SECRET should be set in Coolify environment variables
-      # NEXT_PUBLIC_SERVER_URL should be set in Coolify environment variables
+      - POSTGRES_URL=${POSTGRES_URL}
+      - DATABASE_URI=${DATABASE_URI}
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+      - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
     volumes:
       - /mnt/storagebox/portfolio-media/coding:/app/public/media

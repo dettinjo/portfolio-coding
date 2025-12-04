@@ -34,12 +34,13 @@ export async function generateMetadata({
   const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio";
   const firstName = fullName.split(" ")[0];
 
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN || "";
+  const serverUrl =
+    process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
   return {
     title: t("title", { name: firstName }),
     description: t("description", { name: firstName }),
-    metadataBase: new URL(`https://${softwareDomain || "localhost:3000"}`),
+    metadataBase: new URL(serverUrl),
     icons: {
       icon: "/favicon.ico",
       shortcut: { url: "/favicon.ico", type: "image/x-icon" },
@@ -60,11 +61,11 @@ export async function generateMetadata({
       ],
     },
     alternates: {
-      canonical: `https://${softwareDomain}`,
+      canonical: `${serverUrl}`,
       languages: {
-        en: `https://${softwareDomain}`,
-        de: `https://${softwareDomain}/de`,
-        "x-default": `https://${softwareDomain}`,
+        en: `${serverUrl}`,
+        de: `${serverUrl}/de`,
+        "x-default": `${serverUrl}`,
       },
     },
   };

@@ -51,15 +51,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { title, description, coverImage, localizations } = project;
   const imageUrl = getMediaUrl(coverImage);
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN;
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   const languages: Record<string, string> = {};
-  if (softwareDomain) {
-    languages[locale] = `https://${softwareDomain}${
-      locale === "de" ? "/de" : ""
-    }/${slug}`;
+  if (serverUrl) {
+    languages[locale] = `${serverUrl}${locale === "de" ? "/de" : ""}/${slug}`;
     localizations?.forEach((loc) => {
-      languages[loc.locale] = `https://${softwareDomain}${
+      languages[loc.locale] = `${serverUrl}${
         loc.locale === "de" ? "/de" : ""
       }/${loc.slug}`;
     });
@@ -76,8 +74,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale,
     },
     alternates: {
-      canonical: softwareDomain
-        ? `https://${softwareDomain}${locale === "de" ? "/de" : ""}/${slug}`
+      canonical: serverUrl
+        ? `${serverUrl}${locale === "de" ? "/de" : ""}/${slug}`
         : undefined,
       languages: languages,
     },
@@ -136,7 +134,7 @@ export default async function ProjectDetailPage({ params }: Props) {
     },
   };
 
-  const softwareDomain = process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN;
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
     "@context": "https://schema.org",
@@ -146,7 +144,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: `https://${softwareDomain}`,
+        item: `${serverUrl}`,
       },
       {
         "@type": "ListItem",
