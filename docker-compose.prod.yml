@@ -20,4 +20,4 @@ services:
       # PAYLOAD_SECRET should be set in Coolify environment variables
       # NEXT_PUBLIC_SERVER_URL should be set in Coolify environment variables
     volumes:
-      - /mnt/storagebox/media:/app/public/media
+      - /mnt/storagebox/portfolio-media/coding:/app/public/media
