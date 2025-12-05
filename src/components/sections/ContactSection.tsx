@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 export function ContactSection() {
   const t = useTranslations("software.SoftwareContactSection");
+  const locale = useLocale();
   // ... state and handlers remain the same
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -33,15 +34,16 @@ export function ContactSection() {
     event.preventDefault();
     setSubmissionStatus("submitting");
     const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
     try {
-      const response = await fetch(
-        `https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_ID}`,
-        {
-          method: "POST",
-          body: formData,
-          headers: { Accept: "application/json" },
-        }
-      );
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: JSON.stringify({ ...data, locale }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
       if (response.ok) {
         setSubmissionStatus("success");
       } else {

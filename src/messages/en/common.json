@@ -57,8 +57,8 @@
     "section3_hosting_content": "Our website is hosted by Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. Vercel automatically collects information in server log files each time the website is accessed. This data is not merged with other data sources. The basis for this data processing is Art. 6(1)(f) GDPR.",
     "section3_analytics_title": "Analytics by Vercel Analytics & Speed Insights",
     "section3_analytics_content": "We use the services Vercel Analytics and Speed Insights from our host, Vercel Inc. These services are designed to be privacy-friendly, do not collect personal data that would allow for user identification, and do not use cookies. The legal basis is our legitimate interest (Art. 6(1)(f) GDPR) in the analysis and optimization of our website.",
-    "section3_contact_title": "Contact Form via Formspree",
-    "section3_contact_content": "When you use our contact form, your provided information is transmitted to and processed by the service provider Formspree, Inc., 1201 Orange St, Ste 600, Wilmington, DE 19801, USA, to handle your request. The processing of this data is based on your consent (Art. 6(1)(a) GDPR).",
+    "section3_contact_title": "Contact Form",
+    "section3_contact_content": "When you use our contact form, the information provided is processed internally for the purpose of handling your request. This data is not passed to third parties. The processing is based on your consent (Art. 6(1)(a) GDPR).",
     "section4_title": "3. Your Rights as a Data Subject",
     "section4_content": "Within the framework of the applicable legal provisions, you have the right at any time to free information about your stored personal data, its origin and recipients, and the purpose of the data processing, and, if applicable, a right to correction or deletion of this data."
   },

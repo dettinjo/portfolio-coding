@@ -1,6 +1,7 @@
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import path from "path";
 import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
@@ -34,6 +35,18 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, SoftwareProjects, Skills, SkillCategories],
+  email: nodemailerAdapter({
+    defaultFromAddress: "dettinger.joel@gmail.com",
+    defaultFromName: "Joel Dettinger",
+    transportOptions: {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "super-secret-key",
   typescript: {

@@ -1,7 +1,8 @@
 <a id="readme-top"></a>
 
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![Issues][issues-shield]][issues-url]
+[![CC BY-NC 4.0 License][license-shield]][license-url]
 
 <br />
 <div align="center">
@@ -9,15 +10,15 @@
     <img src="public/favicon-dark.svg" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Software Portfolio | Next.js & Strapi</h3>
+<h3 align="center">Software Portfolio | Next.js & Payload CMS</h3>
 
   <p align="center">
-    A personal portfolio showcasing software development projects, built with Next.js and a Strapi Headless CMS.
+    A personal portfolio showcasing software development projects, built with Next.js and Payload CMS.
     <br />
     <a href="#about-the-project"><strong>Explore the Features »</strong></a>
     <br />
     <br />
-    <a href="https://{process.env.NEXT_PUBLIC_SOFTWARE_DOMAIN}">View Demo</a>
+    <a href="https://{process.env.NEXT_PUBLIC_SERVER_URL}">View Demo</a>
     ·
     <a href="https://github.com/dettinjo/portfolio_frontend/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
@@ -38,8 +39,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#backend-setup-strapi">Backend Setup (Strapi)</a></li>
-        <li><a href="#frontend-setup-nextjs">Frontend Setup (Next.js)</a></li>
+        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li><a href="#license">License</a></li>
@@ -50,86 +50,75 @@
 
 ## About The Project
 
-This repository contains the frontend for a full-stack personal software portfolio. All content, from project details to skill lists, is managed through a flexible Strapi Headless CMS, allowing for easy updates without redeploying the frontend.
+This repository contains a full-stack personal software portfolio. It leverages the power of Next.js for the frontend and Payload CMS as a headless content management system, both integrated into a single repository for a seamless development experience.
 
-Here's why this architecture is effective:
-* **Headless & Dynamic:** Built with Strapi, all project data is fetched at build-time (SSG) or request-time (SSR/ISR) for excellent performance and maintainability.
-* **Modern User Experience:** The site is fully responsive, supports internationalization (EN/DE), and features a dynamic light/dark theme that respects user preferences.
-* **Scalable:** Using Next.js provides a robust foundation for Server-Side Rendering, Static Site Generation, and a great developer experience.
+Key architectural features:
+* **Unified Stack:** Next.js and Payload CMS run together, sharing types and reducing context switching.
+* **Headless & Dynamic:** Project data, skills, and resume details are managed via Payload and fetched dynamically.
+* **Modern User Experience:** Fully responsive, supports internationalization (EN/DE), and includes dark/light mode.
+* **Containerized:** Fully Dockerized Setup for consistent development and production environments, including a PostgreSQL database.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
 
-This project is built with a modern, decoupled architecture using the latest industry-standard tools.
+This project is built with a modern, robust tech stack:
 
 * [![Next][Next.js]][Next-url]
 * [![React][React.js]][React-url]
 * [![TypeScript][TypeScript]][TypeScript-url]
 * [![Tailwind][TailwindCSS]][Tailwind-url]
-* [![Strapi][Strapi.io]][Strapi-url]
-* [![Vercel][Vercel]][Vercel-url]
+* [![Payload][Payload]][Payload-url]
+* [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
+* [![Docker][Docker]][Docker-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting Started
 
-To get a local copy up and running, you will need to set up both the backend (Strapi) and this frontend (Next.js) service.
+To get a local copy up and running, follow these simple steps.
 
 ### Prerequisites
 
-Ensure you have the following software installed on your machine.
+Ensure you have the following installed:
 * [Node.js](https://nodejs.org/) (v18 or higher recommended)
-* npm
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Required for the PostgreSQL database)
+
+### Installation
+
+1.  **Clone the repository**
     ```sh
-    npm install npm@latest -g
+    git clone https://github.com/dettinjo/portfolio_frontend.git
+    cd portfolio_frontend
     ```
 
-### Backend Setup (Strapi)
-
-The backend must be running first. These instructions assume you are running them from the `/backend` directory of the original project monorepo.
-
-1.  Navigate into the `backend` directory.
-    ```sh
-    cd backend
-    ```
-2.  Install NPM packages.
+2.  **Install dependencies**
     ```sh
     npm install
     ```
-3.  Build the Strapi admin panel.
-    ```sh
-    npm run build
-    ```
-4.  Start the Strapi development server (runs on `http://localhost:1337`).
-    ```sh
-    npm run develop
-    ```
-5.  **Admin Setup & Permissions:** Navigate to `http://localhost:1337/admin` to create your admin account. Then, go to **Settings > Roles > Public** and grant `find` and `findOne` permissions for all your software-related content types (projects, skills, etc.).
 
-### Frontend Setup (Next.js)
-
-These instructions should be run from the root directory of this codebase.
-
-1.  Install NPM packages.
+3.  **Environment Setup**
+    Copy the example environment file to `.env.local` and configure your variables.
     ```sh
-    npm install
+    cp .env.example .env.local
     ```
-2.  Create an environment file. Copy `.env.example` to a new file named `.env.local` and fill in your variables. At a minimum, you need:
-    ```env
-    NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-    NEXT_PUBLIC_SOFTWARE_DOMAIN=localhost:3000
-    ```
-3.  Start the Next.js development server (runs on `http://localhost:3000`).
+    *Open `.env.local` and ensure parameters like `Use local database` or `Postgres connection string` are set correctly. The defaults usually work for local Docker development.*
+
+4.  **Start the Development Server**
+    This command will automatically start the PostgreSQL database container (via Docker Compose) and then launch the Next.js application.
     ```sh
     npm run dev
     ```
+
+5.  **Access the Application**
+    *   **Frontend:** `http://localhost:3000`
+    *   **Admin Panel:** `http://localhost:3000/admin` (Create your first user here to get started)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License
 
-Distributed under the MIT License. See the `LICENSE` file for more information.
+Distributed under the CC BY-NC 4.0 License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -141,21 +130,20 @@ Project Link: [https://github.com/dettinjo/portfolio_frontend](https://github.co
 
 ## Acknowledgments
 
-This project was made possible by these incredible tools and libraries.
-
 * [shadcn/ui](https://ui.shadcn.com/)
 * [next-intl](https://next-intl.dev/)
-* [Framer Motion](https://www.framer.com/motion/)
+* [payload-cms](https://payloadcms.com/)
 * [Lucide React](https://lucide.dev/)
 * [Devicon](https://devicon.dev/)
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- MARKDOWN LINKS & IMAGES -->
 [issues-shield]: https://img.shields.io/github/issues/dettinjo/portfolio_frontend.svg?style=for-the-badge
 [issues-url]: https://github.com/dettinjo/portfolio_frontend/issues
-[license-shield]: https://img.shields.io/github/license/dettinjo/portfolio_frontend.svg?style=for-the-badge
-[license-url]: https://github.com/dettinjo/portfolio_frontend/blob/main/LICENSE
+[license-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
+[license-url]: https://creativecommons.org/licenses/by-nc/4.0/
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
@@ -164,7 +152,9 @@ This project was made possible by these incredible tools and libraries.
 [TypeScript-url]: https://www.typescriptlang.org/
 [TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
 [Tailwind-url]: https://tailwindcss.com/
-[Strapi.io]: https://img.shields.io/badge/Strapi-2E7EEA?style=for-the-badge&logo=strapi&logoColor=white
-[Strapi-url]: https://strapi.io/
-[Vercel]: https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white
-[Vercel-url]: https://vercel.com/
+[Payload]: https://img.shields.io/badge/Payload-000000?style=for-the-badge&logo=payload&logoColor=white
+[Payload-url]: https://payloadcms.com/
+[PostgreSQL]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+[PostgreSQL-url]: https://www.postgresql.org/
+[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
+[Docker-url]: https://www.docker.com/
