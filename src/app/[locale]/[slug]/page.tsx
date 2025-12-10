@@ -12,11 +12,7 @@ import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { ProjectGallery } from "@/components/ProjectGallery";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
-import {
-  fetchSoftwareProjectBySlug,
-  fetchAllProjectSlugs,
-  getTechDetailsMap,
-} from "@/lib/payload";
+import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/payload";
 import { getMediaUrl } from "@/lib/payload-helpers";
 import { cn } from "@/lib/utils";
 import { LongTextRenderer } from "@/components/LongTextRenderer";
@@ -24,15 +20,29 @@ import { AlternateLinksProvider } from "@/context/AlternateLinksProvider";
 import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 
+import { fetchAllProjectSlugs } from "@/lib/payload";
+
+// generateStaticParams implemented to enable SSG/ISR.
+// We wrap it in a try/catch to ensure the build doesn't fail if the DB is unreachable (e.g. in CI).
 export async function generateStaticParams() {
   try {
-    const projects = await fetchAllProjectSlugs();
-    return projects.map((project) => ({ slug: project.slug }));
+    const [enSlugs, deSlugs] = await Promise.all([
+      fetchAllProjectSlugs("en"),
+      fetchAllProjectSlugs("de"),
+    ]);
+
+    const params = [
+      ...enSlugs.map((p) => ({ slug: p.slug, locale: "en" })),
+      ...deSlugs.map((p) => ({ slug: p.slug, locale: "de" })),
+    ];
+
+    return params;
   } catch (error) {
     console.warn(
-      "Database not available or empty, skipping static params generation for projects.",
+      "Could not generate static params for projects (DB might be unavailable during build):",
       error
     );
+    // Return empty array to fallback to dynamic rendering (ISR) for paths not generated here.
     return [];
   }
 }
@@ -50,8 +60,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: "Project Not Found" };
 
   const { title, description, coverImage, localizations } = project;
-  const imageUrl = getMediaUrl(coverImage);
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+  const relativeImageUrl = getMediaUrl(coverImage);
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const imageUrl =
+    relativeImageUrl && !relativeImageUrl.startsWith("http")
+      ? `${serverUrl}${relativeImageUrl}`
+      : relativeImageUrl;
 
   const languages: Record<string, string> = {};
   if (serverUrl) {
@@ -69,9 +83,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      // Ensure absolute URL for OG image
       images: imageUrl ? [{ url: imageUrl, alt: `Preview for ${title}` }] : [],
       type: "article",
       locale: locale,
+      siteName: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
     },
     alternates: {
       canonical: serverUrl
@@ -119,6 +135,13 @@ export default async function ProjectDetailPage({ params }: Props) {
     gallery,
   } = project;
 
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const relativeImageUrl = getMediaUrl(coverImage);
+  const imageUrl =
+    relativeImageUrl && !relativeImageUrl.startsWith("http")
+      ? `${serverUrl}${relativeImageUrl}`
+      : relativeImageUrl;
+
   const tagBaseClasses =
     "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none";
 
@@ -128,13 +151,17 @@ export default async function ProjectDetailPage({ params }: Props) {
     name: title,
     applicationCategory: projectType,
     description: description,
+    image: imageUrl || undefined, // Added image to JSON-LD
     author: {
       "@type": "Person",
       name: process.env.NEXT_PUBLIC_FULL_NAME || "Developer",
     },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
   };
-
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   const breadcrumbJsonLd: WithContext<BreadcrumbList> = {
     "@context": "https://schema.org",
@@ -144,12 +171,13 @@ export default async function ProjectDetailPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: `${serverUrl}`,
+        item: `${serverUrl}/${locale === "de" ? "de" : ""}`, // localized home
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
+        item: `${serverUrl}/${locale === "de" ? "de/" : ""}${slug}`, // current page
       },
     ],
   };

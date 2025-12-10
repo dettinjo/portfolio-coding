@@ -61,7 +61,7 @@ export async function generateMetadata({
       ],
     },
     alternates: {
-      canonical: `${serverUrl}`,
+      canonical: locale === "de" ? `${serverUrl}/de` : `${serverUrl}`,
       languages: {
         en: `${serverUrl}`,
         de: `${serverUrl}/de`,
@@ -97,6 +97,18 @@ export default async function RootLocaleLayout({
           // inter.className
         )}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
+              url:
+                process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
+            }),
+          }}
+        />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             {children}

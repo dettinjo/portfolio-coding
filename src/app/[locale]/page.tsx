@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
-import { CollectionPage, WithContext } from "schema-dts";
+import { CollectionPage, WebSite, WithContext } from "schema-dts";
 import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ContactSection } from "@/components/sections/ContactSection";
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale,
     },
     alternates: {
-      canonical: `${serverUrl}`,
+      canonical: locale === "de" ? `${serverUrl}/de` : `${serverUrl}`,
       languages: {
         en: `${serverUrl}`,
         de: `${serverUrl}/de`,
@@ -97,16 +97,32 @@ export default async function DevPage({ params }: Props) {
     "@type": "CollectionPage",
     name: t("title"),
     description: t("subtitle"),
-    url: `${serverUrl}`,
+    url: `${serverUrl}${locale === "de" ? "/de" : ""}`,
     mainEntity: {
       "@type": "ItemList",
       itemListElement: (cleanProjectsData || []).map((project, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: project.title,
-        url: `${serverUrl}/${project.slug}`,
+        url: `${serverUrl}/${locale === "de" ? "de/" : ""}${project.slug}`,
       })),
     },
+  };
+
+  const websiteJsonLd: WithContext<WebSite> = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Joel Dettinger - Portfolio",
+    url: `${serverUrl}${locale === "de" ? "/de" : ""}`,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${serverUrl}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
   };
 
   return (
@@ -116,6 +132,10 @@ export default async function DevPage({ params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <HeroSection />
         <div className="max-w-6xl mx-auto px-6">
