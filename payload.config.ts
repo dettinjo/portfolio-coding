@@ -61,6 +61,7 @@ export default buildConfig({
           pool: {
             connectionString:
               process.env.POSTGRES_URL || process.env.DATABASE_URI,
+            connectionTimeoutMillis: 5000,
           },
         })
       : sqliteAdapter({
