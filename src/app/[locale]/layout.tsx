@@ -11,7 +11,6 @@ import { Metadata } from "next";
 
 // Imports from old src/app/layout.tsx
 import "../globals.css";
-import "devicon/devicon.min.css";
 // import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/Theme-Provider";
@@ -42,8 +41,6 @@ export async function generateMetadata({
     description: t("description", { name: firstName }),
     metadataBase: new URL(serverUrl),
     icons: {
-      icon: "/favicon.ico",
-      shortcut: { url: "/favicon.ico", type: "image/x-icon" },
       apple: { url: "/favicon-light.svg", type: "image/svg+xml" },
       other: [
         {

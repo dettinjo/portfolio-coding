@@ -8,6 +8,8 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
   },
   output: "standalone",
   serverExternalPackages: ["libsql", "@payloadcms/db-sqlite"],

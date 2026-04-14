@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import { useTranslations } from "next-intl";
 import { Globe, Mail, MapPin, Phone, Linkedin, Github } from "lucide-react";
 import { UtilityHeader } from "@/components/layout/UtilityHeader";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
+import Image from "next/image";
 import { ResumeEntry } from "@/components/resume/ResumeItem";
 import { PrintButton } from "@/components/resume/PrintButton";
 import { ProficiencyBar } from "@/components/ProficiencyBar";
@@ -73,12 +74,14 @@ export default function ResumePage() {
                     // Avatar background set to white to fill the circle
                     className="h-48 w-48 lg:h-56 lg:w-56 group transition-all duration-500 ease-in-out bg-zinc-900 border-4 border-zinc-900 shadow-sm dark:bg-white dark:border-white"
                   >
-                    <AvatarImage
+                    <Image
                       src={avatarPath}
                       alt="Profile picture of me"
+                      fill
+                      sizes="(max-width: 1024px) 192px, 224px"
+                      priority
                       className="object-cover object-top scale-[1.2] origin-bottom translate-y-4 transition-transform duration-500 ease-in-out"
                     />
-                    <AvatarFallback>{basics.name[0]}</AvatarFallback>
                   </Avatar>
 
                   <section className="w-full">

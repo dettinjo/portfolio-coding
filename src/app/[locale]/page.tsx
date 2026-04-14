@@ -8,9 +8,19 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 import { SkillsSection } from "@/components/sections/SkillsSection";
 import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
-import { ScrollIndicator } from "@/components/ScrollIndicator";
-import { BackToTopButton } from "@/components/ui/BackToTopButton";
+import dynamicImport from "next/dynamic";
 import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/payload";
+
+const ScrollIndicator = dynamicImport(
+  () =>
+    import("@/components/ScrollIndicator").then((m) => m.ScrollIndicator),
+  { ssr: false }
+);
+const BackToTopButton = dynamicImport(
+  () =>
+    import("@/components/ui/BackToTopButton").then((m) => m.BackToTopButton),
+  { ssr: false }
+);
 
 type Props = {
   params: Promise<{ locale: string }>;

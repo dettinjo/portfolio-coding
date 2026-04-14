@@ -39,7 +39,7 @@ export function AnimatedProjectCard({
   });
 
   const { title, description, coverImage, projectType, slug } = project;
-  const imageUrl = getMediaUrl(coverImage) || "/placeholder.jpg";
+  const imageUrl = getMediaUrl(coverImage);
 
   const locale = useLocale();
 
@@ -72,15 +72,18 @@ export function AnimatedProjectCard({
             index % 2 === 1 ? "md:order-last" : ""
           )}
         >
-          <div className="relative w-full h-full">
-            <Image
-              src={imageUrl}
-              alt={`Preview for ${title}`}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain"
-            />
-          </div>
+          {imageUrl && (
+            <div className="relative w-full h-full">
+              <Image
+                src={imageUrl}
+                alt={`Preview for ${title}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={index < 2}
+                className="object-contain"
+              />
+            </div>
+          )}
         </div>
         <div className="flex flex-col md:w-1/2 p-10 md:p-16">
           <div className="flex-grow">

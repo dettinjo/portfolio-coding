@@ -1,6 +1,8 @@
 // src/components/sections/software/SkillsGrid.tsx
 "use client";
 
+import "devicon/devicon.min.css";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SkillIcon } from "@/components/SkillIcon";

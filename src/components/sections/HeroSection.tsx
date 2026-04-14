@@ -3,7 +3,8 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
+import Image from "next/image";
 import {
   motion,
   useScroll,
@@ -70,9 +71,8 @@ export function HeroSection() {
 
         <motion.div
           className="flex justify-center lg:justify-end"
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={false}
           animate={{
-            opacity: 1,
             scale: isAvatarActive ? 1.05 : 1,
           }}
           transition={{
@@ -90,16 +90,18 @@ export function HeroSection() {
               "data-[active=true]:border-foreground"
             )}
           >
-            <AvatarImage
+            <Image
               src={avatarSrc}
               alt="Profile picture of me"
+              fill
+              sizes="(max-width: 1024px) 224px, 418px"
+              priority
               className={cn(
                 "object-cover object-top scale-[1.2] origin-bottom transition-transform duration-500 ease-in-out",
                 "group-data-[active=true]:scale-[1.3]",
                 "group-data-[active=true]:translate-y-4"
               )}
             />
-            <AvatarFallback>My Picture</AvatarFallback>
           </Avatar>
         </motion.div>
       </div>

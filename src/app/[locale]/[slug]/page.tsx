@@ -1,3 +1,4 @@
+import "devicon/devicon.min.css";
 import { notFound } from "next/navigation";
 import {
   getTranslations,
