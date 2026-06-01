@@ -78,10 +78,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Explicitly copy @libsql to ensure the Linux binary is available
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@libsql ./node_modules/@libsql
+# Copy drizzle-kit so Payload's dev schema push works at runtime
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
 
 # Copy media folder if it exists, or create it and set permissions
 # This is important for Payload CMS media uploads
-RUN mkdir -p media data && chown nextjs:nodejs media data
+RUN mkdir -p public/media data && chown -R nextjs:nodejs public/media data
 
 USER nextjs
 

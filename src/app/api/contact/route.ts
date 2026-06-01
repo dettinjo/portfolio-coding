@@ -38,6 +38,7 @@ export const POST = async (req: NextRequest) => {
       `;
 
     await payload.sendEmail({
+      from: "codeby@joeldettinger.de",
       to: "hello@joeldettinger.de",
       subject,
       html,

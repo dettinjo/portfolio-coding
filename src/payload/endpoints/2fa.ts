@@ -1,5 +1,19 @@
 import type { PayloadRequest } from 'payload'
 import { cookies } from 'next/headers'
+
+async function setPayloadCookie(loginResult: { token?: string; exp?: number }) {
+  if (!loginResult?.token) return
+  const cookieStore = await cookies()
+  cookieStore.set({
+    name: 'payload-token',
+    value: loginResult.token,
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    expires: loginResult.exp ? new Date(loginResult.exp * 1000) : undefined,
+  })
+}
 import { generateTOTPSecret, generateQRCode, generateBackupCodes, hashBackupCode, encryptSecret, verifyTOTP } from '../utils/2fa'
 
 // Temporary storage for passwords during 2FA flow (in-memory, not persistent)
@@ -269,23 +283,8 @@ export const verify2FAHandler = async (req: PayloadRequest): Promise<Response> =
     // Clean up stored password
     pendingLogins.delete(email)
 
-    // Explicitly set the cookie using Next.js headers
-    // This fixes the redirection loop issue where the cookie wasn't being persisted
-    if (loginResult?.token) {
-      const cookieStore = await cookies()
-      
-      cookieStore.set({
-        name: 'payload-token',
-        value: loginResult.token,
-        path: '/',
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        expires: loginResult.exp ? new Date(loginResult.exp * 1000) : undefined,
-      })
-
-      console.log('verify2FAHandler: Cookie set successfully via next/headers')
-    }
+    await setPayloadCookie(loginResult)
+    console.log('verify2FAHandler: Cookie set successfully via next/headers')
 
     console.log('verify2FAHandler: Success, session created')
     
@@ -443,22 +442,22 @@ export const loginInitHandler = async (req: PayloadRequest): Promise<Response> =
       }, { status: 200 })
     }
 
-    // No 2FA required, verify password and create session with cookies
+    // No 2FA required — verify password and create session
+    let loginResult
     try {
-      await payload.login({
+      loginResult = await payload.login({
         collection: 'users',
-        data: {
-          email,
-          password,
-        },
-        req, // Pass req to set session cookies
+        data: { email, password },
+        req,
       })
     } catch {
       return Response.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
-    // User is logged in successfully
-    return Response.json({ 
+    // Explicitly set the cookie via next/headers so it persists in App Router
+    await setPayloadCookie(loginResult)
+
+    return Response.json({
       twoFactorRequired: false,
       success: true,
     }, { status: 200 })

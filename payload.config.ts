@@ -36,13 +36,14 @@ export default buildConfig({
   },
   collections: [Users, Media, SoftwareProjects, Skills, SkillCategories],
   email: nodemailerAdapter({
-    defaultFromAddress: "dettinger.joel@gmail.com",
+    defaultFromAddress: "server@joeldettinger.de",
     defaultFromName: "Joel Dettinger",
     transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      host: process.env.SMTP_HOST || "web207.dogado.net",
+      port: Number(process.env.SMTP_PORT || 465),
+      secure: true,
       auth: {
-        user: process.env.SMTP_USER,
+        user: process.env.SMTP_USER || "admin@joeldettinger.de",
         pass: process.env.SMTP_PASS,
       },
     },
@@ -58,6 +59,8 @@ export default buildConfig({
       (process.env.DATABASE_URI.startsWith("postgres://") ||
         process.env.DATABASE_URI.startsWith("postgresql://")))
       ? postgresAdapter({
+          push: true,
+          logger: true,
           pool: {
             connectionString:
               process.env.POSTGRES_URL || process.env.DATABASE_URI,

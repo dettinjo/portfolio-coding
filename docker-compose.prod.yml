@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-payload}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio_coding}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-payload}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coolify
+
   app:
     build:
       context: .
@@ -12,10 +29,9 @@ services:
         NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
         NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
         NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
-
         NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
         PAYLOAD_SECRET: ${PAYLOAD_SECRET}
-    image: my-portfolio-app
+    image: my-portfolio-coding
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -27,8 +43,7 @@ services:
       start_period: 30s
     environment:
       - NODE_ENV=production
-      - POSTGRES_URL=${POSTGRES_URL}
-      - DATABASE_URI=${DATABASE_URI}
+      - POSTGRES_URL=postgres://${POSTGRES_USER:-payload}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portfolio_coding}
       - PAYLOAD_SECRET=${PAYLOAD_SECRET}
       - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
       - SMTP_HOST=${SMTP_HOST}
@@ -37,8 +52,14 @@ services:
       - SMTP_PASS=${SMTP_PASS}
     volumes:
       - /mnt/storagebox/portfolio-media/coding:/app/public/media
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - coolify
+
+volumes:
+  postgres_data:
 
 networks:
   coolify:

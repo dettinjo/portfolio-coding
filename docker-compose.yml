@@ -44,6 +44,11 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URI=postgres://${POSTGRES_USER:-payload}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-payload}
+      - PAYLOAD_FORCE_DRIZZLE_PUSH=true
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
     depends_on:
       - postgres
     volumes:
