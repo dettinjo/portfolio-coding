@@ -35,6 +35,7 @@ export interface SoftwareProject {
   title: string;
   description: string;
   longDescription?: string; // Markdown string from textarea
+  longDescriptionDe?: string; // German long description (falls back to longDescription if absent)
   projectType: string;
   developedAt?: string;
   liveUrl?: string;

@@ -34,11 +34,17 @@ export const fetchSkillCategories = cache(async (_locale: string = "en") => {
 });
 
 export const fetchSoftwareProjectBySlug = cache(
-  async (slug: string, _locale: string = "en") => {
+  async (slug: string, locale: string = "en") => {
     const project = projects.find(
       (p) => p.slug.toLowerCase() === slug.toLowerCase()
     );
-    return project || null;
+    if (!project) return null;
+    // Return locale-specific long description when available
+    const p = project as typeof project & { longDescriptionDe?: string };
+    if (locale === "de" && p.longDescriptionDe) {
+      return { ...project, longDescription: p.longDescriptionDe };
+    }
+    return project;
   }
 );
 

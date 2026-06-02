@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Globe, Mail, MapPin, Phone, Linkedin, Github } from "lucide-react";
 import { UtilityHeader } from "@/components/layout/UtilityHeader";
 import { Avatar } from "@/components/ui/avatar";
@@ -33,9 +33,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ResumePage() {
-  const t = useTranslations("ResumePage");
+export default async function ResumePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ print?: string }>;
+}) {
+  const t = await getTranslations("ResumePage");
   const { basics, sections } = data;
+  const params = await searchParams;
+  const isPrintMode = params?.print === "true";
 
   // Get LinkedIn and GitHub profiles
   const linkedinProfile = sections.profiles?.items?.find(
@@ -48,14 +54,15 @@ export default function ResumePage() {
   return (
     // Outer page background: matches card background (zinc-950 in light, white in dark)
     <div className="min-h-screen bg-background/90 print:!bg-zinc-950 dark:print:!bg-white print:min-h-screen print:w-full print:p-6 print:box-border">
-      <ResumeAutoPrint />
-      <div className="print:hidden">
+      {/* ResumeAutoPrint is only needed for the old browser-print fallback */}
+      {!isPrintMode && <ResumeAutoPrint />}
+      <div className={isPrintMode ? "hidden" : "print:hidden"}>
         <UtilityHeader />
       </div>
 
       <div className="py-12 print:p-0">
-        {/* Floating Download Button - Hidden in Print */}
-        <div className="fixed bottom-8 right-8 z-50 print:hidden">
+        {/* Floating Download Button - Hidden in Puppeteer print mode and real print */}
+        <div className={`fixed bottom-8 right-8 z-50 ${isPrintMode ? "hidden" : "print:hidden"}`}>
           <PrintButton
             // Label for the download button
             label={t("downloadPdf")}

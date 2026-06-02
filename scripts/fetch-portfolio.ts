@@ -10,7 +10,6 @@ const publicMediaDir = path.join(rootDir, "public", "media", "projects");
 const registryPath = path.join(rootDir, "src", "data", "tech-registry.json");
 const outputProjectsPath = path.join(rootDir, "src", "data", "projects.json");
 const outputSkillsPath = path.join(rootDir, "src", "data", "skills.json");
-const outputPersonalPath = path.join(rootDir, "src", "data", "personal.json");
 const outputResumePath = path.join(rootDir, "src", "data", "resume.json");
 const outputAvatarPath = path.join(rootDir, "public", "images", "profile.webp");
 const outputPdfPath = path.join(rootDir, "public", "media", "resume.pdf");
@@ -39,6 +38,7 @@ interface TechDetail {
 
 interface ProjectMetadata {
   title: string;
+  description?: string;
   projectType: string;
   developedAt: string;
   weight: number;
@@ -54,6 +54,7 @@ interface SoftwareProject {
   title: string;
   description: string;
   longDescription: string;
+  longDescriptionDe?: string;
   projectType: string;
   developedAt?: string;
   liveUrl?: string;
@@ -141,9 +142,8 @@ const main = async () => {
   }
 
   // ─── 0. FETCH CONFIG FROM GITHUB OR LOCAL ──────────────────────────────────
-  console.log("Checking portfolio configuration (personal.json & resume.json)...");
+  console.log("Checking portfolio configuration (resume.json, profile image, PDF)...");
   
-  let personalConfigFetched = false;
   let resumeConfigFetched = false;
 
   const localConfigDir = path.join(rootDir, "config");
@@ -157,31 +157,18 @@ const main = async () => {
       ).catch(() => null);
 
       if (contents && Array.isArray(contents)) {
-        const personalFile = contents.find((c) => c.name === "personal.json");
         const resumeFile = contents.find((c) => c.name === "resume.json");
-        const profileFile = contents.find((c) => c.name.startsWith("profile."));
-        const pdfFile = contents.find((c) => c.name === "resume.pdf");
-
-        if (personalFile) {
-          console.log("  Fetching remote personal.json...");
-          const personalRaw = await githubFetch(personalFile.url);
-          const personalString = Buffer.from(personalRaw.content, "base64").toString("utf8");
-          JSON.parse(personalString);
-          fs.writeFileSync(outputPersonalPath, personalString, "utf8");
-          personalConfigFetched = true;
-          console.log("    ✓ Successfully synced remote personal.json");
-        }
-
         if (resumeFile) {
           console.log("  Fetching remote resume.json...");
           const resumeRaw = await githubFetch(resumeFile.url);
           const resumeString = Buffer.from(resumeRaw.content, "base64").toString("utf8");
-          JSON.parse(resumeString);
+          JSON.parse(resumeString); // validate JSON
           fs.writeFileSync(outputResumePath, resumeString, "utf8");
           resumeConfigFetched = true;
           console.log("    ✓ Successfully synced remote resume.json");
         }
 
+        const profileFile = contents.find((c) => c.name.startsWith("profile."));
         if (profileFile && profileFile.download_url) {
           console.log("  Downloading remote profile image...");
           const buffer = await downloadFileToBuffer(profileFile.download_url);
@@ -199,6 +186,7 @@ const main = async () => {
           }
         }
 
+        const pdfFile = contents.find((c) => c.name === "resume.pdf");
         if (pdfFile && pdfFile.download_url) {
           console.log("  Downloading remote resume.pdf...");
           const buffer = await downloadFileToBuffer(pdfFile.download_url);
@@ -215,89 +203,63 @@ const main = async () => {
     }
   }
 
-  if (!personalConfigFetched || !resumeConfigFetched) {
-    if (fs.existsSync(localConfigDir)) {
-      console.log(`Checking local configuration files in ${localConfigDir}...`);
-      
-      const localPersonal = path.join(localConfigDir, "personal.json");
-      const localResume = path.join(localConfigDir, "resume.json");
-      const localPdf = path.join(localConfigDir, "resume.pdf");
-      
-      const localFiles = fs.readdirSync(localConfigDir);
-      const localProfileFile = localFiles.find((f) => f.startsWith("profile."));
+  if (!resumeConfigFetched && fs.existsSync(localConfigDir)) {
+    console.log(`Checking local configuration files in ${localConfigDir}...`);
 
-      if (fs.existsSync(localPersonal) && !personalConfigFetched) {
-        fs.copyFileSync(localPersonal, outputPersonalPath);
-        personalConfigFetched = true;
-        console.log("  ✓ Loaded personal.json from local config folder");
-      }
+    const localResume = path.join(localConfigDir, "resume.json");
+    if (fs.existsSync(localResume)) {
+      fs.copyFileSync(localResume, outputResumePath);
+      resumeConfigFetched = true;
+      console.log("  ✓ Loaded resume.json from local config folder");
+    }
 
-      if (fs.existsSync(localResume) && !resumeConfigFetched) {
-        fs.copyFileSync(localResume, outputResumePath);
-        resumeConfigFetched = true;
-        console.log("  ✓ Loaded resume.json from local config folder");
+    const localFiles = fs.readdirSync(localConfigDir);
+    const localProfileFile = localFiles.find((f) => f.startsWith("profile."));
+    if (localProfileFile) {
+      const srcPath = path.join(localConfigDir, localProfileFile);
+      const buffer = fs.readFileSync(srcPath);
+      const imagesDir = path.dirname(outputAvatarPath);
+      if (!fs.existsSync(imagesDir)) {
+        fs.mkdirSync(imagesDir, { recursive: true });
       }
+      const ext = path.extname(localProfileFile).toLowerCase();
+      if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+        await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
+        console.log("  ✓ Converted and saved local profile image as profile.webp");
+      } else {
+        fs.writeFileSync(outputAvatarPath, buffer);
+        console.log("  ✓ Copied local profile image");
+      }
+    }
 
-      if (localProfileFile) {
-        const srcPath = path.join(localConfigDir, localProfileFile);
-        const buffer = fs.readFileSync(srcPath);
-        const imagesDir = path.dirname(outputAvatarPath);
-        if (!fs.existsSync(imagesDir)) {
-          fs.mkdirSync(imagesDir, { recursive: true });
-        }
-        const ext = path.extname(localProfileFile).toLowerCase();
-        if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
-          await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
-          console.log("  ✓ Converted and saved local profile image as profile.webp");
-        } else {
-          fs.writeFileSync(outputAvatarPath, buffer);
-          console.log("  ✓ Copied local profile image");
-        }
+    const localPdf = path.join(localConfigDir, "resume.pdf");
+    if (fs.existsSync(localPdf)) {
+      const mediaDir = path.dirname(outputPdfPath);
+      if (!fs.existsSync(mediaDir)) {
+        fs.mkdirSync(mediaDir, { recursive: true });
       }
-
-      if (fs.existsSync(localPdf)) {
-        const mediaDir = path.dirname(outputPdfPath);
-        if (!fs.existsSync(mediaDir)) {
-          fs.mkdirSync(mediaDir, { recursive: true });
-        }
-        fs.copyFileSync(localPdf, outputPdfPath);
-        console.log("  ✓ Copied resume.pdf from local config folder");
-      }
+      fs.copyFileSync(localPdf, outputPdfPath);
+      console.log("  ✓ Copied resume.pdf from local config folder");
     }
   }
 
-  if (!fs.existsSync(outputPersonalPath)) {
-    console.warn(`personal.json not found at ${outputPersonalPath}. Initializing with defaults.`);
-    const defaultPersonal = {
-      fullName: "Developer Portfolio",
-      contactEmail: "",
-      serverUrl: "http://localhost:3000",
-      socials: {
-        github: GITHUB_USERNAME,
-        linkedin: "",
-        instagram: ""
-      }
-    };
-    fs.writeFileSync(outputPersonalPath, JSON.stringify(defaultPersonal, null, 2), "utf8");
-  }
-
   if (!fs.existsSync(outputResumePath)) {
-    console.warn(`resume.json not found at ${outputResumePath}. Initializing with empty basics.`);
+    console.warn(`resume.json not found. Initializing with empty defaults.`);
     const defaultResume = {
       basics: {
         name: "Developer Portfolio",
         headline: "Software Engineer",
         email: "",
         location: "",
-        url: { label: "", href: "" }
+        url: { label: "", href: "" },
       },
       sections: {
         summary: { name: "Summary", visible: true, content: "" },
         education: { name: "Education", visible: true, items: [] },
         experience: { name: "Experience", visible: true, items: [] },
         skills: { name: "Skills", visible: true, items: [] },
-        languages: { name: "Languages", visible: true, items: [] }
-      }
+        languages: { name: "Languages", visible: true, items: [] },
+      },
     };
     fs.writeFileSync(outputResumePath, JSON.stringify(defaultResume, null, 2), "utf8");
   }
@@ -326,6 +288,11 @@ const main = async () => {
         const longDescription = fs.existsSync(enAboutPath)
           ? fs.readFileSync(enAboutPath, "utf8")
           : "";
+
+        // Read German description (falls back to English if absent or empty)
+        const deAboutPath = path.join(portfolioPath, "about.de.md");
+        const deContent = fs.existsSync(deAboutPath) ? fs.readFileSync(deAboutPath, "utf8").trim() : "";
+        const longDescriptionDe = deContent.length > 0 ? deContent : undefined;
 
         const projectDestMediaDir = path.join(publicMediaDir, dirName);
         fs.mkdirSync(projectDestMediaDir, { recursive: true });
@@ -358,8 +325,9 @@ const main = async () => {
           id: slug,
           slug: slug,
           title: metadata.title,
-          description: "", // filled in from dump later
+          description: metadata.description || "",
           longDescription,
+          longDescriptionDe,
           projectType: metadata.projectType,
           developedAt: metadata.developedAt,
           liveUrl: metadata.liveUrl || undefined,
@@ -411,6 +379,7 @@ const main = async () => {
         // Find file details
         const metadataFile = contents.find((c) => c.name === "metadata.json");
         const enAboutFile = contents.find((c) => c.name === "about.en.md");
+        const deAboutFile = contents.find((c) => c.name === "about.de.md");
         const coverFile = contents.find((c) => c.name.startsWith("cover."));
         const galleryDir = contents.find((c) => c.name === "gallery" && c.type === "dir");
 
@@ -429,6 +398,13 @@ const main = async () => {
         if (enAboutFile) {
           const enAboutRaw = await githubFetch(enAboutFile.url);
           longDescription = Buffer.from(enAboutRaw.content, "base64").toString("utf8");
+        }
+
+        // Fetch German description (optional)
+        let longDescriptionDe: string | undefined;
+        if (deAboutFile) {
+          const deAboutRaw = await githubFetch(deAboutFile.url);
+          longDescriptionDe = Buffer.from(deAboutRaw.content, "base64").toString("utf8");
         }
 
         const projectDestMediaDir = path.join(publicMediaDir, repoName);
@@ -474,8 +450,9 @@ const main = async () => {
           id: slug,
           slug: slug,
           title: metadata.title || repoName,
-          description: "", // filled in from dump later
+          description: metadata.description || repo.description || "",
           longDescription,
+          longDescriptionDe,
           projectType: metadata.projectType || repo.language || "Software Project",
           developedAt: metadata.developedAt || repo.created_at,
           liveUrl: metadata.liveUrl || repo.homepage || undefined,
@@ -499,34 +476,6 @@ const main = async () => {
     }
   } catch (err: any) {
     console.warn("Could not fetch from GitHub (offline or invalid token). Using local fallback.", err.message);
-  }
-
-  // ─── 3. RESOLVE MEDIA IMAGES AND DESCRIPTIONS FROM DATABASE DUMP ───────────
-  const dumpPath = path.join(__dirname, "projects_locales_dump.json");
-  if (fs.existsSync(dumpPath)) {
-    try {
-      const rawDump = fs.readFileSync(dumpPath, "utf8");
-      const repairedDump = rawDump.replace(/\\\\"/g, '\\"');
-      const dumpData = JSON.parse(repairedDump);
-
-      for (const p of dumpData) {
-        const slug = p.slug;
-        const matched = Object.values(projectsMap).find(
-          (proj) => proj.slug.toLowerCase() === slug.toLowerCase()
-        );
-
-        if (matched) {
-          if (p.description) {
-            matched.description = p.description;
-          }
-          if (p.long_description && !matched.longDescription) {
-            matched.longDescription = p.long_description;
-          }
-        }
-      }
-    } catch (e: any) {
-      console.error("Failed to merge descriptions from JSON dump:", e.message);
-    }
   }
 
   // Final pass to build the actual coverImage and gallery objects
