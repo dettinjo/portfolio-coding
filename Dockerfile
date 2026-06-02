@@ -1,11 +1,11 @@
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# ── deps: install all node_modules (including devDeps for the build) ──────────
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-# Force development mode so devDependencies are installed regardless of
-# what NODE_ENV Coolify injects as a build arg
+# Keep NODE_ENV=development so devDependencies are always installed,
+# regardless of what Coolify or CI injects as a build arg.
 ENV NODE_ENV=development
 COPY package.json package-lock.json* ./
 RUN \
@@ -13,28 +13,25 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Rebuild the source code only when needed
+# ── builder: compile the Next.js + Payload app ────────────────────────────────
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
-ARG NEXT_PUBLIC_FULL_NAME
-ARG NEXT_PUBLIC_EMAIL_ADDRESS
-ARG NEXT_PUBLIC_PHONE_NUMBER
-ARG NEXT_PUBLIC_STREET_ADDRESS
-ARG NEXT_PUBLIC_CITY_ADDRESS
-ARG NEXT_PUBLIC_GITHUB_USERNAME
-ARG NEXT_PUBLIC_LINKEDIN_USERNAME
-ARG NEXT_PUBLIC_INSTAGRAM_USERNAME
-
-ARG NEXT_PUBLIC_SERVER_URL
-ARG PAYLOAD_SECRET
+# NEXT_PUBLIC_* vars are baked into the JS bundle at build time.
+# Provide safe defaults so the build works in CI without explicit --build-arg.
+ARG NEXT_PUBLIC_FULL_NAME="Joel Dettinger"
+ARG NEXT_PUBLIC_EMAIL_ADDRESS=""
+ARG NEXT_PUBLIC_PHONE_NUMBER=""
+ARG NEXT_PUBLIC_STREET_ADDRESS=""
+ARG NEXT_PUBLIC_CITY_ADDRESS=""
+ARG NEXT_PUBLIC_GITHUB_USERNAME="dettinjo"
+ARG NEXT_PUBLIC_LINKEDIN_USERNAME="joeldettinger"
+ARG NEXT_PUBLIC_INSTAGRAM_USERNAME="joeldettinger"
+ARG NEXT_PUBLIC_SERVER_URL="https://codeby.joeldettinger.de"
 
 ENV NEXT_PUBLIC_FULL_NAME=$NEXT_PUBLIC_FULL_NAME
 ENV NEXT_PUBLIC_EMAIL_ADDRESS=$NEXT_PUBLIC_EMAIL_ADDRESS
@@ -44,55 +41,40 @@ ENV NEXT_PUBLIC_CITY_ADDRESS=$NEXT_PUBLIC_CITY_ADDRESS
 ENV NEXT_PUBLIC_GITHUB_USERNAME=$NEXT_PUBLIC_GITHUB_USERNAME
 ENV NEXT_PUBLIC_LINKEDIN_USERNAME=$NEXT_PUBLIC_LINKEDIN_USERNAME
 ENV NEXT_PUBLIC_INSTAGRAM_USERNAME=$NEXT_PUBLIC_INSTAGRAM_USERNAME
-
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
-ENV PAYLOAD_SECRET=$PAYLOAD_SECRET
 
-
+# PAYLOAD_SECRET and POSTGRES_URL are runtime-only — never bake secrets
+# into the image. They are injected at container startup via env vars.
 
 RUN npm run build
 
-# Production image, copy all the files and run next
+# ── runner: minimal production image ─────────────────────────────────────────
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser  --system --uid 1001 nextjs \
+ && apk add --no-cache curl
 
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+RUN mkdir -p .next public/media data \
+ && chown -R nextjs:nodejs .next public/media data
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Explicitly copy @libsql to ensure the Linux binary is available
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@libsql ./node_modules/@libsql
-# Copy drizzle-kit so Payload's dev schema push works at runtime
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
 
-# Copy media folder if it exists, or create it and set permissions
-# This is important for Payload CMS media uploads
-RUN mkdir -p public/media data && chown -R nextjs:nodejs public/media data
+# Payload needs the native libsql binary and drizzle-kit at runtime
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@libsql ./node_modules/@libsql
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
 
 USER nextjs
 
 EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-ENV PORT 3000
-# set hostname to localhost
-ENV HOSTNAME "0.0.0.0"
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD ["node", "server.js"]

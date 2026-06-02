@@ -42,6 +42,13 @@ export interface ResumeData {
     url: { href: string };
     picture: { url: string };
   };
+  /** Controls how many items are shown per section in the rendered resume/PDF.
+   *  All items remain in the raw JSON — only display is restricted. */
+  display?: {
+    experience?: number;
+    education?: number;
+    [section: string]: number | undefined;
+  };
   sections: {
     summary: { content: string };
     education: ResumeSection;

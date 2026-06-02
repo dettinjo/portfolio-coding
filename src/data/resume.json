@@ -3,7 +3,7 @@
     "name": "Joel Dettinger",
     "headline": "Master's Student in Computer Science",
     "email": "dettinger.joel@gmail.com",
-    "location": "08904 L'Hospitalet de Llobregat, Spain",
+    "location": "08034 Barcelona, Spain",
     "url": {
       "label": "",
       "href": "https://codeby.joeldettinger.de"
@@ -21,6 +21,10 @@
       }
     }
   },
+  "display": {
+    "experience": 4,
+    "education": 3
+  },
   "sections": {
     "summary": {
       "name": "Summary",
@@ -28,7 +32,7 @@
       "separateLinks": true,
       "visible": true,
       "id": "summary",
-      "content": "<p>I am a German master's student in computer science at Vrije University and the University of Amsterdam. I am currently completing an academic exchange at the Autonomous University of Barcelona. I have experience in project management, DevOps, infrastructure as code, and AI, and I specialize in mobile and web development.</p>"
+      "content": "<p>I am a German master's student in Computer Science at Vrije University Amsterdam, currently completing my master's thesis at the Barcelona Supercomputing Center (BSC) within the BIG-5 Horizon Europe project. My research focuses on automating qualitative codebook refinement using LLM Chain-of-Thought reasoning and Explainable AI. I specialize in full-stack and mobile development, DevOps, and applied AI/NLP.</p>"
     },
     "awards": {
       "name": "Awards",
@@ -114,6 +118,18 @@
       "visible": true,
       "id": "experience",
       "items": [
+        {
+          "id": "bsc2026icta",
+          "visible": true,
+          "company": "Barcelona Supercomputing Center (BSC) & ICTA-UAB",
+          "position": "Master's Thesis Researcher",
+          "location": "Barcelona (ES)",
+          "date": "June, 2026 – Present",
+          "summary": "<p><em>Master's Thesis (VU Amsterdam): Automating qualitative codebook refinement via LLM Chain-of-Thought reasoning and Explainable AI for the BIG-5 Horizon Europe project. Supervised by Johannes Langemeyer (BSC).</em></p>",
+          "url": {
+            "href": "https://www.bsc.es"
+          }
+        },
         {
           "id": "v61g0ytaa3ap8fbitzoy0lxz",
           "visible": true,

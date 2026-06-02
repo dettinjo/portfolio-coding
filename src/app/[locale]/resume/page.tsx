@@ -15,6 +15,18 @@ import { ResumeAutoPrint } from "@/components/resume/ResumeAutoPrint";
 const data = resumeData as unknown as ResumeData;
 const avatarPath = "/images/profile.webp";
 
+// Apply per-section display limits defined in resume.json `display` block.
+// All raw items are preserved in the JSON — only rendering is restricted.
+const displayLimit = data.display ?? {};
+const experienceItems = data.sections.experience.items.slice(
+  0,
+  displayLimit.experience ?? undefined
+);
+const educationItems = data.sections.education.items.slice(
+  0,
+  displayLimit.education ?? undefined
+);
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Resume - ${data.basics.name}`,
@@ -228,7 +240,7 @@ export default function ResumePage() {
                   {t("experience")}
                 </h2>
                 <div className="space-y-4">
-                  {data.sections.experience.items.map((item) => (
+                  {experienceItems.map((item) => (
                     <ResumeEntry key={item.id} item={item} type="work" />
                   ))}
                 </div>
@@ -239,7 +251,7 @@ export default function ResumePage() {
                   {t("education")}
                 </h2>
                 <div className="space-y-4">
-                  {data.sections.education.items.map((item) => (
+                  {educationItems.map((item) => (
                     <ResumeEntry key={item.id} item={item} type="education" />
                   ))}
                 </div>
