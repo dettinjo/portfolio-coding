@@ -28,7 +28,7 @@
       {
         "id": "blade",
         "name": "Blade",
-        "iconClassName": "",
+        "iconClassName": "devicon-laravel-original",
         "level": 1,
         "url": "https://laravel.com/docs/blade"
       }
@@ -39,20 +39,6 @@
     "name": "Backend",
     "order": 2,
     "skills": [
-      {
-        "id": "rest api",
-        "name": "REST API",
-        "iconClassName": "",
-        "level": 5,
-        "url": ""
-      },
-      {
-        "id": "full-stack",
-        "name": "Full-Stack",
-        "iconClassName": "",
-        "level": 4,
-        "url": ""
-      },
       {
         "id": "strapi",
         "name": "Strapi",
@@ -70,7 +56,7 @@
       {
         "id": "eloquent orm",
         "name": "Eloquent ORM",
-        "iconClassName": "",
+        "iconClassName": "devicon-laravel-original",
         "level": 2,
         "url": "https://laravel.com/docs/eloquent"
       },
@@ -87,20 +73,6 @@
         "iconClassName": "devicon-laravel-original",
         "level": 2,
         "url": "https://laravel.com/"
-      },
-      {
-        "id": "microservices",
-        "name": "Microservices",
-        "iconClassName": "",
-        "level": 2,
-        "url": ""
-      },
-      {
-        "id": "mvc",
-        "name": "MVC",
-        "iconClassName": "",
-        "level": 2,
-        "url": ""
       },
       {
         "id": "mysql",
@@ -133,30 +105,23 @@
       {
         "id": "android jetpack",
         "name": "Android Jetpack",
-        "iconClassName": "",
+        "iconClassName": "devicon-android-plain",
         "level": 2,
         "url": "https://developer.android.com/jetpack"
       },
       {
         "id": "cloudkit",
         "name": "CloudKit",
-        "iconClassName": "",
+        "iconClassName": "devicon-apple-original",
         "level": 2,
         "url": "https://developer.apple.com/icloud/cloudkit/"
       },
       {
         "id": "core data",
         "name": "Core Data",
-        "iconClassName": "",
+        "iconClassName": "devicon-apple-original",
         "level": 2,
         "url": "https://developer.apple.com/documentation/coredata/"
-      },
-      {
-        "id": "google places api",
-        "name": "Google Places API",
-        "iconClassName": "",
-        "level": 2,
-        "url": "https://developers.google.com/maps/documentation/places/web-service/overview"
       },
       {
         "id": "ios",
@@ -175,28 +140,21 @@
       {
         "id": "mobile app",
         "name": "Mobile App",
-        "iconClassName": "",
-        "level": 2,
-        "url": ""
-      },
-      {
-        "id": "mvvm",
-        "name": "MVVM",
-        "iconClassName": "",
+        "iconClassName": "devicon-android-plain",
         "level": 2,
         "url": ""
       },
       {
         "id": "retrofit",
         "name": "Retrofit",
-        "iconClassName": "",
+        "iconClassName": "devicon-android-plain",
         "level": 2,
         "url": "https://square.github.io/retrofit/"
       },
       {
         "id": "room db",
         "name": "Room DB",
-        "iconClassName": "",
+        "iconClassName": "devicon-android-plain",
         "level": 2,
         "url": "https://developer.android.com/training/data-storage/room"
       },
@@ -236,27 +194,6 @@
         "url": "https://www.docker.com/"
       },
       {
-        "id": "automation",
-        "name": "Automation",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "cloud infrastructure",
-        "name": "Cloud Infrastructure",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "devops",
-        "name": "DevOps",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
         "id": "gitlab",
         "name": "GitLab",
         "iconClassName": "devicon-gitlab-plain",
@@ -269,13 +206,6 @@
         "iconClassName": "devicon-gitlab-plain",
         "level": 3,
         "url": "https://docs.gitlab.com/ee/ci/"
-      },
-      {
-        "id": "infrastructure as code (iac)",
-        "name": "Infrastructure as Code (IaC)",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
       },
       {
         "id": "microsoft azure",
@@ -306,16 +236,9 @@
         "url": "https://terragrunt.gruntwork.io/"
       },
       {
-        "id": "cert-manager",
-        "name": "cert-manager",
-        "iconClassName": "",
-        "level": 2,
-        "url": "https://cert-manager.io/"
-      },
-      {
         "id": "ingress",
         "name": "Ingress",
-        "iconClassName": "",
+        "iconClassName": "devicon-kubernetes-plain",
         "level": 2,
         "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/"
       },
@@ -327,25 +250,11 @@
         "url": "https://kubernetes.io/"
       },
       {
-        "id": "nfs",
-        "name": "NFS",
-        "iconClassName": "",
-        "level": 2,
-        "url": ""
-      },
-      {
         "id": "nginx",
         "name": "NGINX",
         "iconClassName": "devicon-nginx-original",
         "level": 2,
         "url": "https://www.nginx.com/"
-      },
-      {
-        "id": "ssl/tls",
-        "name": "SSL/TLS",
-        "iconClassName": "",
-        "level": 2,
-        "url": ""
       }
     ]
   },
@@ -355,67 +264,11 @@
     "order": 5,
     "skills": [
       {
-        "id": "data processing",
-        "name": "Data Processing",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "entity linking",
-        "name": "Entity Linking",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "fact-checking",
-        "name": "Fact-Checking",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "llm",
-        "name": "LLM",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
-        "id": "nlp",
-        "name": "NLP",
-        "iconClassName": "",
-        "level": 3,
-        "url": ""
-      },
-      {
         "id": "pytorch",
         "name": "PyTorch",
         "iconClassName": "devicon-pytorch-plain",
         "level": 3,
         "url": "https://pytorch.org/"
-      },
-      {
-        "id": "spacy",
-        "name": "spaCy",
-        "iconClassName": "",
-        "level": 3,
-        "url": "https://spacy.io/"
-      },
-      {
-        "id": "stanza",
-        "name": "Stanza",
-        "iconClassName": "",
-        "level": 3,
-        "url": "https://stanfordnlp.github.io/stanza/"
-      },
-      {
-        "id": "wikidata",
-        "name": "Wikidata",
-        "iconClassName": "",
-        "level": 3,
-        "url": "https://www.wikidata.org/"
       }
     ]
   }

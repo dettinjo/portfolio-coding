@@ -647,10 +647,16 @@ const main = async () => {
       level = registryEntry.levelOverride;
     }
 
+    // Skip skills with no icon — they'd render as blank tiles in the grid.
+    // They still contributed to scoring above; just omit them from the output.
+    if (!registryEntry.iconClassName) {
+      continue;
+    }
+
     const skillObj = {
       id: techKey,
       name: registryEntry.name,
-      iconClassName: registryEntry.iconClassName || "",
+      iconClassName: registryEntry.iconClassName,
       level,
       url: registryEntry.url || "",
     };
@@ -660,7 +666,6 @@ const main = async () => {
       skillsByCategory[category].push(skillObj);
     } else {
       console.warn(`  Warning: Category "${category}" for tech "${techKey}" is not a recognized category.`);
-      // Add to backend as fallback
       skillsByCategory.backend.push(skillObj);
     }
   }

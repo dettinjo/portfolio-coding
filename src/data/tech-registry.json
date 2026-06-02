@@ -146,7 +146,7 @@
   "transformers": {
     "name": "Transformers",
     "category": "ai",
-    "iconClassName": null,
+    "iconClassName": "devicon-pytorch-plain",
     "url": "https://huggingface.co/docs/transformers/"
   },
   "spacy": {
@@ -230,7 +230,7 @@
   "cloudkit": {
     "name": "CloudKit",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-apple-original",
     "url": "https://developer.apple.com/icloud/cloudkit/"
   },
   "mapkit": {
@@ -308,13 +308,13 @@
   "room db": {
     "name": "Room DB",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-android-plain",
     "url": "https://developer.android.com/training/data-storage/room"
   },
   "retrofit": {
     "name": "Retrofit",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-android-plain",
     "url": "https://square.github.io/retrofit/"
   },
   "google places api": {
@@ -326,7 +326,7 @@
   "android jetpack": {
     "name": "Android Jetpack",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-android-plain",
     "url": "https://developer.android.com/jetpack"
   },
   "glide": {
@@ -368,7 +368,7 @@
   "ingress": {
     "name": "Ingress",
     "category": "devops",
-    "iconClassName": null,
+    "iconClassName": "devicon-kubernetes-plain",
     "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/"
   },
   "cert-manager": {
@@ -416,7 +416,7 @@
   "blade": {
     "name": "Blade",
     "category": "frontend",
-    "iconClassName": null,
+    "iconClassName": "devicon-laravel-original",
     "url": "https://laravel.com/docs/blade"
   },
   "tailwind css": {
@@ -440,7 +440,7 @@
   "eloquent orm": {
     "name": "Eloquent ORM",
     "category": "backend",
-    "iconClassName": null,
+    "iconClassName": "devicon-laravel-original",
     "url": "https://laravel.com/docs/eloquent"
   },
   "uikit": {
@@ -458,7 +458,7 @@
   "core data": {
     "name": "Core Data",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-apple-original",
     "url": "https://developer.apple.com/documentation/coredata/"
   },
   "xctest": {
@@ -470,7 +470,7 @@
   "mobile app": {
     "name": "Mobile App",
     "category": "mobile",
-    "iconClassName": null,
+    "iconClassName": "devicon-android-plain",
     "url": null
   },
   "strapi": {
