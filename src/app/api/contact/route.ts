@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import personalConfig from "@/data/personal.json";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -44,9 +45,12 @@ export const POST = async (req: NextRequest) => {
         <p>${message.replace(/\n/g, "<br>")}</p>
       `;
 
+    const recipientEmail = personalConfig.contactEmail || "hello@joeldettinger.de";
+    const senderName = personalConfig.fullName || "Portfolio Owner";
+
     await transporter.sendMail({
-      from: `"Joel Dettinger" <${process.env.SMTP_USER || "admin@joeldettinger.de"}>`,
-      to: "hello@joeldettinger.de",
+      from: `"${senderName}" <${process.env.SMTP_USER || "admin@joeldettinger.de"}>`,
+      to: recipientEmail,
       subject,
       html,
       replyTo: email,

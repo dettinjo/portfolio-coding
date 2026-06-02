@@ -10,9 +10,14 @@ const publicMediaDir = path.join(rootDir, "public", "media", "projects");
 const registryPath = path.join(rootDir, "src", "data", "tech-registry.json");
 const outputProjectsPath = path.join(rootDir, "src", "data", "projects.json");
 const outputSkillsPath = path.join(rootDir, "src", "data", "skills.json");
+const outputPersonalPath = path.join(rootDir, "src", "data", "personal.json");
+const outputResumePath = path.join(rootDir, "src", "data", "resume.json");
+const outputAvatarPath = path.join(rootDir, "public", "images", "profile.webp");
+const outputPdfPath = path.join(rootDir, "public", "media", "resume.pdf");
 
 const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "dettinjo";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const PORTFOLIO_CONFIG_REPO = process.env.PORTFOLIO_CONFIG_REPO;
 
 // Category metadata
 const CATEGORIES: Record<string, { name: string; order: number }> = {
@@ -28,6 +33,8 @@ interface TechDetail {
   category: string;
   iconClassName: string | null;
   url: string | null;
+  baseScore?: number;
+  levelOverride?: number;
 }
 
 interface ProjectMetadata {
@@ -131,6 +138,168 @@ const main = async () => {
     techRegistry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
   } else {
     console.warn(`Tech registry not found at ${registryPath}`);
+  }
+
+  // ─── 0. FETCH CONFIG FROM GITHUB OR LOCAL ──────────────────────────────────
+  console.log("Checking portfolio configuration (personal.json & resume.json)...");
+  
+  let personalConfigFetched = false;
+  let resumeConfigFetched = false;
+
+  const localConfigDir = path.join(rootDir, "config");
+
+  if (PORTFOLIO_CONFIG_REPO) {
+    try {
+      console.log(`Fetching configuration from remote repository: ${GITHUB_USERNAME}/${PORTFOLIO_CONFIG_REPO}...`);
+      
+      const contents = await githubFetch(
+        `https://api.github.com/repos/${GITHUB_USERNAME}/${PORTFOLIO_CONFIG_REPO}/contents/.portfolio`
+      ).catch(() => null);
+
+      if (contents && Array.isArray(contents)) {
+        const personalFile = contents.find((c) => c.name === "personal.json");
+        const resumeFile = contents.find((c) => c.name === "resume.json");
+        const profileFile = contents.find((c) => c.name.startsWith("profile."));
+        const pdfFile = contents.find((c) => c.name === "resume.pdf");
+
+        if (personalFile) {
+          console.log("  Fetching remote personal.json...");
+          const personalRaw = await githubFetch(personalFile.url);
+          const personalString = Buffer.from(personalRaw.content, "base64").toString("utf8");
+          JSON.parse(personalString);
+          fs.writeFileSync(outputPersonalPath, personalString, "utf8");
+          personalConfigFetched = true;
+          console.log("    ✓ Successfully synced remote personal.json");
+        }
+
+        if (resumeFile) {
+          console.log("  Fetching remote resume.json...");
+          const resumeRaw = await githubFetch(resumeFile.url);
+          const resumeString = Buffer.from(resumeRaw.content, "base64").toString("utf8");
+          JSON.parse(resumeString);
+          fs.writeFileSync(outputResumePath, resumeString, "utf8");
+          resumeConfigFetched = true;
+          console.log("    ✓ Successfully synced remote resume.json");
+        }
+
+        if (profileFile && profileFile.download_url) {
+          console.log("  Downloading remote profile image...");
+          const buffer = await downloadFileToBuffer(profileFile.download_url);
+          const imagesDir = path.dirname(outputAvatarPath);
+          if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+          }
+          const ext = path.extname(profileFile.name).toLowerCase();
+          if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+            await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
+            console.log("    ✓ Converted and saved profile image as profile.webp");
+          } else {
+            fs.writeFileSync(outputAvatarPath, buffer);
+            console.log("    ✓ Saved profile image");
+          }
+        }
+
+        if (pdfFile && pdfFile.download_url) {
+          console.log("  Downloading remote resume.pdf...");
+          const buffer = await downloadFileToBuffer(pdfFile.download_url);
+          const mediaDir = path.dirname(outputPdfPath);
+          if (!fs.existsSync(mediaDir)) {
+            fs.mkdirSync(mediaDir, { recursive: true });
+          }
+          fs.writeFileSync(outputPdfPath, buffer);
+          console.log("    ✓ Successfully downloaded resume.pdf");
+        }
+      }
+    } catch (err: any) {
+      console.warn("  Failed to fetch configuration from GitHub. Checking local fallbacks...", err.message);
+    }
+  }
+
+  if (!personalConfigFetched || !resumeConfigFetched) {
+    if (fs.existsSync(localConfigDir)) {
+      console.log(`Checking local configuration files in ${localConfigDir}...`);
+      
+      const localPersonal = path.join(localConfigDir, "personal.json");
+      const localResume = path.join(localConfigDir, "resume.json");
+      const localPdf = path.join(localConfigDir, "resume.pdf");
+      
+      const localFiles = fs.readdirSync(localConfigDir);
+      const localProfileFile = localFiles.find((f) => f.startsWith("profile."));
+
+      if (fs.existsSync(localPersonal) && !personalConfigFetched) {
+        fs.copyFileSync(localPersonal, outputPersonalPath);
+        personalConfigFetched = true;
+        console.log("  ✓ Loaded personal.json from local config folder");
+      }
+
+      if (fs.existsSync(localResume) && !resumeConfigFetched) {
+        fs.copyFileSync(localResume, outputResumePath);
+        resumeConfigFetched = true;
+        console.log("  ✓ Loaded resume.json from local config folder");
+      }
+
+      if (localProfileFile) {
+        const srcPath = path.join(localConfigDir, localProfileFile);
+        const buffer = fs.readFileSync(srcPath);
+        const imagesDir = path.dirname(outputAvatarPath);
+        if (!fs.existsSync(imagesDir)) {
+          fs.mkdirSync(imagesDir, { recursive: true });
+        }
+        const ext = path.extname(localProfileFile).toLowerCase();
+        if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+          await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
+          console.log("  ✓ Converted and saved local profile image as profile.webp");
+        } else {
+          fs.writeFileSync(outputAvatarPath, buffer);
+          console.log("  ✓ Copied local profile image");
+        }
+      }
+
+      if (fs.existsSync(localPdf)) {
+        const mediaDir = path.dirname(outputPdfPath);
+        if (!fs.existsSync(mediaDir)) {
+          fs.mkdirSync(mediaDir, { recursive: true });
+        }
+        fs.copyFileSync(localPdf, outputPdfPath);
+        console.log("  ✓ Copied resume.pdf from local config folder");
+      }
+    }
+  }
+
+  if (!fs.existsSync(outputPersonalPath)) {
+    console.warn(`personal.json not found at ${outputPersonalPath}. Initializing with defaults.`);
+    const defaultPersonal = {
+      fullName: "Developer Portfolio",
+      contactEmail: "",
+      serverUrl: "http://localhost:3000",
+      socials: {
+        github: GITHUB_USERNAME,
+        linkedin: "",
+        instagram: ""
+      }
+    };
+    fs.writeFileSync(outputPersonalPath, JSON.stringify(defaultPersonal, null, 2), "utf8");
+  }
+
+  if (!fs.existsSync(outputResumePath)) {
+    console.warn(`resume.json not found at ${outputResumePath}. Initializing with empty basics.`);
+    const defaultResume = {
+      basics: {
+        name: "Developer Portfolio",
+        headline: "Software Engineer",
+        email: "",
+        location: "",
+        url: { label: "", href: "" }
+      },
+      sections: {
+        summary: { name: "Summary", visible: true, content: "" },
+        education: { name: "Education", visible: true, items: [] },
+        experience: { name: "Experience", visible: true, items: [] },
+        skills: { name: "Skills", visible: true, items: [] },
+        languages: { name: "Languages", visible: true, items: [] }
+      }
+    };
+    fs.writeFileSync(outputResumePath, JSON.stringify(defaultResume, null, 2), "utf8");
   }
 
   const projectsMap: Record<string, SoftwareProject> = {};
@@ -513,12 +682,21 @@ const main = async () => {
     const registryEntry = techRegistry[techKey];
     if (!registryEntry) continue;
 
+    // Apply base score if defined in tech registry
+    const baseScore = registryEntry.baseScore || 0;
+    const finalScore = score + baseScore;
+
     // Calculate level based on score threshold
     let level = 1;
-    if (score >= 6) level = 5;
-    else if (score >= 4) level = 4;
-    else if (score >= 3) level = 3;
-    else if (score >= 2) level = 2;
+    if (finalScore >= 6) level = 5;
+    else if (finalScore >= 4) level = 4;
+    else if (finalScore >= 3) level = 3;
+    else if (finalScore >= 2) level = 2;
+
+    // Apply manual level override if defined in tech registry
+    if (registryEntry.levelOverride !== undefined) {
+      level = registryEntry.levelOverride;
+    }
 
     const skillObj = {
       id: techKey,

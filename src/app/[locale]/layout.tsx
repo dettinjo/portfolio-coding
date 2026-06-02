@@ -17,6 +17,8 @@ import { ThemeProvider } from "@/components/Theme-Provider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import personalConfig from "@/data/personal.json";
+
 // const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
@@ -30,11 +32,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "HomePageSEO" });
-  const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio";
+  const fullName = personalConfig.fullName || "Portfolio";
   const firstName = fullName.split(" ")[0];
 
   const serverUrl =
-    process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+    personalConfig.serverUrl || "http://localhost:3000";
 
   return {
     title: t("title", { name: firstName }),
@@ -100,9 +102,8 @@ export default async function RootLocaleLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
-              name: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
-              url:
-                process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
+              name: personalConfig.fullName || "Portfolio",
+              url: personalConfig.serverUrl || "http://localhost:3000",
             }),
           }}
         />
