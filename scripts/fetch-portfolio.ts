@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -79,8 +80,8 @@ const githubFetch = async (url: string) => {
   return res.json();
 };
 
-// Helper to download a binary file
-const downloadFile = async (url: string, destPath: string) => {
+// Helper to download file as Buffer
+const downloadFileToBuffer = async (url: string): Promise<Buffer> => {
   const headers: Record<string, string> = {
     "User-Agent": "portfolio-builder",
   };
@@ -92,8 +93,27 @@ const downloadFile = async (url: string, destPath: string) => {
   if (!res.ok) {
     throw new Error(`Failed to download ${url}: ${res.statusText}`);
   }
-  const buffer = await res.arrayBuffer();
-  fs.writeFileSync(destPath, Buffer.from(buffer));
+  const arrayBuffer = await res.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+};
+
+// Helper to save and compress image to WebP if needed
+const saveAndCompressImage = async (buffer: Buffer, destPath: string): Promise<string> => {
+  const ext = path.extname(destPath).toLowerCase();
+  const dir = path.dirname(destPath);
+  const name = path.basename(destPath, ext);
+
+  if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+    const webpPath = path.join(dir, `${name}.webp`);
+    await sharp(buffer)
+      .webp({ quality: 85 })
+      .toFile(webpPath);
+    console.log(`    ✓ Compressed and saved as WebP: ${path.basename(webpPath)}`);
+    return `${name}.webp`;
+  } else {
+    fs.writeFileSync(destPath, buffer);
+    return path.basename(destPath);
+  }
 };
 
 const main = async () => {
@@ -140,23 +160,26 @@ const main = async () => {
         const projectDestMediaDir = path.join(publicMediaDir, dirName);
         fs.mkdirSync(projectDestMediaDir, { recursive: true });
 
-        // Copy cover image if exists
+        // Copy cover image if exists and compress if needed
         const coverFiles = fs.readdirSync(portfolioPath).filter(f => f.startsWith("cover."));
         if (coverFiles.length > 0) {
-          fs.copyFileSync(
-            path.join(portfolioPath, coverFiles[0]),
-            path.join(projectDestMediaDir, coverFiles[0])
-          );
+          const srcPath = path.join(portfolioPath, coverFiles[0]);
+          const buffer = fs.readFileSync(srcPath);
+          const destPath = path.join(projectDestMediaDir, coverFiles[0]);
+          await saveAndCompressImage(buffer, destPath);
         }
 
-        // Copy gallery if exists
+        // Copy gallery if exists and compress if needed
         const gallerySrcDir = path.join(portfolioPath, "gallery");
         if (fs.existsSync(gallerySrcDir)) {
           const galleryDestDir = path.join(projectDestMediaDir, "gallery");
           fs.mkdirSync(galleryDestDir, { recursive: true });
           const galleryFiles = fs.readdirSync(gallerySrcDir);
           for (const file of galleryFiles) {
-            fs.copyFileSync(path.join(gallerySrcDir, file), path.join(galleryDestDir, file));
+            const srcPath = path.join(gallerySrcDir, file);
+            const buffer = fs.readFileSync(srcPath);
+            const destPath = path.join(galleryDestDir, file);
+            await saveAndCompressImage(buffer, destPath);
           }
         }
 
@@ -244,8 +267,8 @@ const main = async () => {
         if (coverFile && coverFile.download_url) {
           const ext = path.extname(coverFile.name);
           const destCoverPath = path.join(projectDestMediaDir, `cover${ext}`);
-          await downloadFile(coverFile.download_url, destCoverPath);
-          console.log(`  ✓ Downloaded cover: ${coverFile.name}`);
+          const buffer = await downloadFileToBuffer(coverFile.download_url);
+          await saveAndCompressImage(buffer, destCoverPath);
         }
 
         // Download gallery files
@@ -258,8 +281,8 @@ const main = async () => {
             for (const item of galleryContents) {
               if (item.type === "file" && item.download_url) {
                 const destPath = path.join(galleryDestDir, item.name);
-                await downloadFile(item.download_url, destPath);
-                console.log(`  ✓ Downloaded gallery image: ${item.name}`);
+                const buffer = await downloadFileToBuffer(item.download_url);
+                await saveAndCompressImage(buffer, destPath);
               }
             }
           }
