@@ -1,0 +1,103 @@
+[
+  {
+    "id": "frontend",
+    "name": "Frontend",
+    "order": 1,
+    "skills": []
+  },
+  {
+    "id": "backend",
+    "name": "Backend",
+    "order": 2,
+    "skills": []
+  },
+  {
+    "id": "mobile",
+    "name": "Mobile",
+    "order": 3,
+    "skills": []
+  },
+  {
+    "id": "devops",
+    "name": "DevOps",
+    "order": 4,
+    "skills": [
+      {
+        "id": "automation",
+        "name": "Automation",
+        "iconClassName": "",
+        "level": 3,
+        "url": ""
+      },
+      {
+        "id": "cloud infrastructure",
+        "name": "Cloud Infrastructure",
+        "iconClassName": "",
+        "level": 3,
+        "url": ""
+      },
+      {
+        "id": "devops",
+        "name": "DevOps",
+        "iconClassName": "",
+        "level": 3,
+        "url": ""
+      },
+      {
+        "id": "gitlab",
+        "name": "GitLab",
+        "iconClassName": "devicon-gitlab-plain",
+        "level": 3,
+        "url": "https://about.gitlab.com/"
+      },
+      {
+        "id": "gitlab ci/cd",
+        "name": "GitLab CI/CD",
+        "iconClassName": "devicon-gitlab-plain",
+        "level": 3,
+        "url": "https://docs.gitlab.com/ee/ci/"
+      },
+      {
+        "id": "infrastructure as code (iac)",
+        "name": "Infrastructure as Code (IaC)",
+        "iconClassName": "",
+        "level": 3,
+        "url": ""
+      },
+      {
+        "id": "microsoft azure",
+        "name": "Microsoft Azure",
+        "iconClassName": "devicon-azure-plain",
+        "level": 3,
+        "url": "https://azure.microsoft.com/"
+      },
+      {
+        "id": "shell scripting",
+        "name": "Shell Scripting",
+        "iconClassName": "devicon-bash-plain",
+        "level": 3,
+        "url": "https://www.gnu.org/software/bash/"
+      },
+      {
+        "id": "terraform",
+        "name": "Terraform",
+        "iconClassName": "devicon-terraform-plain",
+        "level": 3,
+        "url": "https://www.terraform.io/"
+      },
+      {
+        "id": "terragrunt",
+        "name": "Terragrunt",
+        "iconClassName": "devicon-terraform-plain",
+        "level": 3,
+        "url": "https://terragrunt.gruntwork.io/"
+      }
+    ]
+  },
+  {
+    "id": "ai",
+    "name": "AI",
+    "order": 5,
+    "skills": []
+  }
+]

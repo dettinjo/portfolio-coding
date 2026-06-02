@@ -1,0 +1,500 @@
+{
+  "terraform": {
+    "name": "Terraform",
+    "category": "devops",
+    "iconClassName": "devicon-terraform-plain",
+    "url": "https://www.terraform.io/"
+  },
+  "terragrunt": {
+    "name": "Terragrunt",
+    "category": "devops",
+    "iconClassName": "devicon-terraform-plain",
+    "url": "https://terragrunt.gruntwork.io/"
+  },
+  "infrastructure as code (iac)": {
+    "name": "Infrastructure as Code (IaC)",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "microsoft azure": {
+    "name": "Microsoft Azure",
+    "category": "devops",
+    "iconClassName": "devicon-azure-plain",
+    "url": "https://azure.microsoft.com/"
+  },
+  "gitlab": {
+    "name": "GitLab",
+    "category": "devops",
+    "iconClassName": "devicon-gitlab-plain",
+    "url": "https://about.gitlab.com/"
+  },
+  "gitlab ci/cd": {
+    "name": "GitLab CI/CD",
+    "category": "devops",
+    "iconClassName": "devicon-gitlab-plain",
+    "url": "https://docs.gitlab.com/ee/ci/"
+  },
+  "shell scripting": {
+    "name": "Shell Scripting",
+    "category": "devops",
+    "iconClassName": "devicon-bash-plain",
+    "url": "https://www.gnu.org/software/bash/"
+  },
+  "bash scripting": {
+    "name": "Bash Scripting",
+    "category": "devops",
+    "iconClassName": "devicon-bash-plain",
+    "url": "https://www.gnu.org/software/bash/"
+  },
+  "devops": {
+    "name": "DevOps",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "cloud infrastructure": {
+    "name": "Cloud Infrastructure",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "automation": {
+    "name": "Automation",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "node.js": {
+    "name": "Node.js",
+    "category": "backend",
+    "iconClassName": "devicon-nodejs-plain",
+    "url": "https://nodejs.org/"
+  },
+  "react": {
+    "name": "React",
+    "category": "frontend",
+    "iconClassName": "devicon-react-original",
+    "url": "https://react.dev/"
+  },
+  "next.js": {
+    "name": "Next.js",
+    "category": "frontend",
+    "iconClassName": "devicon-nextjs-plain",
+    "url": "https://nextjs.org/"
+  },
+  "mongodb": {
+    "name": "MongoDB",
+    "category": "backend",
+    "iconClassName": "devicon-mongodb-plain",
+    "url": "https://www.mongodb.com/"
+  },
+  "docker": {
+    "name": "Docker",
+    "category": "devops",
+    "iconClassName": "devicon-docker-plain",
+    "url": "https://www.docker.com/"
+  },
+  "docker compose": {
+    "name": "Docker Compose",
+    "category": "devops",
+    "iconClassName": "devicon-docker-plain",
+    "url": "https://docs.docker.com/compose/"
+  },
+  "full-stack": {
+    "name": "Full-Stack",
+    "category": "backend",
+    "iconClassName": null,
+    "url": null
+  },
+  "rest api": {
+    "name": "REST API",
+    "category": "backend",
+    "iconClassName": null,
+    "url": null
+  },
+  "ci/cd": {
+    "name": "CI/CD",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "express.js": {
+    "name": "Express.js",
+    "category": "backend",
+    "iconClassName": "devicon-express-original",
+    "url": "https://expressjs.com/"
+  },
+  "jwt": {
+    "name": "JWT",
+    "category": "backend",
+    "iconClassName": null,
+    "url": "https://jwt.io/"
+  },
+  "python": {
+    "name": "Python",
+    "category": "backend",
+    "iconClassName": "devicon-python-plain",
+    "url": "https://www.python.org/"
+  },
+  "pytorch": {
+    "name": "PyTorch",
+    "category": "ai",
+    "iconClassName": "devicon-pytorch-plain",
+    "url": "https://pytorch.org/"
+  },
+  "transformers": {
+    "name": "Transformers",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://huggingface.co/docs/transformers/"
+  },
+  "spacy": {
+    "name": "spaCy",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://spacy.io/"
+  },
+  "nltk": {
+    "name": "NLTK",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://www.nltk.org/"
+  },
+  "stanza": {
+    "name": "Stanza",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://stanfordnlp.github.io/stanza/"
+  },
+  "corenlp": {
+    "name": "CoreNLP",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://stanfordnlp.github.io/CoreNLP/"
+  },
+  "llm": {
+    "name": "LLM",
+    "category": "ai",
+    "iconClassName": null,
+    "url": null
+  },
+  "llama": {
+    "name": "Llama",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://llama.meta.com/"
+  },
+  "nlp": {
+    "name": "NLP",
+    "category": "ai",
+    "iconClassName": null,
+    "url": null
+  },
+  "entity linking": {
+    "name": "Entity Linking",
+    "category": "ai",
+    "iconClassName": null,
+    "url": null
+  },
+  "fact-checking": {
+    "name": "Fact-Checking",
+    "category": "ai",
+    "iconClassName": null,
+    "url": null
+  },
+  "wikidata": {
+    "name": "Wikidata",
+    "category": "ai",
+    "iconClassName": null,
+    "url": "https://www.wikidata.org/"
+  },
+  "data processing": {
+    "name": "Data Processing",
+    "category": "ai",
+    "iconClassName": null,
+    "url": null
+  },
+  "swift": {
+    "name": "Swift",
+    "category": "mobile",
+    "iconClassName": "devicon-swift-plain",
+    "url": "https://developer.apple.com/swift/"
+  },
+  "swiftui": {
+    "name": "SwiftUI",
+    "category": "mobile",
+    "iconClassName": "devicon-swift-plain",
+    "url": "https://developer.apple.com/xcode/swiftui/"
+  },
+  "cloudkit": {
+    "name": "CloudKit",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/icloud/cloudkit/"
+  },
+  "mapkit": {
+    "name": "MapKit",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/mapkit/"
+  },
+  "corelocation": {
+    "name": "CoreLocation",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/corelocation/"
+  },
+  "coremotion": {
+    "name": "CoreMotion",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/coremotion/"
+  },
+  "xcode": {
+    "name": "Xcode",
+    "category": "mobile",
+    "iconClassName": "devicon-xcode-plain",
+    "url": "https://developer.apple.com/xcode/"
+  },
+  "graphql": {
+    "name": "GraphQL",
+    "category": "backend",
+    "iconClassName": "devicon-graphql-plain",
+    "url": "https://graphql.org/"
+  },
+  "mongoose": {
+    "name": "Mongoose",
+    "category": "backend",
+    "iconClassName": null,
+    "url": "https://mongoosejs.com/"
+  },
+  "heroku": {
+    "name": "Heroku",
+    "category": "devops",
+    "iconClassName": "devicon-heroku-plain",
+    "url": "https://www.heroku.com/"
+  },
+  "material-ui": {
+    "name": "Material-UI",
+    "category": "frontend",
+    "iconClassName": "devicon-materialui-plain",
+    "url": "https://mui.com/"
+  },
+  "apollo client": {
+    "name": "Apollo Client",
+    "category": "frontend",
+    "iconClassName": null,
+    "url": "https://www.apollographql.com/docs/react/"
+  },
+  "kotlin": {
+    "name": "Kotlin",
+    "category": "mobile",
+    "iconClassName": "devicon-kotlin-plain",
+    "url": "https://kotlinlang.org/"
+  },
+  "android": {
+    "name": "Android",
+    "category": "mobile",
+    "iconClassName": "devicon-android-plain",
+    "url": "https://developer.android.com/"
+  },
+  "mvvm": {
+    "name": "MVVM",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": null
+  },
+  "room db": {
+    "name": "Room DB",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.android.com/training/data-storage/room"
+  },
+  "retrofit": {
+    "name": "Retrofit",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://square.github.io/retrofit/"
+  },
+  "google places api": {
+    "name": "Google Places API",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developers.google.com/maps/documentation/places/web-service/overview"
+  },
+  "android jetpack": {
+    "name": "Android Jetpack",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.android.com/jetpack"
+  },
+  "glide": {
+    "name": "Glide",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://github.com/bumptech/glide"
+  },
+  "sqlite": {
+    "name": "SQLite",
+    "category": "backend",
+    "iconClassName": "devicon-sqlite-plain",
+    "url": "https://www.sqlite.org/"
+  },
+  "flask": {
+    "name": "Flask",
+    "category": "backend",
+    "iconClassName": "devicon-flask-original",
+    "url": "https://flask.palletsprojects.com/"
+  },
+  "microservices": {
+    "name": "Microservices",
+    "category": "backend",
+    "iconClassName": null,
+    "url": null
+  },
+  "kubernetes": {
+    "name": "Kubernetes",
+    "category": "devops",
+    "iconClassName": "devicon-kubernetes-plain",
+    "url": "https://kubernetes.io/"
+  },
+  "nginx": {
+    "name": "NGINX",
+    "category": "devops",
+    "iconClassName": "devicon-nginx-original",
+    "url": "https://www.nginx.com/"
+  },
+  "ingress": {
+    "name": "Ingress",
+    "category": "devops",
+    "iconClassName": null,
+    "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/"
+  },
+  "cert-manager": {
+    "name": "cert-manager",
+    "category": "devops",
+    "iconClassName": null,
+    "url": "https://cert-manager.io/"
+  },
+  "ssl/tls": {
+    "name": "SSL/TLS",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "nfs": {
+    "name": "NFS",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "unit testing": {
+    "name": "Unit Testing",
+    "category": "devops",
+    "iconClassName": null,
+    "url": null
+  },
+  "laravel": {
+    "name": "Laravel",
+    "category": "backend",
+    "iconClassName": "devicon-laravel-original",
+    "url": "https://laravel.com/"
+  },
+  "php": {
+    "name": "PHP",
+    "category": "backend",
+    "iconClassName": "devicon-php-plain",
+    "url": "https://www.php.net/"
+  },
+  "mysql": {
+    "name": "MySQL",
+    "category": "backend",
+    "iconClassName": "devicon-mysql-plain",
+    "url": "https://www.mysql.com/"
+  },
+  "blade": {
+    "name": "Blade",
+    "category": "frontend",
+    "iconClassName": null,
+    "url": "https://laravel.com/docs/blade"
+  },
+  "tailwind css": {
+    "name": "Tailwind CSS",
+    "category": "frontend",
+    "iconClassName": "devicon-tailwindcss-plain",
+    "url": "https://tailwindcss.com/"
+  },
+  "alpine.js": {
+    "name": "Alpine.js",
+    "category": "frontend",
+    "iconClassName": null,
+    "url": "https://alpinejs.dev/"
+  },
+  "mvc": {
+    "name": "MVC",
+    "category": "backend",
+    "iconClassName": null,
+    "url": null
+  },
+  "eloquent orm": {
+    "name": "Eloquent ORM",
+    "category": "backend",
+    "iconClassName": null,
+    "url": "https://laravel.com/docs/eloquent"
+  },
+  "uikit": {
+    "name": "UIKit",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/uikit/"
+  },
+  "ios": {
+    "name": "iOS",
+    "category": "mobile",
+    "iconClassName": "devicon-swift-plain",
+    "url": "https://developer.apple.com/"
+  },
+  "core data": {
+    "name": "Core Data",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/coredata/"
+  },
+  "xctest": {
+    "name": "XCTest",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": "https://developer.apple.com/documentation/xctest/"
+  },
+  "mobile app": {
+    "name": "Mobile App",
+    "category": "mobile",
+    "iconClassName": null,
+    "url": null
+  },
+  "strapi": {
+    "name": "Strapi",
+    "category": "backend",
+    "iconClassName": "devicon-nodejs-plain",
+    "url": "https://strapi.io/"
+  },
+  "typescript": {
+    "name": "TypeScript",
+    "category": "frontend",
+    "iconClassName": "devicon-typescript-plain",
+    "url": "https://www.typescriptlang.org/"
+  },
+  "next-intl": {
+    "name": "next-intl",
+    "category": "frontend",
+    "iconClassName": null,
+    "url": "https://next-intl-docs.vercel.app/"
+  },
+  "framer motion": {
+    "name": "Framer Motion",
+    "category": "frontend",
+    "iconClassName": null,
+    "url": "https://www.framer.com/motion/"
+  }
+}

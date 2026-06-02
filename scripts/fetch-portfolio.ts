@@ -1,0 +1,493 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.join(__dirname, "..");
+const localProjectsDir = path.join(rootDir, "projects-local");
+const publicMediaDir = path.join(rootDir, "public", "media", "projects");
+const registryPath = path.join(rootDir, "src", "data", "tech-registry.json");
+const outputProjectsPath = path.join(rootDir, "src", "data", "projects.json");
+const outputSkillsPath = path.join(rootDir, "src", "data", "skills.json");
+
+const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "dettinjo";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+// Category metadata
+const CATEGORIES: Record<string, { name: string; order: number }> = {
+  frontend: { name: "Frontend", order: 1 },
+  backend: { name: "Backend", order: 2 },
+  mobile: { name: "Mobile", order: 3 },
+  devops: { name: "DevOps", order: 4 },
+  ai: { name: "AI", order: 5 },
+};
+
+interface TechDetail {
+  name: string;
+  category: string;
+  iconClassName: string | null;
+  url: string | null;
+}
+
+interface ProjectMetadata {
+  title: string;
+  projectType: string;
+  developedAt: string;
+  weight: number;
+  publishLink: boolean;
+  liveUrl: string | null;
+  repoUrl: string | null;
+  tags: string[];
+}
+
+interface SoftwareProject {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  projectType: string;
+  developedAt?: string;
+  liveUrl?: string;
+  repoUrl?: string;
+  tags: string[];
+  coverImage: any | null;
+  gallery: any[] | null;
+  localizations?: Array<{
+    id: string;
+    slug: string;
+    locale: string;
+  }>;
+  _weight?: number; // Internal use during build
+}
+
+// Helper to make authenticated GitHub requests
+const githubFetch = async (url: string) => {
+  const headers: Record<string, string> = {
+    "User-Agent": "portfolio-builder",
+    Accept: "application/vnd.github.v3+json",
+  };
+
+  if (GITHUB_TOKEN) {
+    headers["Authorization"] = `token ${GITHUB_TOKEN}`;
+  }
+
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    throw new Error(`GitHub API returned ${res.status} for ${url}`);
+  }
+  return res.json();
+};
+
+// Helper to download a binary file
+const downloadFile = async (url: string, destPath: string) => {
+  const headers: Record<string, string> = {
+    "User-Agent": "portfolio-builder",
+  };
+  if (GITHUB_TOKEN) {
+    headers["Authorization"] = `token ${GITHUB_TOKEN}`;
+  }
+
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    throw new Error(`Failed to download ${url}: ${res.statusText}`);
+  }
+  const buffer = await res.arrayBuffer();
+  fs.writeFileSync(destPath, Buffer.from(buffer));
+};
+
+const main = async () => {
+  console.log("Starting portfolio synchronization...");
+
+  // Create media outputs path
+  if (!fs.existsSync(publicMediaDir)) {
+    fs.mkdirSync(publicMediaDir, { recursive: true });
+  }
+
+  // Load tech registry
+  let techRegistry: Record<string, TechDetail> = {};
+  if (fs.existsSync(registryPath)) {
+    techRegistry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+  } else {
+    console.warn(`Tech registry not found at ${registryPath}`);
+  }
+
+  const projectsMap: Record<string, SoftwareProject> = {};
+
+  // ─── 1. LOAD LOCAL PROJECTS ───────────────────────────────────────────────
+  if (fs.existsSync(localProjectsDir)) {
+    const localDirs = fs.readdirSync(localProjectsDir);
+    for (const dirName of localDirs) {
+      const projPath = path.join(localProjectsDir, dirName);
+      if (!fs.statSync(projPath).isDirectory()) continue;
+
+      const portfolioPath = path.join(projPath, ".portfolio");
+      const metadataPath = path.join(portfolioPath, "metadata.json");
+      if (!fs.existsSync(metadataPath)) continue;
+
+      console.log(`Loading local project: ${dirName}...`);
+
+      try {
+        const metadata: ProjectMetadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+        const slug = dirName;
+
+        // Read English description
+        const enAboutPath = path.join(portfolioPath, "about.en.md");
+        const longDescription = fs.existsSync(enAboutPath)
+          ? fs.readFileSync(enAboutPath, "utf8")
+          : "";
+
+        const projectDestMediaDir = path.join(publicMediaDir, dirName);
+        fs.mkdirSync(projectDestMediaDir, { recursive: true });
+
+        // Copy cover image if exists
+        const coverFiles = fs.readdirSync(portfolioPath).filter(f => f.startsWith("cover."));
+        if (coverFiles.length > 0) {
+          fs.copyFileSync(
+            path.join(portfolioPath, coverFiles[0]),
+            path.join(projectDestMediaDir, coverFiles[0])
+          );
+        }
+
+        // Copy gallery if exists
+        const gallerySrcDir = path.join(portfolioPath, "gallery");
+        if (fs.existsSync(gallerySrcDir)) {
+          const galleryDestDir = path.join(projectDestMediaDir, "gallery");
+          fs.mkdirSync(galleryDestDir, { recursive: true });
+          const galleryFiles = fs.readdirSync(gallerySrcDir);
+          for (const file of galleryFiles) {
+            fs.copyFileSync(path.join(gallerySrcDir, file), path.join(galleryDestDir, file));
+          }
+        }
+
+        // Add to map
+        projectsMap[slug] = {
+          id: slug,
+          slug: slug,
+          title: metadata.title,
+          description: "", // filled in from dump later
+          longDescription,
+          projectType: metadata.projectType,
+          developedAt: metadata.developedAt,
+          liveUrl: metadata.liveUrl || undefined,
+          repoUrl: metadata.publishLink ? (metadata.repoUrl || undefined) : undefined,
+          tags: metadata.tags,
+          coverImage: null,
+          gallery: null,
+          _weight: metadata.weight || 1,
+        };
+      } catch (err: any) {
+        console.error(`Error loading local project ${dirName}:`, err.message);
+      }
+    }
+  }
+
+  // ─── 2. FETCH FROM GITHUB ──────────────────────────────────────────────────
+  try {
+    console.log("Fetching repositories from GitHub...");
+    let repos: any[] = [];
+    if (GITHUB_TOKEN) {
+      repos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
+    } else {
+      repos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+    }
+
+    const portfolioRepos = repos.filter(
+      (repo) => repo.topics && repo.topics.includes("portfolio")
+    );
+
+    console.log(`Found ${portfolioRepos.length} repositories matching the topic "portfolio".`);
+
+    for (const repo of portfolioRepos) {
+      const repoName = repo.name;
+      const slug = repoName.toLowerCase();
+      console.log(`Syncing repository: ${repoName}...`);
+
+      try {
+        // Query the contents of .portfolio/
+        const contents = await githubFetch(
+          `https://api.github.com/repos/${repo.owner.login}/${repoName}/contents/.portfolio`
+        ).catch(() => null);
+
+        if (!contents || !Array.isArray(contents)) {
+          console.log(`  Skipping ${repoName}: .portfolio/ folder not found or accessible.`);
+          continue;
+        }
+
+        // Find file details
+        const metadataFile = contents.find((c) => c.name === "metadata.json");
+        const enAboutFile = contents.find((c) => c.name === "about.en.md");
+        const coverFile = contents.find((c) => c.name.startsWith("cover."));
+        const galleryDir = contents.find((c) => c.name === "gallery" && c.type === "dir");
+
+        if (!metadataFile) {
+          console.warn(`  Skipping ${repoName}: metadata.json not found in .portfolio/`);
+          continue;
+        }
+
+        // Fetch metadata
+        const metadataRaw = await githubFetch(metadataFile.url);
+        const metadataString = Buffer.from(metadataRaw.content, "base64").toString("utf8");
+        const metadata: ProjectMetadata = JSON.parse(metadataString);
+
+        // Fetch English description
+        let longDescription = "";
+        if (enAboutFile) {
+          const enAboutRaw = await githubFetch(enAboutFile.url);
+          longDescription = Buffer.from(enAboutRaw.content, "base64").toString("utf8");
+        }
+
+        const projectDestMediaDir = path.join(publicMediaDir, repoName);
+        fs.mkdirSync(projectDestMediaDir, { recursive: true });
+
+        // Download cover image
+        if (coverFile && coverFile.download_url) {
+          const ext = path.extname(coverFile.name);
+          const destCoverPath = path.join(projectDestMediaDir, `cover${ext}`);
+          await downloadFile(coverFile.download_url, destCoverPath);
+          console.log(`  ✓ Downloaded cover: ${coverFile.name}`);
+        }
+
+        // Download gallery files
+        if (galleryDir) {
+          const galleryContents = await githubFetch(galleryDir.url);
+          if (Array.isArray(galleryContents)) {
+            const galleryDestDir = path.join(projectDestMediaDir, "gallery");
+            fs.mkdirSync(galleryDestDir, { recursive: true });
+
+            for (const item of galleryContents) {
+              if (item.type === "file" && item.download_url) {
+                const destPath = path.join(galleryDestDir, item.name);
+                await downloadFile(item.download_url, destPath);
+                console.log(`  ✓ Downloaded gallery image: ${item.name}`);
+              }
+            }
+          }
+        }
+
+        // Add or overwrite the project in maps
+        projectsMap[slug] = {
+          id: slug,
+          slug: slug,
+          title: metadata.title || repoName,
+          description: "", // filled in from dump later
+          longDescription,
+          projectType: metadata.projectType || repo.language || "Software Project",
+          developedAt: metadata.developedAt || repo.created_at,
+          liveUrl: metadata.liveUrl || repo.homepage || undefined,
+          repoUrl: metadata.publishLink && !repo.private ? (metadata.repoUrl || repo.html_url) : undefined,
+          tags: metadata.tags && metadata.tags.length > 0 ? metadata.tags : (repo.topics || []),
+          coverImage: null,
+          gallery: null,
+          _weight: metadata.weight || 1,
+        };
+
+        // Note: If private repository or publishLink is false, suppress the repo URL
+        if (repo.private || !metadata.publishLink) {
+          projectsMap[slug].repoUrl = undefined;
+        }
+
+        console.log(`  ✓ Successfully synced ${repoName}`);
+      } catch (err: any) {
+        console.error(`  Error syncing repository ${repoName}:`, err.message);
+      }
+    }
+  } catch (err: any) {
+    console.warn("Could not fetch from GitHub (offline or invalid token). Using local fallback.", err.message);
+  }
+
+  // ─── 3. RESOLVE MEDIA IMAGES AND DESCRIPTIONS FROM DATABASE DUMP ───────────
+  const dumpPath = path.join(__dirname, "projects_locales_dump.json");
+  if (fs.existsSync(dumpPath)) {
+    try {
+      const rawDump = fs.readFileSync(dumpPath, "utf8");
+      const repairedDump = rawDump.replace(/\\\\"/g, '\\"');
+      const dumpData = JSON.parse(repairedDump);
+
+      for (const p of dumpData) {
+        const slug = p.slug;
+        const matched = Object.values(projectsMap).find(
+          (proj) => proj.slug.toLowerCase() === slug.toLowerCase()
+        );
+
+        if (matched) {
+          if (p.description) {
+            matched.description = p.description;
+          }
+          if (p.long_description && !matched.longDescription) {
+            matched.longDescription = p.long_description;
+          }
+        }
+      }
+    } catch (e: any) {
+      console.error("Failed to merge descriptions from JSON dump:", e.message);
+    }
+  }
+
+  // Final pass to build the actual coverImage and gallery objects
+  const finalProjectsList: SoftwareProject[] = [];
+
+  for (const slug of Object.keys(projectsMap)) {
+    const project = projectsMap[slug];
+    const projectDestMediaDir = path.join(publicMediaDir, project.slug);
+
+    let repoName = project.slug;
+    if (!fs.existsSync(projectDestMediaDir)) {
+      const dirs = fs.existsSync(publicMediaDir) ? fs.readdirSync(publicMediaDir) : [];
+      const matchedDir = dirs.find((d) => d.toLowerCase() === project.slug.toLowerCase());
+      if (matchedDir) {
+        repoName = matchedDir;
+      }
+    }
+
+    const actualMediaDir = path.join(publicMediaDir, repoName);
+
+    // Cover Image resolution
+    if (fs.existsSync(actualMediaDir)) {
+      const files = fs.readdirSync(actualMediaDir);
+      const coverFile = files.find((f) => f.startsWith("cover."));
+      if (coverFile) {
+        const coverPath = path.join(actualMediaDir, coverFile);
+        const stats = fs.statSync(coverPath);
+        project.coverImage = {
+          id: "cover",
+          url: `/media/projects/${repoName}/${coverFile}`,
+          alternativeText: `${project.title} Cover`,
+          width: 1200,
+          height: 900,
+          size: Math.round(stats.size / 1024),
+        };
+      }
+    }
+
+    // Gallery Images resolution
+    const galleryDir = path.join(actualMediaDir, "gallery");
+    if (fs.existsSync(galleryDir)) {
+      const files = fs.readdirSync(galleryDir);
+      project.gallery = files.map((filename, index) => {
+        const filePath = path.join(galleryDir, filename);
+        const stats = fs.statSync(filePath);
+        return {
+          id: `gallery_${index}`,
+          url: `/media/projects/${repoName}/gallery/${filename}`,
+          alternativeText: `${project.title} Gallery Image ${index + 1}`,
+          width: 1200,
+          height: 900,
+          size: Math.round(stats.size / 1024),
+        };
+      });
+    }
+
+    project.localizations = [
+      { id: project.slug, slug: project.slug, locale: "en" },
+      { id: project.slug, slug: project.slug, locale: "de" },
+    ];
+
+    finalProjectsList.push(project);
+  }
+
+  // Sort projects by developedAt descending
+  finalProjectsList.sort((a, b) => {
+    const dateA = a.developedAt ? new Date(a.developedAt).getTime() : 0;
+    const dateB = b.developedAt ? new Date(b.developedAt).getTime() : 0;
+    return dateB - dateA;
+  });
+
+  // Save projects.json (strip temporary internal key `_weight` before saving, but keep it in memory for skills)
+  const cleanProjectsList = finalProjectsList.map(({ _weight, ...rest }) => rest);
+  const dataDir = path.dirname(outputProjectsPath);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  fs.writeFileSync(outputProjectsPath, JSON.stringify(cleanProjectsList, null, 2), "utf8");
+  console.log(`Saved ${cleanProjectsList.length} projects to ${outputProjectsPath}`);
+
+  // ─── 4. AGGREGATE SKILLS & CALCULATE LEVELS ───────────────────────────────
+  console.log("Aggregating skills levels...");
+  const skillScores: Record<string, number> = {};
+
+  for (const project of finalProjectsList) {
+    const weight = project._weight || 1;
+    for (const tag of project.tags) {
+      const cleanTag = tag.trim().toLowerCase();
+      // Match key in tech registry
+      if (techRegistry[cleanTag]) {
+        skillScores[cleanTag] = (skillScores[cleanTag] || 0) + weight;
+      } else {
+        console.warn(`  Warning: Tag "${tag}" (used in "${project.title}") is not defined in tech-registry.json`);
+      }
+    }
+  }
+
+  // Map scores to skill levels (1-5) and group by category
+  const skillsByCategory: Record<string, any[]> = {
+    frontend: [],
+    backend: [],
+    mobile: [],
+    devops: [],
+    ai: [],
+  };
+
+  for (const [techKey, score] of Object.entries(skillScores)) {
+    const registryEntry = techRegistry[techKey];
+    if (!registryEntry) continue;
+
+    // Calculate level based on score threshold
+    let level = 1;
+    if (score >= 6) level = 5;
+    else if (score >= 4) level = 4;
+    else if (score >= 3) level = 3;
+    else if (score >= 2) level = 2;
+
+    const skillObj = {
+      id: techKey,
+      name: registryEntry.name,
+      iconClassName: registryEntry.iconClassName || "",
+      level,
+      url: registryEntry.url || "",
+    };
+
+    const category = registryEntry.category.toLowerCase();
+    if (skillsByCategory[category]) {
+      skillsByCategory[category].push(skillObj);
+    } else {
+      console.warn(`  Warning: Category "${category}" for tech "${techKey}" is not a recognized category.`);
+      // Add to backend as fallback
+      skillsByCategory.backend.push(skillObj);
+    }
+  }
+
+  // Construct final categories list and sort them
+  const finalCategories = Object.keys(CATEGORIES).map((catKey) => {
+    const catMeta = CATEGORIES[catKey];
+    const skills = skillsByCategory[catKey] || [];
+
+    // Sort skills inside the category by level desc, then name asc
+    skills.sort((a, b) => {
+      if (b.level !== a.level) {
+        return b.level - a.level;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return {
+      id: catKey,
+      name: catMeta.name,
+      order: catMeta.order,
+      skills,
+    };
+  });
+
+  // Sort categories by order asc
+  finalCategories.sort((a, b) => a.order - b.order);
+
+  fs.writeFileSync(outputSkillsPath, JSON.stringify(finalCategories, null, 2), "utf8");
+  console.log(`Saved aggregated skills to ${outputSkillsPath}`);
+  console.log("Portfolio synchronization completed successfully!");
+};
+
+main().catch((err) => {
+  console.error("Fatal error during synchronization:", err);
+  process.exit(1);
+});

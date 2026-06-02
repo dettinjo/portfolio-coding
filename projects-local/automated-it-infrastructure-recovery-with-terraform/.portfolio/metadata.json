@@ -1,0 +1,21 @@
+{
+  "title": "Automated IT Infrastructure Recovery with Terraform",
+  "projectType": "DevOps & IaC",
+  "developedAt": "2023-07-24T00:00:00+00:00",
+  "weight": 3,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Terraform",
+    "Terragrunt",
+    "Infrastructure as Code (IaC)",
+    "Microsoft Azure",
+    "GitLab",
+    "GitLab CI/CD",
+    "Shell Scripting",
+    "DevOps",
+    "Cloud Infrastructure",
+    "Automation"
+  ]
+}
