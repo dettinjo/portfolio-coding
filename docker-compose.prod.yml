@@ -20,8 +20,6 @@ services:
     # Image is built by GitHub Actions and pushed to ghcr.io — never built on the server.
     image: ghcr.io/dettinjo/portfolio-coding:latest
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/en"]
       interval: 30s
