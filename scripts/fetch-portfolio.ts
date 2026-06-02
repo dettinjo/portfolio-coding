@@ -60,6 +60,7 @@ interface SoftwareProject {
     locale: string;
   }>;
   _weight?: number; // Internal use during build
+  _languages?: Record<string, number>; // Internal use during build
 }
 
 // Helper to make authenticated GitHub requests
@@ -198,6 +199,7 @@ const main = async () => {
           coverImage: null,
           gallery: null,
           _weight: metadata.weight || 1,
+          _languages: (metadata as any).languages || {},
         };
       } catch (err: any) {
         console.error(`Error loading local project ${dirName}:`, err.message);
@@ -288,6 +290,16 @@ const main = async () => {
           }
         }
 
+        // Fetch languages
+        let languages: Record<string, number> = {};
+        try {
+          languages = await githubFetch(
+            `https://api.github.com/repos/${repo.owner.login}/${repoName}/languages`
+          );
+        } catch (e: any) {
+          console.warn(`  Warning: Could not fetch languages for ${repoName}:`, e.message);
+        }
+
         // Add or overwrite the project in maps
         projectsMap[slug] = {
           id: slug,
@@ -303,6 +315,7 @@ const main = async () => {
           coverImage: null,
           gallery: null,
           _weight: metadata.weight || 1,
+          _languages: languages,
         };
 
         // Note: If private repository or publishLink is false, suppress the repo URL
@@ -430,12 +443,56 @@ const main = async () => {
   console.log("Aggregating skills levels...");
   const skillScores: Record<string, number> = {};
 
+  // Custom language name mappings from GitHub to registry keys
+  const languageMappings: Record<string, string> = {
+    hcl: "terraform",
+    shell: "shell scripting",
+    dockerfile: "docker",
+  };
+
   for (const project of finalProjectsList) {
     const weight = project._weight || 1;
+    const projectLanguages = project._languages || {};
+
+    // Calculate total language bytes
+    const totalBytes = Object.values(projectLanguages).reduce(
+      (sum: number, b: any) => sum + b,
+      0
+    ) as number;
+
+    const processedLanguages = new Set<string>();
+
+    if (totalBytes > 0) {
+      for (const [langName, bytes] of Object.entries(projectLanguages)) {
+        const percentage = bytes / totalBytes;
+        // Ignore languages representing less than 5% of the codebase
+        if (percentage < 0.05) continue;
+
+        const cleanLang = langName.trim().toLowerCase();
+        const mappedKey = languageMappings[cleanLang] || cleanLang;
+
+        if (techRegistry[mappedKey]) {
+          const scoreContribution = percentage * weight;
+          skillScores[mappedKey] = (skillScores[mappedKey] || 0) + scoreContribution;
+          processedLanguages.add(mappedKey);
+
+          // Dynamically add the language to the project's tags if not already present
+          const displayName = techRegistry[mappedKey].name;
+          if (!project.tags.includes(displayName)) {
+            project.tags.push(displayName);
+          }
+        }
+      }
+    }
+
+    // Process all other tags (frameworks, libraries, tools)
+    // If a tag is a language that was already processed dynamically above, skip it to avoid double counting
     for (const tag of project.tags) {
       const cleanTag = tag.trim().toLowerCase();
-      // Match key in tech registry
+      if (processedLanguages.has(cleanTag)) continue;
+
       if (techRegistry[cleanTag]) {
+        // Frameworks/libraries get full weight contribution
         skillScores[cleanTag] = (skillScores[cleanTag] || 0) + weight;
       } else {
         console.warn(`  Warning: Tag "${tag}" (used in "${project.title}") is not defined in tech-registry.json`);

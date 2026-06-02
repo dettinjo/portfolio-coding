@@ -37,6 +37,7 @@
         "size": 0
       }
     ],
+    "_languages": {},
     "localizations": [
       {
         "id": "automated-it-infrastructure-recovery-with-terraform",
