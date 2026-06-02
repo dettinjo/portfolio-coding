@@ -17,21 +17,8 @@ services:
       - coolify
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_FULL_NAME: ${NEXT_PUBLIC_FULL_NAME}
-        NEXT_PUBLIC_EMAIL_ADDRESS: ${NEXT_PUBLIC_EMAIL_ADDRESS}
-        NEXT_PUBLIC_PHONE_NUMBER: ${NEXT_PUBLIC_PHONE_NUMBER}
-        NEXT_PUBLIC_STREET_ADDRESS: ${NEXT_PUBLIC_STREET_ADDRESS}
-        NEXT_PUBLIC_CITY_ADDRESS: ${NEXT_PUBLIC_CITY_ADDRESS}
-        NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
-        NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
-        NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
-        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
-        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
-    image: my-portfolio-coding
+    # Image is built by GitHub Actions and pushed to ghcr.io — never built on the server.
+    image: ghcr.io/dettinjo/portfolio-coding:latest
     restart: unless-stopped
     ports:
       - "3000:3000"

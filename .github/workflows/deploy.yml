@@ -30,23 +30,41 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
-          # GitHub Actions cache keeps builds fast without any server-side disk use
+          # GitHub Actions cache — builds stay fast without touching the server
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            NEXT_PUBLIC_FULL_NAME=${{ secrets.NEXT_PUBLIC_FULL_NAME }}
-            NEXT_PUBLIC_EMAIL_ADDRESS=${{ secrets.NEXT_PUBLIC_EMAIL_ADDRESS }}
-            NEXT_PUBLIC_PHONE_NUMBER=${{ secrets.NEXT_PUBLIC_PHONE_NUMBER }}
-            NEXT_PUBLIC_STREET_ADDRESS=${{ secrets.NEXT_PUBLIC_STREET_ADDRESS }}
-            NEXT_PUBLIC_CITY_ADDRESS=${{ secrets.NEXT_PUBLIC_CITY_ADDRESS }}
-            NEXT_PUBLIC_GITHUB_USERNAME=${{ secrets.NEXT_PUBLIC_GITHUB_USERNAME }}
-            NEXT_PUBLIC_LINKEDIN_USERNAME=${{ secrets.NEXT_PUBLIC_LINKEDIN_USERNAME }}
-            NEXT_PUBLIC_INSTAGRAM_USERNAME=${{ secrets.NEXT_PUBLIC_INSTAGRAM_USERNAME }}
-            NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+            NEXT_PUBLIC_FULL_NAME=${{ secrets.NEXT_PUBLIC_FULL_NAME || 'Joel Dettinger' }}
+            NEXT_PUBLIC_EMAIL_ADDRESS=${{ secrets.NEXT_PUBLIC_EMAIL_ADDRESS || '' }}
+            NEXT_PUBLIC_PHONE_NUMBER=${{ secrets.NEXT_PUBLIC_PHONE_NUMBER || '' }}
+            NEXT_PUBLIC_STREET_ADDRESS=${{ secrets.NEXT_PUBLIC_STREET_ADDRESS || '' }}
+            NEXT_PUBLIC_CITY_ADDRESS=${{ secrets.NEXT_PUBLIC_CITY_ADDRESS || '' }}
+            NEXT_PUBLIC_GITHUB_USERNAME=${{ secrets.NEXT_PUBLIC_GITHUB_USERNAME || 'dettinjo' }}
+            NEXT_PUBLIC_LINKEDIN_USERNAME=${{ secrets.NEXT_PUBLIC_LINKEDIN_USERNAME || 'joeldettinger' }}
+            NEXT_PUBLIC_INSTAGRAM_USERNAME=${{ secrets.NEXT_PUBLIC_INSTAGRAM_USERNAME || 'joeldettinger' }}
+            NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL || 'https://codeby.joeldettinger.de' }}
 
       # PAYLOAD_SECRET and POSTGRES_URL are injected at runtime by Coolify —
       # they must never appear as build args (would be stored in image layers).
 
-      - name: Trigger Coolify deploy
-        run: |
-          curl --fail -X GET "${{ secrets.COOLIFY_WEBHOOK_URL }}"
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          known_hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          script: |
+            # Pull the new image (built by GitHub Actions, never built on server)
+            docker pull ghcr.io/dettinjo/portfolio-coding:latest
+            # Find and restart only the app container (leaves postgres untouched)
+            APP=$(docker ps --format '{{.Names}}' | grep 'ikws0k0oc440k0cs08csws08.*app\|portfolio-coding.*app' | head -1)
+            if [ -n "$APP" ]; then
+              docker restart "$APP"
+              echo "Restarted: $APP"
+            else
+              echo "App container not found — triggering full Coolify redeploy"
+              docker exec coolify-db psql -U coolify -d coolify -c \
+                "INSERT INTO application_deployment_queues (application_id, deployment_uuid, commit, status, is_webhook, force_rebuild, server_id, application_name, server_name, restart_only)
+                 VALUES ('2', gen_random_uuid()::text, 'HEAD', 'queued', false, false, 0, 'portfolio-coding', 'Hetzner-VPS', true)"
+            fi
