@@ -46,16 +46,23 @@ interface ProjectMetadata {
   liveUrl: string | null;
   repoUrl: string | null;
   tags: string[];
+  // German overrides — optional, falls back to EN if absent
+  titleDe?: string;
+  descriptionDe?: string;
+  projectTypeDe?: string;
 }
 
 interface SoftwareProject {
   id: string;
   slug: string;
   title: string;
+  titleDe?: string;
   description: string;
+  descriptionDe?: string;
   longDescription: string;
   longDescriptionDe?: string;
   projectType: string;
+  projectTypeDe?: string;
   developedAt?: string;
   liveUrl?: string;
   repoUrl?: string;
@@ -106,7 +113,8 @@ const downloadFileToBuffer = async (url: string): Promise<Buffer> => {
   return Buffer.from(arrayBuffer);
 };
 
-// Helper to save and compress image to WebP if needed
+// Helper to save and compress image to WebP if needed.
+// Preserves alpha channel (transparency) from source PNGs.
 const saveAndCompressImage = async (buffer: Buffer, destPath: string): Promise<string> => {
   const ext = path.extname(destPath).toLowerCase();
   const dir = path.dirname(destPath);
@@ -114,12 +122,20 @@ const saveAndCompressImage = async (buffer: Buffer, destPath: string): Promise<s
 
   if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
     const webpPath = path.join(dir, `${name}.webp`);
-    await sharp(buffer)
-      .webp({ quality: 85 })
+    const img = sharp(buffer);
+    const meta = await img.metadata();
+    await img
+      .webp({
+        quality: 85,
+        // Lossless alpha ensures transparent pixels stay fully transparent,
+        // not blended to white during lossy compression of the alpha plane.
+        alphaQuality: meta.hasAlpha ? 100 : undefined,
+      })
       .toFile(webpPath);
     console.log(`    ✓ Compressed and saved as WebP: ${path.basename(webpPath)}`);
     return `${name}.webp`;
   } else {
+    // SVG and other formats pass through unchanged
     fs.writeFileSync(destPath, buffer);
     return path.basename(destPath);
   }
@@ -325,10 +341,13 @@ const main = async () => {
           id: slug,
           slug: slug,
           title: metadata.title,
+          titleDe: metadata.titleDe,
           description: metadata.description || "",
+          descriptionDe: metadata.descriptionDe,
           longDescription,
           longDescriptionDe,
           projectType: metadata.projectType,
+          projectTypeDe: metadata.projectTypeDe,
           developedAt: metadata.developedAt,
           liveUrl: metadata.liveUrl || undefined,
           repoUrl: metadata.publishLink ? (metadata.repoUrl || undefined) : undefined,
@@ -450,9 +469,12 @@ const main = async () => {
           id: slug,
           slug: slug,
           title: metadata.title || repoName,
+          titleDe: metadata.titleDe,
           description: metadata.description || repo.description || "",
+          descriptionDe: metadata.descriptionDe,
           longDescription,
           longDescriptionDe,
+          projectTypeDe: metadata.projectTypeDe,
           projectType: metadata.projectType || repo.language || "Software Project",
           developedAt: metadata.developedAt || repo.created_at,
           liveUrl: metadata.liveUrl || repo.homepage || undefined,

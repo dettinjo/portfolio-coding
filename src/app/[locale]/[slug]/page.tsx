@@ -124,10 +124,6 @@ export default async function ProjectDetailPage({ params }: Props) {
   const format = await getFormatter({ locale: locale });
 
   const {
-    title,
-    description,
-    longDescription,
-    projectType,
     developedAt,
     liveUrl,
     repoUrl,
@@ -135,6 +131,12 @@ export default async function ProjectDetailPage({ params }: Props) {
     coverImage,
     gallery,
   } = project;
+
+  // Use German localized fields when available, fall back to English
+  const title = (locale === "de" && project.titleDe) ? project.titleDe : project.title;
+  const description = (locale === "de" && project.descriptionDe) ? project.descriptionDe : project.description;
+  const projectType = (locale === "de" && project.projectTypeDe) ? project.projectTypeDe : project.projectType;
+  const longDescription = project.longDescription;
 
   const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
   const relativeImageUrl = getMediaUrl(coverImage);

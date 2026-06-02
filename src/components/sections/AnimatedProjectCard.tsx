@@ -38,10 +38,15 @@ export function AnimatedProjectCard({
     onScrollProgressChange(latest);
   });
 
-  const { title, description, coverImage, projectType, slug } = project;
+  const { coverImage, slug } = project;
   const imageUrl = getMediaUrl(coverImage);
 
   const locale = useLocale();
+
+  // Use German localized fields when available, fall back to English
+  const title = (locale === "de" && project.titleDe) ? project.titleDe : project.title;
+  const description = (locale === "de" && project.descriptionDe) ? project.descriptionDe : project.description;
+  const projectType = (locale === "de" && project.projectTypeDe) ? project.projectTypeDe : project.projectType;
 
   return (
     // UPDATED: The motion link handles its own animation, no staggered fade-in
