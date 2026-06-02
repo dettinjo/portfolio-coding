@@ -54,6 +54,7 @@ jobs:
           username: root
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           known_hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          envs: COOLIFY_TOKEN
           script: |
             # Pull the new image (built by GitHub Actions, never built on server)
             docker pull ghcr.io/dettinjo/portfolio-coding:latest
