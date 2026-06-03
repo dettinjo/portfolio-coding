@@ -13,15 +13,15 @@ import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { ProjectGallery } from "@/components/ProjectGallery";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
-import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/payload";
-import { getMediaUrl } from "@/lib/payload-helpers";
+import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/data";
+import { getMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { LongTextRenderer } from "@/components/LongTextRenderer";
 import { AlternateLinksProvider } from "@/context/AlternateLinksProvider";
 import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 
-import { fetchAllProjectSlugs } from "@/lib/payload";
+import { fetchAllProjectSlugs } from "@/lib/data";
 
 // generateStaticParams implemented to enable SSG/ISR.
 // We wrap it in a try/catch to ensure the build doesn't fail if the DB is unreachable (e.g. in CI).

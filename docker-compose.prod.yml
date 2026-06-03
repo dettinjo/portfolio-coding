@@ -1,21 +1,4 @@
 services:
-  postgres:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-payload}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-portfolio_coding}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-payload}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - coolify
-
   app:
     # Image is built by GitHub Actions and pushed to ghcr.io — never built on the server.
     image: ghcr.io/dettinjo/portfolio-coding:latest
@@ -28,23 +11,15 @@ services:
       start_period: 30s
     environment:
       - NODE_ENV=production
-      - POSTGRES_URL=postgres://${POSTGRES_USER:-payload}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portfolio_coding}
-      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
       - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
-    volumes:
-      - /mnt/storagebox/portfolio-media/coding:/app/public/media
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - PORTFOLIO_CONFIG_REPO=${PORTFOLIO_CONFIG_REPO}
     networks:
       - coolify
-
-volumes:
-  postgres_data:
 
 networks:
   coolify:

@@ -10,7 +10,7 @@ import { SkillsSection } from "@/components/sections/SkillsSection";
 import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
-import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/payload";
+import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/data";
 import personalConfig from "@/data/personal.json";
 
 type Props = {

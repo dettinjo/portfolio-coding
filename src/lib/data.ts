@@ -7,9 +7,9 @@ export type {
   Skill,
   SkillCategory,
   SoftwareProject,
-} from "./payload-types-shared";
+} from "./types";
 
-import type { SoftwareProject, SkillCategory } from "./payload-types-shared";
+import type { SoftwareProject, SkillCategory } from "./types";
 
 // Import static JSON data
 import projectsData from "@/data/projects.json";

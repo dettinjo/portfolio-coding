@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Github, Linkedin, Instagram, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import personalConfig from "@/data/personal.json";
 
 export function ContactSection() {
   const t = useTranslations("software.SoftwareContactSection");
@@ -86,9 +85,9 @@ export function ContactSection() {
               <p className="text-sm text-muted-foreground transition-colors duration-300 group-data-[active=true]:text-background/70">
                 {t("socials_text")}
               </p>
-              {personalConfig.socials?.github && (
+              {process.env.NEXT_PUBLIC_GITHUB_USERNAME && (
                 <a
-                  href={`https://github.com/${personalConfig.socials.github}`}
+                  href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_USERNAME}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="GitHub"
@@ -96,9 +95,9 @@ export function ContactSection() {
                   <Github className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
                 </a>
               )}
-              {personalConfig.socials?.linkedin && (
+              {process.env.NEXT_PUBLIC_LINKEDIN_USERNAME && (
                 <a
-                  href={`https://linkedin.com/in/${personalConfig.socials.linkedin}`}
+                  href={`https://linkedin.com/in/${process.env.NEXT_PUBLIC_LINKEDIN_USERNAME}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
@@ -106,9 +105,9 @@ export function ContactSection() {
                   <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
                 </a>
               )}
-              {personalConfig.socials?.instagram && (
+              {process.env.NEXT_PUBLIC_INSTAGRAM_USERNAME && (
                 <a
-                  href={`https://instagram.com/${personalConfig.socials.instagram}`}
+                  href={`https://instagram.com/${process.env.NEXT_PUBLIC_INSTAGRAM_USERNAME}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"

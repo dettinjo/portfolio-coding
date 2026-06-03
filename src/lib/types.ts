@@ -1,5 +1,4 @@
-// Shared types for Payload CMS
-// This file contains only type definitions and can be safely imported by both client and server components
+// Shared portfolio type definitions — safe to import in both client and server components
 
 export interface MediaImage {
   id: number | string;

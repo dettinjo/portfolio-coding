@@ -1,34 +1,54 @@
-// src/components/resume/PrintButton.tsx
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 interface PrintButtonProps {
   label: string;
   filename?: string;
 }
 
-export function PrintButton({ label, filename }: PrintButtonProps) {
+export function PrintButton({ label }: PrintButtonProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleDownload = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/resume/download");
+      if (!response.ok) {
+        throw new Error(`Server responded ${response.status}`);
+      }
+      const blob = await response.blob();
+
+      // Extract filename from Content-Disposition header if present.
+      const disposition = response.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      const downloadName = match?.[1] ?? "Resume.pdf";
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download resume PDF:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Button
-      variant="outline"
-      onClick={() => {
-        // Triggers the browser's print dialog (Save as PDF)
-        if (typeof window !== "undefined") {
-          const originalTitle = document.title;
-          if (filename) {
-            document.title = filename;
-          }
-          window.print();
-          // Restore the original title after the print dialog closes (or immediately, as print() is blocking)
-          if (filename) {
-            document.title = originalTitle;
-          }
-        }
-      }}
-    >
-      <Download className="mr-2 h-4 w-4" /> {label}
+    <Button variant="outline" onClick={handleDownload} disabled={loading}>
+      {loading ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="mr-2 h-4 w-4" />
+      )}
+      {loading ? "Generating PDF…" : label}
     </Button>
   );
 }

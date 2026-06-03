@@ -7,13 +7,15 @@ WORKDIR /app
 # Keep NODE_ENV=development so devDependencies are always installed,
 # regardless of what Coolify or CI injects as a build arg.
 ENV NODE_ENV=development
+# Tell puppeteer to skip downloading its own Chrome — we use the system one.
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 COPY package.json package-lock.json* ./
 RUN \
   if [ -f package-lock.json ]; then npm ci; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# ── builder: compile the Next.js + Payload app ────────────────────────────────
+# ── builder: compile the Next.js app ─────────────────────────────────────────
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -43,8 +45,8 @@ ENV NEXT_PUBLIC_LINKEDIN_USERNAME=$NEXT_PUBLIC_LINKEDIN_USERNAME
 ENV NEXT_PUBLIC_INSTAGRAM_USERNAME=$NEXT_PUBLIC_INSTAGRAM_USERNAME
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 
-# PAYLOAD_SECRET and POSTGRES_URL are runtime-only — never bake secrets
-# into the image. They are injected at container startup via env vars.
+# Runtime secrets (SMTP_PASS, GITHUB_TOKEN, etc.) are injected at container
+# startup via environment variables — they are never baked into the image.
 
 RUN npm run build
 
@@ -57,19 +59,27 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs \
- && apk add --no-cache curl
+ && apk add --no-cache curl \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont
+
+# Tell puppeteer to use the system Chromium rather than a downloaded one.
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 COPY --from=builder /app/public ./public
 
-RUN mkdir -p .next public/media data \
- && chown -R nextjs:nodejs .next public/media data
+RUN mkdir -p .next \
+ && chown -R nextjs:nodejs .next public
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Payload needs the native libsql binary and drizzle-kit at runtime
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@libsql ./node_modules/@libsql
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
+# Puppeteer needs its own node_modules in the standalone output
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/puppeteer ./node_modules/puppeteer
 
 USER nextjs
 

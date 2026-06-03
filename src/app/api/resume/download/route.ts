@@ -24,7 +24,7 @@ async function getBrowser(): Promise<Browser> {
   return browserInstance;
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SERVER_URL || `http://localhost:${process.env.PORT || 3000}`;
 

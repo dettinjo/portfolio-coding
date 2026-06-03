@@ -1,6 +1,6 @@
 "use client";
 
-import { getMediaUrl } from "@/lib/payload-helpers";
+import { getMediaUrl } from "@/lib/media";
 import Image from "next/image";
 
 interface SkillIconProps {

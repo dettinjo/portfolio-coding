@@ -1,19 +1,4 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: my-portfolio-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-payload}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-payload}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env.local
-
   app:
     build:
       context: .
@@ -27,9 +12,7 @@ services:
         NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
         NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
         NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
-
         NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
-        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
     image: my-portfolio-app
     container_name: my-portfolio-app
     restart: unless-stopped
@@ -42,19 +25,10 @@ services:
       retries: 5
       start_period: 30s
     environment:
-      - NODE_ENV=development
-      - DATABASE_URI=postgres://${POSTGRES_USER:-payload}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-payload}
-      - PAYLOAD_FORCE_DRIZZLE_PUSH=true
+      - NODE_ENV=production
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
-    depends_on:
-      - postgres
-    volumes:
-      - ./public/media:/app/public/media
     env_file:
       - .env.local
-
-volumes:
-  postgres_data:
