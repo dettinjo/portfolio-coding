@@ -3,6 +3,13 @@ name: Build & Deploy
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    # Triggered by project repos and the config repo when their data changes.
+    # Payload: { "repo": "dettinjo/kube-url-shortener" } (for logging)
+    types: [portfolio-data-changed]
+  schedule:
+    # Weekly safety net — catches any drift from repos updated without the notify workflow
+    - cron: '0 3 * * 1'
 
 jobs:
   build:

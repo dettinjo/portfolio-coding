@@ -1,0 +1,38 @@
+# Reusable workflow — called by project repos to trigger a portfolio rebuild.
+#
+# Usage in any project repo (.github/workflows/notify-portfolio.yml):
+#
+#   on:
+#     push:
+#       branches: [main]
+#   jobs:
+#     notify:
+#       uses: dettinjo/portfolio-coding/.github/workflows/portfolio-notify.yml@main
+#       secrets:
+#         token: ${{ secrets.PORTFOLIO_DISPATCH_TOKEN }}
+#
+# Required secret in the calling repo:
+#   PORTFOLIO_DISPATCH_TOKEN — a fine-grained PAT with:
+#     Repository: dettinjo/portfolio-coding
+#     Permission:  Actions → Read and write
+#
+# That's all. No other setup needed.
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger portfolio rebuild
+        run: |
+          curl -s --fail -X POST \
+            -H "Authorization: Bearer ${{ secrets.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/dettinjo/portfolio-coding/dispatches" \
+            -d "{\"event_type\":\"portfolio-data-changed\",\"client_payload\":{\"repo\":\"$GITHUB_REPOSITORY\"}}"
+          echo "Portfolio rebuild triggered from $GITHUB_REPOSITORY"
