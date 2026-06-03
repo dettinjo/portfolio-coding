@@ -1,0 +1,49 @@
+# Umami — self-hosted, privacy-friendly analytics
+#
+# Deploy this as a separate service in Coolify:
+#   1. In Coolify → New Resource → Docker Compose → paste this file
+#   2. Set the environment variables below (especially APP_SECRET and POSTGRES_PASSWORD)
+#   3. Add a domain (e.g. analytics.joeldettinger.de) — Coolify handles HTTPS automatically
+#   4. After first login (admin / umami), add a website and copy the website ID + script URL
+#   5. Set UMAMI_SCRIPT_URL and UMAMI_WEBSITE_ID on the portfolio app in Coolify
+#
+# Default credentials on first boot:  user: admin  password: umami
+# Change the password immediately after first login.
+
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${UMAMI_DB_USER:-umami}:${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}@umami-db:5432/${UMAMI_DB_NAME:-umami}
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET:?UMAMI_APP_SECRET is required}
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    networks:
+      - coolify
+
+  umami-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${UMAMI_DB_NAME:-umami}
+      POSTGRES_USER: ${UMAMI_DB_USER:-umami}
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${UMAMI_DB_USER:-umami} -d ${UMAMI_DB_NAME:-umami}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - coolify
+
+volumes:
+  umami-db-data:
+
+networks:
+  coolify:
+    external: true

@@ -1,4 +1,5 @@
 import React from "react";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
@@ -9,14 +10,9 @@ import { routing, isValidLocale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-// Imports from old src/app/layout.tsx
 import "../globals.css";
-// import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/Theme-Provider";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-
 // const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
@@ -84,14 +80,16 @@ export default async function RootLocaleLayout({
 
   const messages = await getMessages();
 
+  // Umami analytics — read at request time from runtime env vars so the
+  // website ID can be changed in Coolify without triggering a rebuild.
+  const umamiScriptUrl = process.env.UMAMI_SCRIPT_URL;
+  const umamiWebsiteId = process.env.UMAMI_WEBSITE_ID;
+
   return (
-    // --- THIS IS THE FIX ---
-    // Changed suppressHydWarning to suppressHydrationWarning
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased"
-          // inter.className
         )}
       >
         <script
@@ -110,8 +108,13 @@ export default async function RootLocaleLayout({
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        {umamiScriptUrl && umamiWebsiteId && (
+          <Script
+            src={umamiScriptUrl}
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );
