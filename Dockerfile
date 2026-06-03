@@ -45,10 +45,12 @@ ENV NEXT_PUBLIC_LINKEDIN_USERNAME=$NEXT_PUBLIC_LINKEDIN_USERNAME
 ENV NEXT_PUBLIC_INSTAGRAM_USERNAME=$NEXT_PUBLIC_INSTAGRAM_USERNAME
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 
-# Runtime secrets (SMTP_PASS, GITHUB_TOKEN, etc.) are injected at container
-# startup via environment variables — they are never baked into the image.
-
-RUN npm run build
+# GITHUB_TOKEN is mounted as a BuildKit secret for the build step only.
+# It lets fetch-portfolio.ts access GitHub repos and download project images.
+# The secret is never stored in any image layer.
+RUN --mount=type=secret,id=GITHUB_TOKEN \
+    GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN 2>/dev/null || true) \
+    npm run build
 
 # ── runner: minimal production image ─────────────────────────────────────────
 FROM base AS runner
