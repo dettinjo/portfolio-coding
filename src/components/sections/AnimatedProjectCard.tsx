@@ -69,6 +69,9 @@ export function AnimatedProjectCard({
         href={`/${slug}`}
         locale={locale}
         className="flex flex-col md:flex-row w-full h-full"
+        data-umami-event="project_viewed"
+        data-umami-event-slug={slug}
+        data-umami-event-title={title}
       >
         {/* The rest of the component remains the same */}
         <div

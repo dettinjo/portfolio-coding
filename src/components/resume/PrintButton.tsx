@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
+import { useUmami } from "@/hooks/useUmami";
 
 interface PrintButtonProps {
   label: string;
@@ -11,9 +13,12 @@ interface PrintButtonProps {
 
 export function PrintButton({ label }: PrintButtonProps) {
   const [loading, setLoading] = useState(false);
+  const locale = useLocale();
+  const { track } = useUmami();
 
   const handleDownload = async () => {
     setLoading(true);
+    track("resume_downloaded", { source: "resume_page", locale });
     try {
       const response = await fetch("/api/resume/download");
       if (!response.ok) {

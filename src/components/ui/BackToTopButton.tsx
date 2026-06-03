@@ -49,6 +49,7 @@ export function BackToTopButton() {
             onClick={scrollToTop}
             aria-label="Back to Top"
             className="flex justify-center"
+            data-umami-event="back_to_top_clicked"
           >
             <motion.div
               className="rounded-full border border-muted-foreground/50 p-1.5 transition-colors hover:border-muted-foreground"

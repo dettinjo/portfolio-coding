@@ -4,12 +4,16 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { useUmami } from "@/hooks/useUmami";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { track } = useUmami();
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    const next = theme === "dark" ? "light" : "dark";
+    track("theme_toggled", { theme: next });
+    setTheme(next);
   };
 
   return (

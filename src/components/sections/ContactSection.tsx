@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Github, Linkedin, Instagram, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
+import { useUmami } from "@/hooks/useUmami";
 
 export function ContactSection() {
   const t = useTranslations("software.SoftwareContactSection");
   const locale = useLocale();
+  const { track } = useUmami();
   // ... state and handlers remain the same
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -47,12 +48,15 @@ export function ContactSection() {
       });
       if (response.ok) {
         setSubmissionStatus("success");
+        track("contact_form_submitted", { status: "success", locale });
       } else {
         setSubmissionStatus("error");
+        track("contact_form_submitted", { status: "error", locale });
       }
     } catch (error) {
       console.error("Form submission error:", error);
       setSubmissionStatus("error");
+      track("contact_form_submitted", { status: "error", locale });
     }
   };
 
