@@ -1,6 +1,6 @@
 // src/app/sitemap.ts
 import { MetadataRoute } from "next";
-import { fetchAllProjectSlugs } from "@/lib/payload";
+import { fetchAllProjectSlugs } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 

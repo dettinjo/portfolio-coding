@@ -1,32 +1,34 @@
-import { getTranslations } from "next-intl/server";
-import { Metadata } from "next"; // 1. Metadaten-Typ importieren
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Metadata } from "next";
+import personalConfig from "@/data/personal.json";
 
-// 2. Diese Funktion für dynamische Metadaten hinzufügen
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("ImprintPage");
+type Props = { params: Promise<{ locale: string }> };
 
-  return {
-    title: t("title"),
-  };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ImprintPage" });
+  return { title: t("title") };
 }
 
-export default async function Imprintage() {
+export default async function ImprintPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const t = await getTranslations("ImprintPage");
 
   const values = {
-    name: process.env.NEXT_PUBLIC_FULL_NAME || "",
+    name: process.env.NEXT_PUBLIC_FULL_NAME || personalConfig.fullName,
     street: process.env.NEXT_PUBLIC_STREET_ADDRESS || "",
     city: process.env.NEXT_PUBLIC_CITY_ADDRESS || "",
-    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "[Not specified]",
-    email: process.env.NEXT_PUBLIC_EMAIL_ADDRESS || "",
+    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "",
+    email: process.env.NEXT_PUBLIC_EMAIL_ADDRESS || personalConfig.contactEmail,
   };
 
-  // 2. Build the content arrays by calling `t()` for each line and passing the values
   const section1Content = [
     t("section1_content.name", values),
     t("section1_content.street", values),
     t("section1_content.city", values),
-    t("section1_content.country"), // This line has no variable
+    t("section1_content.country"),
   ];
 
   const section2Content = [

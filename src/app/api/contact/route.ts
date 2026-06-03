@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPayload } from "payload";
-import config from "@payload-config";
+import nodemailer from "nodemailer";
+import personalConfig from "@/data/personal.json";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -13,7 +13,15 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    const payload = await getPayload({ config });
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "web207.dogado.net",
+      port: Number(process.env.SMTP_PORT || 465),
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER || "admin@joeldettinger.de",
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
     const subject =
       locale === "de"
@@ -37,9 +45,12 @@ export const POST = async (req: NextRequest) => {
         <p>${message.replace(/\n/g, "<br>")}</p>
       `;
 
-    await payload.sendEmail({
-      from: "codeby@joeldettinger.de",
-      to: "hello@joeldettinger.de",
+    const recipientEmail = personalConfig.contactEmail || "hello@joeldettinger.de";
+    const senderName = personalConfig.fullName || "Portfolio Owner";
+
+    await transporter.sendMail({
+      from: `"${senderName}" <${process.env.SMTP_USER || "admin@joeldettinger.de"}>`,
+      to: recipientEmail,
       subject,
       html,
       replyTo: email,

@@ -40,7 +40,7 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-function SkillItem({ skill }: { skill: Skill }) {
+function SkillItem({ skill, category }: { skill: Skill; category: string }) {
   const [isHovered, setIsHovered] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 1280px)"); // xl breakpoint
 
@@ -61,6 +61,9 @@ function SkillItem({ skill }: { skill: Skill }) {
         layout
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
+        data-umami-event="skill_clicked"
+        data-umami-event-skill={skill.name}
+        data-umami-event-category={category}
         transition={{
           layout: {
             type: "spring",
@@ -148,7 +151,7 @@ export function SkillsGrid({ skills }: SkillsGridProps) {
             <CardContent className="w-full p-4 pt-3 flex justify-center">
               <div className="inline-grid grid-cols-2 gap-2 xl:gap-0">
                 {category.skills.map((skill: Skill) => (
-                  <SkillItem key={skill.name} skill={skill} />
+                  <SkillItem key={skill.name} skill={skill} category={category.category} />
                 ))}
               </div>
             </CardContent>

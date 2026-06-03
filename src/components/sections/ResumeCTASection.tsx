@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { useResumeDownload } from "@/hooks/useResumeDownload";
+import { useUmami } from "@/hooks/useUmami";
 
 export function ResumeCTASection() {
   const t = useTranslations("software.ResumeCTASection");
@@ -15,6 +16,7 @@ export function ResumeCTASection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
   const { downloadResume } = useResumeDownload();
+  const { track } = useUmami();
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -101,14 +103,17 @@ export function ResumeCTASection() {
                 "group-data-[active=true]:hover:bg-background group-data-[active=true]:hover:text-foreground"
               )}
             >
-              <Link href="/resume" locale={locale}>
+              <Link href="/resume" locale={locale} data-umami-event="resume_cta_viewed">
                 <FileText className="h-4 w-4" />
                 {t("viewResume")}
               </Link>
             </Button>
             <Button
               size="lg"
-              onClick={downloadResume}
+              onClick={() => {
+                track("resume_downloaded", { source: "cta_section", locale });
+                downloadResume();
+              }}
               className={cn(
                 "gap-2 transition-all duration-500 border-2 border-transparent cursor-pointer",
                 // Active State (Dark Card): Transparent with White Border -> Hover: White Button

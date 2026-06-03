@@ -5,8 +5,8 @@ import { useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import type { SoftwareProject } from "@/lib/payload-types-shared";
-import { getMediaUrl } from "@/lib/payload-helpers";
+import type { SoftwareProject } from "@/lib/types";
+import { getMediaUrl } from "@/lib/media";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
@@ -38,10 +38,15 @@ export function AnimatedProjectCard({
     onScrollProgressChange(latest);
   });
 
-  const { title, description, coverImage, projectType, slug } = project;
+  const { coverImage, slug } = project;
   const imageUrl = getMediaUrl(coverImage);
 
   const locale = useLocale();
+
+  // Use German localized fields when available, fall back to English
+  const title = (locale === "de" && project.titleDe) ? project.titleDe : project.title;
+  const description = (locale === "de" && project.descriptionDe) ? project.descriptionDe : project.description;
+  const projectType = (locale === "de" && project.projectTypeDe) ? project.projectTypeDe : project.projectType;
 
   return (
     // UPDATED: The motion link handles its own animation, no staggered fade-in
@@ -64,6 +69,9 @@ export function AnimatedProjectCard({
         href={`/${slug}`}
         locale={locale}
         className="flex flex-col md:flex-row w-full h-full"
+        data-umami-event="project_viewed"
+        data-umami-event-slug={slug}
+        data-umami-event-title={title}
       >
         {/* The rest of the component remains the same */}
         <div

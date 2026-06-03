@@ -10,7 +10,8 @@ import { SkillsSection } from "@/components/sections/SkillsSection";
 import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
-import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/payload";
+import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/data";
+import personalConfig from "@/data/personal.json";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -26,11 +27,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     namespace: "software.SoftwarePageSEO",
   });
 
-  const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "Developer";
+  const fullName = personalConfig.fullName || "Developer";
   const firstName = fullName.split(" ")[0];
   const siteTitle = t("siteName", { name: firstName });
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const serverUrl = personalConfig.serverUrl || "";
 
   return {
     title: siteTitle,
@@ -90,7 +91,7 @@ export default async function DevPage({ params }: Props) {
 
   const cleanProjectsData = projectsData ? projectsData.filter(Boolean) : null;
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const serverUrl = personalConfig.serverUrl || "";
 
   const jsonLd: WithContext<CollectionPage> = {
     "@context": "https://schema.org",
@@ -112,7 +113,7 @@ export default async function DevPage({ params }: Props) {
   const websiteJsonLd: WithContext<WebSite> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Joel Dettinger - Portfolio",
+    name: `${personalConfig.fullName || "Developer"} - Portfolio`,
     url: `${serverUrl}${locale === "de" ? "/de" : ""}`,
     potentialAction: {
       "@type": "SearchAction",

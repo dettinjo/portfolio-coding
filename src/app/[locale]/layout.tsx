@@ -1,4 +1,5 @@
 import React from "react";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
@@ -9,14 +10,9 @@ import { routing, isValidLocale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-// Imports from old src/app/layout.tsx
 import "../globals.css";
-// import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/Theme-Provider";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-
 // const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
@@ -84,14 +80,16 @@ export default async function RootLocaleLayout({
 
   const messages = await getMessages();
 
+  // Umami analytics — website ID is the only runtime var needed.
+  // The script is served through /api/umami (proxied to the internal Umami
+  // instance) so no public Umami domain is required.
+  const umamiWebsiteId = process.env.UMAMI_WEBSITE_ID;
+
   return (
-    // --- THIS IS THE FIX ---
-    // Changed suppressHydWarning to suppressHydrationWarning
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased"
-          // inter.className
         )}
       >
         <script
@@ -101,8 +99,7 @@ export default async function RootLocaleLayout({
               "@context": "https://schema.org",
               "@type": "Person",
               name: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
-              url:
-                process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
+              url: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
             }),
           }}
         />
@@ -111,8 +108,13 @@ export default async function RootLocaleLayout({
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        {umamiWebsiteId && (
+          <Script
+            src="/api/umami"
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

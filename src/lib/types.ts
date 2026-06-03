@@ -1,5 +1,4 @@
-// Shared types for Payload CMS
-// This file contains only type definitions and can be safely imported by both client and server components
+// Shared portfolio type definitions — safe to import in both client and server components
 
 export interface MediaImage {
   id: number | string;
@@ -33,9 +32,13 @@ export interface SoftwareProject {
   id: number | string;
   slug: string;
   title: string;
+  titleDe?: string;
   description: string;
+  descriptionDe?: string;
   longDescription?: string; // Markdown string from textarea
+  longDescriptionDe?: string; // German long description (falls back to longDescription if absent)
   projectType: string;
+  projectTypeDe?: string;
   developedAt?: string;
   liveUrl?: string;
   repoUrl?: string;

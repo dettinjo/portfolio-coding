@@ -37,9 +37,9 @@
     },
     "disclaimer_title": "Disclaimer",
     "disclaimer_links_title": "Liability for Links",
-    "disclaimer_links_content": "Our site contains links to external third-party websites, over whose content we have no influence. Therefore, we cannot assume any liability for this external content. The respective provider or operator of the pages is always responsible for the content of the linked pages.",
+    "disclaimer_links_content": "This site contains links to external third-party websites over whose content I have no influence. I cannot assume liability for this external content. The respective provider or operator of those pages is always responsible for their content.",
     "disclaimer_copyright_title": "Copyright",
-    "disclaimer_copyright_content": "The content and works created by the site operators on these pages are subject to German copyright law. The reproduction, processing, distribution, and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator."
+    "disclaimer_copyright_content": "The content and works on this website are subject to German copyright law. Reproduction, editing, distribution, or any exploitation beyond the limits of copyright law requires my written consent."
   },
   "PrivacyPage": {
     "title": "Privacy Policy",
@@ -54,9 +54,9 @@
     },
     "section3_title": "2. Data Collection on This Website",
     "section3_hosting_title": "Hosting and Server Log Files",
-    "section3_hosting_content": "Our website is hosted by Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. Vercel automatically collects information in server log files each time the website is accessed. This data is not merged with other data sources. The basis for this data processing is Art. 6(1)(f) GDPR.",
-    "section3_analytics_title": "Analytics by Vercel Analytics & Speed Insights",
-    "section3_analytics_content": "We use the services Vercel Analytics and Speed Insights from our host, Vercel Inc. These services are designed to be privacy-friendly, do not collect personal data that would allow for user identification, and do not use cookies. The legal basis is our legitimate interest (Art. 6(1)(f) GDPR) in the analysis and optimization of our website.",
+    "section3_hosting_content": "This website is self-hosted on a dedicated server by Dogado GmbH, Am Rahser Bahnhof 4, 41189 Mönchengladbach, Germany. The server may automatically record standard access log data (IP address, browser type, timestamp, requested URL) as part of normal server operation. This data is used solely for security and availability purposes and is not shared with third parties. The legal basis is Art. 6(1)(f) GDPR.",
+    "section3_tracking_title": "Analytics",
+    "section3_tracking_content": "This website uses Umami, an open-source, self-hosted analytics tool (analytics.joeldettinger.de). Umami does not use cookies and does not collect any personally identifiable information. Only anonymised data such as page views, referrers, and device type are recorded. The data is stored exclusively on my own server and is not shared with third parties. The legal basis is my legitimate interest in understanding aggregate website usage (Art. 6(1)(f) GDPR).",
     "section3_contact_title": "Contact Form",
     "section3_contact_content": "When you use our contact form, the information provided is processed internally for the purpose of handling your request. This data is not passed to third parties. The processing is based on your consent (Art. 6(1)(a) GDPR).",
     "section4_title": "3. Your Rights as a Data Subject",

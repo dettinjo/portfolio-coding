@@ -37,9 +37,9 @@
     },
     "disclaimer_title": "Haftungsausschluss",
     "disclaimer_links_title": "Haftung für Links",
-    "disclaimer_links_content": "Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.",
+    "disclaimer_links_content": "Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Für diese fremden Inhalte kann ich keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber verantwortlich.",
     "disclaimer_copyright_title": "Urheberrecht",
-    "disclaimer_copyright_content": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers."
+    "disclaimer_copyright_content": "Die auf dieser Website erstellten Inhalte und Werke unterliegen dem deutschen Urheberrecht. Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen meiner schriftlichen Zustimmung."
   },
   "PrivacyPage": {
     "title": "Datenschutzerklärung",
@@ -54,9 +54,9 @@
     },
     "section3_title": "2. Datenerfassung auf dieser Website",
     "section3_hosting_title": "Hosting und Server-Log-Dateien",
-    "section3_hosting_content": "Unsere Website wird bei Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA, gehostet. Vercel erhebt bei jedem Zugriff auf die Website automatisch Informationen in sogenannten Server-Log-Dateien. Diese Daten werden nicht mit anderen Datenquellen zusammengeführt. Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.",
-    "section3_analytics_title": "Analyse durch Vercel Analytics & Speed Insights",
-    "section3_analytics_content": "Wir nutzen die Dienste Vercel Analytics und Speed Insights von unserem Hoster Vercel Inc. Diese Dienste sind datenschutzfreundlich konzipiert, erheben keine personenbezogenen Daten, die eine Identifizierung des Nutzers ermöglichen und verwenden keine Cookies. Die Rechtsgrundlage ist unser berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO) an der Analyse und Optimierung unserer Website.",
+    "section3_hosting_content": "Diese Website wird auf einem dedizierten Server der Dogado GmbH, Am Rahser Bahnhof 4, 41189 Mönchengladbach, selbst gehostet. Der Server kann im Rahmen des normalen Betriebs standardmäßige Zugriffsprotokolldaten (IP-Adresse, Browsertyp, Zeitstempel, aufgerufene URL) erfassen. Diese Daten werden ausschließlich zu Sicherheits- und Verfügbarkeitszwecken verwendet und nicht an Dritte weitergegeben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.",
+    "section3_tracking_title": "Analyse",
+    "section3_tracking_content": "Diese Website verwendet Umami, ein quelloffenes, selbst gehostetes Analyse-Tool (analytics.joeldettinger.de). Umami setzt keine Cookies und erhebt keine personenbezogenen Daten. Es werden ausschließlich anonymisierte Daten wie Seitenaufrufe, Verweisquellen und Gerätetyp erfasst. Die Daten werden ausschließlich auf meinem eigenen Server gespeichert und nicht an Dritte weitergegeben. Rechtsgrundlage ist mein berechtigtes Interesse an der Auswertung aggregierter Website-Nutzung (Art. 6 Abs. 1 lit. f DSGVO).",
     "section3_contact_title": "Kontaktformular",
     "section3_contact_content": "Wenn Sie unser Kontaktformular nutzen, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage intern verarbeitet. Diese Daten werden nicht an Dritte weitergegeben. Die Verarbeitung dieser Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).",
     "section4_title": "3. Ihre Rechte als Betroffener",

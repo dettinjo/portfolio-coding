@@ -61,6 +61,8 @@ export function SoftwareHeader({ showNavLinks = false }: SoftwareHeaderProps) {
                 key={link.href}
                 href={link.href}
                 className="text-muted-foreground transition-colors hover:text-foreground"
+                data-umami-event="nav_clicked"
+                data-umami-event-section={link.href.replace("#", "")}
               >
                 {link.label}
               </a>

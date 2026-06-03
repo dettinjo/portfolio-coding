@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import type { SoftwareProject } from "@/lib/payload-types-shared";
+import type { SoftwareProject } from "@/lib/types";
 import { AnimatedProjectCard } from "./AnimatedProjectCard";
 
 interface ProjectsSectionProps {

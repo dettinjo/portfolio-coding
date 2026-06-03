@@ -57,3 +57,13 @@ next-env.d.ts
 
 # migration
 migration-data.json
+migration-assets/
+/public/media/projects/
+
+# generated build-time files
+/src/data/projects.json
+/src/data/skills.json
+/src/data/resume.json
+/src/data/personal.json
+/public/images/profile.webp
+/public/media/resume.pdf

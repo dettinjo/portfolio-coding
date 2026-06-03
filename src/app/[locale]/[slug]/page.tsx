@@ -13,15 +13,15 @@ import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { ProjectGallery } from "@/components/ProjectGallery";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
-import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/payload";
-import { getMediaUrl } from "@/lib/payload-helpers";
+import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/data";
+import { getMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { LongTextRenderer } from "@/components/LongTextRenderer";
 import { AlternateLinksProvider } from "@/context/AlternateLinksProvider";
 import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 
-import { fetchAllProjectSlugs } from "@/lib/payload";
+import { fetchAllProjectSlugs } from "@/lib/data";
 
 // generateStaticParams implemented to enable SSG/ISR.
 // We wrap it in a try/catch to ensure the build doesn't fail if the DB is unreachable (e.g. in CI).
@@ -124,10 +124,6 @@ export default async function ProjectDetailPage({ params }: Props) {
   const format = await getFormatter({ locale: locale });
 
   const {
-    title,
-    description,
-    longDescription,
-    projectType,
     developedAt,
     liveUrl,
     repoUrl,
@@ -135,6 +131,12 @@ export default async function ProjectDetailPage({ params }: Props) {
     coverImage,
     gallery,
   } = project;
+
+  // Use German localized fields when available, fall back to English
+  const title = (locale === "de" && project.titleDe) ? project.titleDe : project.title;
+  const description = (locale === "de" && project.descriptionDe) ? project.descriptionDe : project.description;
+  const projectType = (locale === "de" && project.projectTypeDe) ? project.projectTypeDe : project.projectType;
+  const longDescription = project.longDescription;
 
   const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
   const relativeImageUrl = getMediaUrl(coverImage);

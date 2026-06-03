@@ -8,23 +8,25 @@ import React from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTransition } from "react";
 import { useAlternateLinks } from "@/context/AlternateLinksProvider";
+import { useUmami } from "@/hooks/useUmami";
 
 export function LanguageToggle() {
   const currentLocale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
+  const { track } = useUmami();
 
   const { alternateSlugs } = useAlternateLinks();
 
   const nextLocale = currentLocale === "de" ? "en" : "de";
 
   const handleLanguageSwitch = () => {
+    track("language_switched", { from: currentLocale, to: nextLocale });
     startTransition(() => {
       if (alternateSlugs && alternateSlugs[nextLocale]) {
         router.replace(alternateSlugs[nextLocale], { locale: nextLocale });
       } else {
-        // This will seamlessly switch the locale in the path
         router.replace(pathname, { locale: nextLocale });
       }
     });

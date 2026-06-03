@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Github, Linkedin, Instagram, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUmami } from "@/hooks/useUmami";
 
 export function ContactSection() {
   const t = useTranslations("software.SoftwareContactSection");
   const locale = useLocale();
+  const { track } = useUmami();
   // ... state and handlers remain the same
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -46,12 +48,15 @@ export function ContactSection() {
       });
       if (response.ok) {
         setSubmissionStatus("success");
+        track("contact_form_submitted", { status: "success", locale });
       } else {
         setSubmissionStatus("error");
+        track("contact_form_submitted", { status: "error", locale });
       }
     } catch (error) {
       console.error("Form submission error:", error);
       setSubmissionStatus("error");
+      track("contact_form_submitted", { status: "error", locale });
     }
   };
 
@@ -84,30 +89,36 @@ export function ContactSection() {
               <p className="text-sm text-muted-foreground transition-colors duration-300 group-data-[active=true]:text-background/70">
                 {t("socials_text")}
               </p>
-              <a
-                href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_USERNAME}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-              >
-                <Github className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-              </a>
-              <a
-                href={`https://linkedin.com/in/${process.env.NEXT_PUBLIC_LINKEDIN_USERNAME}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-              </a>
-              <a
-                href={`https://instagram.com/${process.env.NEXT_PUBLIC_INSTAGRAM_USERNAME}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-              </a>
+              {process.env.NEXT_PUBLIC_GITHUB_USERNAME && (
+                <a
+                  href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_USERNAME}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
+                </a>
+              )}
+              {process.env.NEXT_PUBLIC_LINKEDIN_USERNAME && (
+                <a
+                  href={`https://linkedin.com/in/${process.env.NEXT_PUBLIC_LINKEDIN_USERNAME}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
+                </a>
+              )}
+              {process.env.NEXT_PUBLIC_INSTAGRAM_USERNAME && (
+                <a
+                  href={`https://instagram.com/${process.env.NEXT_PUBLIC_INSTAGRAM_USERNAME}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
+                </a>
+              )}
             </div>
           </motion.div>
 
