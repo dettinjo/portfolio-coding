@@ -7,17 +7,9 @@ export function useResumeDownload() {
   const locale = useLocale();
 
   const downloadResume = useCallback(() => {
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    // Use the current locale for the resume path
-    iframe.src = `/${locale}/resume?print=true`;
-    document.body.appendChild(iframe);
-
-    // Clean up the iframe after a reasonable amount of time
-    // The printing itself is handled by the page inside the iframe
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 5000); // 5 seconds should be enough for the print dialog to appear and the print to start
+    if (typeof window !== "undefined") {
+      window.open(`/${locale}/resume?print=true`, "_blank");
+    }
   }, [locale]);
 
   return { downloadResume };
