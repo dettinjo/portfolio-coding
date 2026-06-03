@@ -33,11 +33,13 @@ jobs:
           # GitHub Actions cache — builds stay fast without touching the server
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # GITHUB_TOKEN is passed as a BuildKit secret (not a build arg) so it
-          # is available during `npm run build` for fetching private repo data
-          # but is never baked into any image layer.
+          # PORTFOLIO_GITHUB_TOKEN is a PAT with repo scope — passed as a
+          # BuildKit secret so it's available to fetch-portfolio.ts during
+          # `npm run build` without being baked into any image layer.
+          # Without it the script falls back to the public GitHub API (public
+          # repos only, rate-limited to 60 req/hr).
           secrets: |
-            GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
           build-args: |
             NEXT_PUBLIC_FULL_NAME=${{ secrets.NEXT_PUBLIC_FULL_NAME || 'Joel Dettinger' }}
             NEXT_PUBLIC_EMAIL_ADDRESS=${{ secrets.NEXT_PUBLIC_EMAIL_ADDRESS || '' }}

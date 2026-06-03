@@ -368,7 +368,16 @@ const main = async () => {
     console.log("Fetching repositories from GitHub...");
     let repos: any[] = [];
     if (GITHUB_TOKEN) {
-      repos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
+      // Try the authenticated endpoint (lists private repos too).
+      // The built-in GitHub Actions GITHUB_TOKEN is scoped to the current repo
+      // and returns 403 on /user/repos — fall back to the public endpoint so
+      // the build still works even without a real PAT.
+      try {
+        repos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
+      } catch {
+        console.warn("  /user/repos returned an error (token may be scoped to this repo only). Falling back to public endpoint.");
+        repos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+      }
     } else {
       repos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
     }
