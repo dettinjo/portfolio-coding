@@ -157,19 +157,50 @@ const main = async () => {
     console.warn(`Tech registry not found at ${registryPath}`);
   }
 
-  // ─── 0. FETCH CONFIG FROM GITHUB OR LOCAL ──────────────────────────────────
-  console.log("Checking portfolio configuration (resume.json, profile image, PDF)...");
-  
-  let resumeConfigFetched = false;
+  // ─── 0. FETCH ALL REPOS FROM GITHUB (used for both config and projects) ──────
+  let allRepos: any[] = [];
+  try {
+    console.log("Fetching repositories from GitHub...");
+    if (GITHUB_TOKEN) {
+      try {
+        allRepos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
+      } catch {
+        console.warn("  /user/repos returned an error (token may be scoped to this repo only). Falling back to public endpoint.");
+        allRepos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+      }
+    } else {
+      allRepos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+    }
+    console.log(`  Fetched ${allRepos.length} repositories.`);
+  } catch (err: any) {
+    console.warn("Could not fetch repositories from GitHub. Using local fallback only.", err.message);
+  }
 
+  // ─── 1. FETCH CONFIG FROM GITHUB OR LOCAL ──────────────────────────────────
+  console.log("Checking portfolio configuration (resume.json, profile image, PDF)...");
+
+  let resumeConfigFetched = false;
   const localConfigDir = path.join(rootDir, "config");
 
-  if (PORTFOLIO_CONFIG_REPO) {
+  // Resolve config repo: explicit env var overrides auto-detection.
+  // Auto-detection: find the repo tagged with the "portfolio-config" topic.
+  let configRepoName: string | null = PORTFOLIO_CONFIG_REPO || null;
+  if (!configRepoName && allRepos.length > 0) {
+    const autoDetected = allRepos.find(
+      (r) => r.topics && r.topics.includes("portfolio-config")
+    );
+    if (autoDetected) {
+      configRepoName = autoDetected.name;
+      console.log(`  Auto-detected config repository: ${configRepoName} (topic: portfolio-config)`);
+    }
+  }
+
+  if (configRepoName) {
     try {
-      console.log(`Fetching configuration from remote repository: ${GITHUB_USERNAME}/${PORTFOLIO_CONFIG_REPO}...`);
-      
+      console.log(`Fetching configuration from remote repository: ${GITHUB_USERNAME}/${configRepoName}...`);
+
       const contents = await githubFetch(
-        `https://api.github.com/repos/${GITHUB_USERNAME}/${PORTFOLIO_CONFIG_REPO}/contents/.portfolio`
+        `https://api.github.com/repos/${GITHUB_USERNAME}/${configRepoName}/contents/.portfolio`
       ).catch(() => null);
 
       if (contents && Array.isArray(contents)) {
@@ -363,26 +394,10 @@ const main = async () => {
     }
   }
 
-  // ─── 2. FETCH FROM GITHUB ──────────────────────────────────────────────────
+  // ─── 2. SYNC PROJECTS FROM GITHUB ────────────────────────────────────────
   try {
-    console.log("Fetching repositories from GitHub...");
-    let repos: any[] = [];
-    if (GITHUB_TOKEN) {
-      // Try the authenticated endpoint (lists private repos too).
-      // The built-in GitHub Actions GITHUB_TOKEN is scoped to the current repo
-      // and returns 403 on /user/repos — fall back to the public endpoint so
-      // the build still works even without a real PAT.
-      try {
-        repos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
-      } catch {
-        console.warn("  /user/repos returned an error (token may be scoped to this repo only). Falling back to public endpoint.");
-        repos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
-      }
-    } else {
-      repos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
-    }
-
-    const portfolioRepos = repos.filter(
+    // Use the repo list fetched in section 0 — no second API call needed.
+    const portfolioRepos = allRepos.filter(
       (repo) => repo.topics && repo.topics.includes("portfolio")
     );
 
