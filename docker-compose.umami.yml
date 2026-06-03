@@ -2,10 +2,19 @@
 #
 # Deploy this as a separate service in Coolify:
 #   1. In Coolify → New Resource → Docker Compose → paste this file
-#   2. Set the environment variables below (especially APP_SECRET and POSTGRES_PASSWORD)
-#   3. Add a domain (e.g. analytics.joeldettinger.de) — Coolify handles HTTPS automatically
-#   4. After first login (admin / umami), add a website and copy the website ID + script URL
-#   5. Set UMAMI_SCRIPT_URL and UMAMI_WEBSITE_ID on the portfolio app in Coolify
+#   2. Set the environment variables below (UMAMI_APP_SECRET, UMAMI_DB_PASSWORD)
+#   3. Do NOT assign a public domain — Umami is internal-only
+#   4. Access the admin dashboard via Tailscale (see README below)
+#
+# Tailscale admin access (run once on the server after first deploy):
+#   tailscale serve --bg https / http://localhost:3001
+#   → dashboard available at https://<hostname>.tailnet-name.ts.net
+#
+# Portfolio wiring:
+#   Set UMAMI_INTERNAL_URL=http://host.docker.internal:3001 on the portfolio
+#   app in Coolify. Set UMAMI_WEBSITE_ID to the ID from Umami Settings.
+#   The portfolio proxies /api/umami and /api/send internally — no public
+#   Umami domain is needed and no visitor ever talks to Umami directly.
 #
 # Default credentials on first boot:  user: admin  password: umami
 # Change the password immediately after first login.
@@ -14,6 +23,10 @@ services:
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
     restart: unless-stopped
+    # Bind only to localhost — not reachable from the public internet.
+    # Tailscale serve forwards HTTPS from the Tailscale network to this port.
+    ports:
+      - "127.0.0.1:3001:3000"
     environment:
       DATABASE_URL: postgresql://${UMAMI_DB_USER:-umami}:${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}@umami-db:5432/${UMAMI_DB_NAME:-umami}
       DATABASE_TYPE: postgresql

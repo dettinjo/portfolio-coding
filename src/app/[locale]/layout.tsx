@@ -80,9 +80,9 @@ export default async function RootLocaleLayout({
 
   const messages = await getMessages();
 
-  // Umami analytics — read at request time from runtime env vars so the
-  // website ID can be changed in Coolify without triggering a rebuild.
-  const umamiScriptUrl = process.env.UMAMI_SCRIPT_URL;
+  // Umami analytics — website ID is the only runtime var needed.
+  // The script is served through /api/umami (proxied to the internal Umami
+  // instance) so no public Umami domain is required.
   const umamiWebsiteId = process.env.UMAMI_WEBSITE_ID;
 
   return (
@@ -108,9 +108,9 @@ export default async function RootLocaleLayout({
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>
-        {umamiScriptUrl && umamiWebsiteId && (
+        {umamiWebsiteId && (
           <Script
-            src={umamiScriptUrl}
+            src="/api/umami"
             data-website-id={umamiWebsiteId}
             strategy="afterInteractive"
           />
