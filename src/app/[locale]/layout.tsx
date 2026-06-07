@@ -110,7 +110,7 @@ export default async function RootLocaleLayout({
         </ThemeProvider>
         {umamiWebsiteId && (
           <Script
-            src="/api/umami"
+            src="/api/sys-client"
             data-website-id={umamiWebsiteId}
             strategy="afterInteractive"
           />

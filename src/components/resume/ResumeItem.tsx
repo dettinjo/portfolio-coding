@@ -45,7 +45,7 @@ export function ResumeEntry({ item, type }: Props) {
 
       {/* Education Area (Description style) */}
       {description && (
-        <div className="text-sm opacity-70 leading-relaxed">
+        <div className="text-sm opacity-70 leading-relaxed line-clamp-2">
           {description}
         </div>
       )}
@@ -53,7 +53,7 @@ export function ResumeEntry({ item, type }: Props) {
       {/* Render HTML content safely since your JSON contains <p> tags */}
       {item.summary && (
         <div
-          className="text-sm opacity-70 leading-relaxed [&>p]:mb-0 [&_em]:not-italic"
+          className="text-sm opacity-70 leading-relaxed [&>p]:mb-0 [&_em]:not-italic line-clamp-2"
           dangerouslySetInnerHTML={{ __html: item.summary }}
         />
       )}
