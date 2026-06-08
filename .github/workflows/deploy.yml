@@ -21,6 +21,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute cache-bust value
+        id: cachebust
+        # On repository_dispatch and schedule triggers the portfolio data may have
+        # changed in external repos — bust the npm build cache so fetch-portfolio.ts
+        # always re-runs. On push triggers the code changed so the layer rebuilds
+        # naturally; pass a fixed value to keep the cache warm for subsequent runs.
+        run: |
+          if [[ "${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "schedule" ]]; then
+            echo "value=$(date +%s)" >> $GITHUB_OUTPUT
+          else
+            echo "value=1" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -48,6 +61,7 @@ jobs:
           secrets: |
             GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
           build-args: |
+            CACHEBUST=${{ steps.cachebust.outputs.value }}
             NEXT_PUBLIC_FULL_NAME=${{ secrets.NEXT_PUBLIC_FULL_NAME || 'Joel Dettinger' }}
             NEXT_PUBLIC_EMAIL_ADDRESS=${{ secrets.NEXT_PUBLIC_EMAIL_ADDRESS || '' }}
             NEXT_PUBLIC_PHONE_NUMBER=${{ secrets.NEXT_PUBLIC_PHONE_NUMBER || '' }}
