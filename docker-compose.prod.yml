@@ -35,7 +35,6 @@ services:
     restart: unless-stopped
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - DISPATCH_TOKEN=${DISPATCH_TOKEN}
       - GITHUB_USER=dettinjo
       - POLL_INTERVAL=300
     volumes:

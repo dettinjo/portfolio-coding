@@ -8,7 +8,6 @@ import urllib.request
 from pathlib import Path
 
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
-DISPATCH_TOKEN = os.environ["DISPATCH_TOKEN"]
 GITHUB_USER = os.environ.get("GITHUB_USER", "dettinjo")
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "300"))  # seconds
 STATE_FILE = Path("/data/state.json")
@@ -60,7 +59,6 @@ def get_latest_sha(repo_name: str) -> str | None:
 def trigger_rebuild(repo_name: str) -> None:
     gh(
         "/repos/dettinjo/portfolio-coding/dispatches",
-        token=DISPATCH_TOKEN,
         method="POST",
         body={
             "event_type": "portfolio-data-changed",
