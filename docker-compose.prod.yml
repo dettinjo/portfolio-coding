@@ -26,6 +26,26 @@ services:
     networks:
       - coolify
 
+  portfolio-watcher:
+    # Polls GitHub every 5 min for new commits to portfolio-tagged repos.
+    # Fires repository_dispatch on portfolio-coding when changes are detected,
+    # triggering a full rebuild. Zero per-repo setup required.
+    build:
+      context: ./portfolio-watcher
+    restart: unless-stopped
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DISPATCH_TOKEN=${DISPATCH_TOKEN}
+      - GITHUB_USER=dettinjo
+      - POLL_INTERVAL=300
+    volumes:
+      - portfolio-watcher-state:/data
+    networks:
+      - coolify
+
+volumes:
+  portfolio-watcher-state:
+
 networks:
   coolify:
     external: true
