@@ -8,8 +8,9 @@ on:
     # Payload: { "repo": "dettinjo/kube-url-shortener" } (for logging)
     types: [portfolio-data-changed]
   schedule:
-    # Weekly safety net — catches any drift from repos updated without the notify workflow
-    - cron: '0 3 * * 1'
+    # Fallback safety net — the portfolio-watcher poller handles real-time triggers;
+    # this catches any edge cases (watcher down, missed events, new repos without a push).
+    - cron: '0 */6 * * *'
 
 jobs:
   build:
