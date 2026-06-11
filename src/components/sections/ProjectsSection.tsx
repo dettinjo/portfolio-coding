@@ -12,7 +12,8 @@ interface ProjectsSectionProps {
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
   const t = useTranslations("software.SoftwareProjectsSection");
-  const [activeCardId, setActiveCardId] = useState<number | null>(null);
+  // IDs are repo slugs (strings) in the GitHub-driven data, not numbers.
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
   const scrollProgressRef = useRef<Record<string, number>>({});
   const ticking = useRef(false);
@@ -22,14 +23,14 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           const progressValues = scrollProgressRef.current;
-          let closestId = null;
+          let closestId: string | null = null;
           let minDistance = Infinity;
 
           for (const id in progressValues) {
             const distance = Math.abs(progressValues[id] - 0.5);
             if (distance < minDistance) {
               minDistance = distance;
-              closestId = parseInt(id, 10);
+              closestId = id;
             }
           }
 
@@ -77,7 +78,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
               key={project.id}
               project={project}
               index={index}
-              isActive={project.id === activeCardId}
+              isActive={String(project.id) === activeCardId}
               onScrollProgressChange={(progress) => {
                 scrollProgressRef.current[String(project.id)] = progress;
               }}
