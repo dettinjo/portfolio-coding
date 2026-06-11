@@ -99,9 +99,10 @@ export function HeroSection() {
               sizes="(max-width: 1024px) 224px, 418px"
               priority
               className={cn(
-                "object-cover object-top scale-[1.2] origin-bottom transition-transform duration-500 ease-in-out",
-                "group-data-[active=true]:scale-[1.3]",
-                "group-data-[active=true]:translate-y-4"
+                // Anchor the bottom of the photo to the bottom of the circle so
+                // the head keeps headroom at the top instead of being cropped.
+                "object-cover object-bottom origin-bottom transition-transform duration-500 ease-in-out",
+                "group-data-[active=true]:scale-105"
               )}
             />
           </Avatar>
