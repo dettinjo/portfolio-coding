@@ -83,6 +83,8 @@ interface SoftwareProject {
   }>;
   _weight?: number; // Internal use during build
   _languages?: Record<string, number>; // Internal use during build
+  _coverUrl?: string; // Internal: local URL of the cover image (first README image)
+  _topicTags?: string[]; // Internal: raw GitHub topic slugs, for skill scoring
 }
 
 // Helper to make authenticated GitHub requests
@@ -156,22 +158,26 @@ const prettifyRepoName = (name: string): string =>
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-// Synthesize project metadata from the GitHub repo object when a repo has the
-// "portfolio" topic but no curated .portfolio/metadata.json (topic-only setup).
-const synthesizeMetadata = (repo: any): ProjectMetadata => ({
-  title: prettifyRepoName(repo.name),
-  description: repo.description || "",
-  projectType: repo.language || "Software Project",
-  developedAt: repo.created_at,
-  weight: 1,
-  // Public repos link to source; private repos show description only.
-  publishLink: !repo.private,
-  liveUrl: repo.homepage || null,
-  repoUrl: repo.private ? null : repo.html_url,
-  tags: (repo.topics || []).filter(
-    (t: string) => t !== "portfolio" && t !== "portfolio-config"
-  ),
-});
+// Control topics: a repo opts into the portfolio by carrying one of these.
+//   portfolio          → displayed WITH a link to the source code
+//   portfolio-private  → displayed WITHOUT a code link (proprietary/closed source)
+const TOPIC_LINKED = "portfolio";
+const TOPIC_UNLINKED = "portfolio-private";
+const CONTROL_TOPICS = new Set([TOPIC_LINKED, TOPIC_UNLINKED, "portfolio-config"]);
+
+// Normalize a tech name/topic to a comparison key by stripping everything but
+// alphanumerics: "Next.js" / "nextjs" / "next-js" → "nextjs". Lets GitHub topic
+// slugs match tech-registry display names regardless of punctuation/casing.
+const normalizeTech = (s: string): string =>
+  s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// Human-friendly label for a topic that has no tech-registry entry:
+// "rest-api" → "Rest Api", "core-data" → "Core Data".
+const prettifyTag = (topic: string): string =>
+  topic
+    .replace(/[-_]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 // Per-project complexity multiplier derived from signals already present on the
 // repo object (no extra API calls): codebase size (repo.size, KB, log-scaled)
@@ -203,6 +209,170 @@ const main = async () => {
   } else {
     console.warn(`Tech registry not found at ${registryPath}`);
   }
+
+  // Normalized lookup: maps normalizeTech(key) and normalizeTech(name) → registry
+  // entry, so GitHub topic slugs resolve to the canonical registry entry.
+  const registryByNorm: Record<string, { key: string; detail: TechDetail }> = {};
+  for (const [key, detail] of Object.entries(techRegistry)) {
+    registryByNorm[normalizeTech(key)] = { key, detail };
+    if (detail.name) registryByNorm[normalizeTech(detail.name)] = { key, detail };
+  }
+  // A topic → display label (registry name when known, else prettified slug).
+  const displayTag = (topic: string): string => {
+    const hit = registryByNorm[normalizeTech(topic)];
+    return hit ? hit.detail.name : prettifyTag(topic);
+  };
+
+  // Fetch a repo file's text content (base64 contents API). Returns null if 404.
+  const fetchRepoText = async (
+    owner: string,
+    repo: string,
+    filePath: string
+  ): Promise<string | null> => {
+    try {
+      const res = await githubFetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`
+      );
+      if (res && res.content) {
+        return Buffer.from(res.content, "base64").toString("utf8");
+      }
+    } catch {
+      /* not found */
+    }
+    return null;
+  };
+
+  // Turn a project README into renderable detail markdown:
+  //  - drops the language-switcher line and the leading H1 (the site shows the
+  //    title itself), returning the H1 text as the resolved title
+  //  - downloads every referenced image into public/media/projects/<repo>/ and
+  //    rewrites the markdown to the local (optimized) path
+  //  - returns the first image's local URL as the cover
+  const processReadme = async (
+    markdown: string,
+    owner: string,
+    repoName: string,
+    downloaded: Map<string, string>
+  ): Promise<{ title: string; body: string; coverUrl: string | null }> => {
+    const destDir = path.join(publicMediaDir, repoName);
+    let title = "";
+    let coverUrl: string | null = null;
+
+    const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+    const kept: string[] = [];
+    for (const line of lines) {
+      // Drop the language-switcher line, e.g. "[English](README.md) · [Deutsch](README.de.md)"
+      if (/\]\(README(\.[a-z]{2})?\.md\)/i.test(line) && /^\s*\[/.test(line)) continue;
+      // Capture & drop the first top-level H1 as the title
+      const h1 = line.match(/^#\s+(.+?)\s*$/);
+      if (h1 && !title) {
+        title = h1[1].trim();
+        continue;
+      }
+      kept.push(line);
+    }
+    let body = kept.join("\n").trim();
+
+    // Download + rewrite every markdown image whose src is a repo-relative path.
+    const imgRe = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    const replacements: Array<{ from: string; to: string }> = [];
+    let m: RegExpExecArray | null;
+    while ((m = imgRe.exec(body)) !== null) {
+      const srcPath = m[2].trim();
+      if (/^https?:\/\//i.test(srcPath)) {
+        if (!coverUrl) coverUrl = srcPath; // external image, leave as-is
+        continue;
+      }
+      const cleanPath = srcPath.replace(/^\.?\//, "");
+      const base = path.basename(cleanPath);
+      let localUrl = downloaded.get(cleanPath) || null;
+      if (!localUrl) {
+        try {
+          const meta = await githubFetch(
+            `https://api.github.com/repos/${owner}/${repoName}/contents/${cleanPath}`
+          );
+          if (meta && meta.download_url) {
+            fs.mkdirSync(destDir, { recursive: true });
+            const buffer = await downloadFileToBuffer(meta.download_url);
+            const savedName = await saveAndCompressImage(
+              buffer,
+              path.join(destDir, base)
+            );
+            localUrl = `/media/projects/${repoName}/${savedName}`;
+            downloaded.set(cleanPath, localUrl);
+          }
+        } catch (e: any) {
+          console.warn(`    Could not fetch README image ${cleanPath}:`, e.message);
+        }
+      }
+      if (localUrl) {
+        replacements.push({ from: m[2], to: localUrl });
+        if (!coverUrl) coverUrl = localUrl;
+      }
+    }
+    for (const r of replacements) body = body.split(`(${r.from})`).join(`(${r.to})`);
+
+    return { title, body, coverUrl };
+  };
+
+  // Generate a branded title-card cover for projects whose README has no image,
+  // so every card has a consistent visual. Returns the local cover URL.
+  const esc = (s: string) =>
+    String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const generateProjectCover = async (
+    repoName: string,
+    title: string,
+    tags: string[]
+  ): Promise<string> => {
+    const destDir = path.join(publicMediaDir, repoName);
+    fs.mkdirSync(destDir, { recursive: true });
+    // Balance the title across one or two lines (split near the midpoint by
+    // word, never dropping words).
+    const words = title.split(/\s+/).filter(Boolean);
+    let lines: string[] = [title];
+    if (title.length > 20 && words.length > 1) {
+      let best = 1;
+      let bestDiff = Infinity;
+      for (let i = 1; i < words.length; i++) {
+        const a = words.slice(0, i).join(" ").length;
+        const b = words.slice(i).join(" ").length;
+        if (Math.abs(a - b) < bestDiff) {
+          bestDiff = Math.abs(a - b);
+          best = i;
+        }
+      }
+      lines = [words.slice(0, best).join(" "), words.slice(best).join(" ")];
+    }
+    // Shrink the font for long lines so they always fit the 1104px-wide card.
+    const longest = Math.max(...lines.map((l) => l.length));
+    const fontSize = longest > 22 ? 52 : longest > 16 ? 62 : 72;
+    const lineGap = Math.round(fontSize * 1.25);
+    const titleY = lines.length > 1 ? 470 : 510;
+    const titleSvg = lines
+      .map(
+        (l, i) =>
+          `<tspan x="600" dy="${i === 0 ? 0 : lineGap}">${esc(l)}</tspan>`
+      )
+      .join("");
+    const techLine = esc(tags.slice(0, 4).join("  ·  "));
+    const techY = titleY + (lines.length > 1 ? lineGap + 90 : 110);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#1d1d23"/><stop offset="100%" stop-color="#0e0e12"/>
+  </linearGradient></defs>
+  <rect width="1200" height="900" fill="url(#g)"/>
+  <rect x="48" y="48" width="1104" height="804" rx="24" fill="none" stroke="#ffffff14" stroke-width="2"/>
+  <g transform="translate(540, 250) scale(7)">
+    <polyline points="4 17 10 11 4 5" fill="none" stroke="#ffffff55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="12" y1="19" x2="20" y2="19" stroke="#ffffff55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="600" y="${titleY}" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="${fontSize}" font-weight="700" fill="#FAFAFA">${titleSvg}</text>
+  <text x="600" y="${techY}" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="28" font-weight="500" fill="#ffffff66" letter-spacing="1">${techLine}</text>
+</svg>`;
+    const out = path.join(destDir, "cover.webp");
+    await sharp(Buffer.from(svg)).webp({ quality: 90 }).toFile(out);
+    return `/media/projects/${repoName}/cover.webp`;
+  };
 
   // ─── 0. FETCH ALL REPOS FROM GITHUB (used for both config and projects) ──────
   let allRepos: any[] = [];
@@ -541,131 +711,86 @@ const main = async () => {
   }
 
   // ─── 2. SYNC PROJECTS FROM GITHUB ────────────────────────────────────────
+  // A repo opts in via the "portfolio" (linked) or "portfolio-private" (no code
+  // link) topic. Everything is derived from GitHub-native data — no per-repo
+  // metadata files. The localized README is the project detail (images inline);
+  // the repo description is the card overview; topics are the tags.
   try {
-    // Use the repo list fetched in section 0 — no second API call needed.
     const portfolioRepos = allRepos.filter(
-      (repo) => repo.topics && repo.topics.includes("portfolio")
+      (repo) =>
+        repo.topics &&
+        (repo.topics.includes(TOPIC_LINKED) || repo.topics.includes(TOPIC_UNLINKED))
     );
 
-    console.log(`Found ${portfolioRepos.length} repositories matching the topic "portfolio".`);
+    console.log(`Found ${portfolioRepos.length} portfolio repositories (topics: ${TOPIC_LINKED}, ${TOPIC_UNLINKED}).`);
 
     for (const repo of portfolioRepos) {
       const repoName = repo.name;
+      const owner = repo.owner.login;
       const slug = repoName.toLowerCase();
-      console.log(`Syncing repository: ${repoName}...`);
+      const linked = (repo.topics || []).includes(TOPIC_LINKED);
+      console.log(`Syncing repository: ${repoName} (${linked ? "linked" : "no link"})...`);
 
       try {
-        // .portfolio/ is optional. When present it curates the project; when
-        // absent the project is synthesized from the repo (topic-only setup).
-        const contents = await githubFetch(
-          `https://api.github.com/repos/${repo.owner.login}/${repoName}/contents/.portfolio`
-        ).catch(() => null);
-        const hasFolder = Array.isArray(contents);
+        // Fetch the localized READMEs (de falls back to en).
+        const enReadme = await fetchRepoText(owner, repoName, "README.md");
+        const deReadme =
+          (await fetchRepoText(owner, repoName, "README.de.md")) || enReadme;
 
-        // Find file details (only meaningful when a .portfolio/ folder exists)
-        const metadataFile = hasFolder ? contents.find((c) => c.name === "metadata.json") : null;
-        const enAboutFile = hasFolder ? contents.find((c) => c.name === "about.en.md") : null;
-        const deAboutFile = hasFolder ? contents.find((c) => c.name === "about.de.md") : null;
-        const coverFile = hasFolder ? contents.find((c) => c.name.startsWith("cover.")) : null;
-        const galleryDir = hasFolder ? contents.find((c) => c.name === "gallery" && c.type === "dir") : null;
+        // Process: strip switcher + H1, download images, rewrite paths.
+        const downloaded = new Map<string, string>();
+        const en = enReadme
+          ? await processReadme(enReadme, owner, repoName, downloaded)
+          : { title: "", body: "", coverUrl: null };
+        const de = deReadme
+          ? await processReadme(deReadme, owner, repoName, downloaded)
+          : en;
 
-        // Resolve metadata: curated metadata.json if present, otherwise
-        // synthesized from the GitHub repo object.
-        let metadata: ProjectMetadata;
-        if (metadataFile) {
-          const metadataRaw = await githubFetch(metadataFile.url);
-          const metadataString = Buffer.from(metadataRaw.content, "base64").toString("utf8");
-          metadata = JSON.parse(metadataString);
-        } else {
-          metadata = synthesizeMetadata(repo);
-          console.log(`  ${repoName}: no .portfolio/metadata.json — using repo metadata (topic-only).`);
-        }
+        // Tags from topics (minus control topics), mapped to nice display names.
+        const topicTags = (repo.topics || []).filter((t: string) => !CONTROL_TOPICS.has(t));
+        const tags = topicTags.map(displayTag);
 
-        // Fetch English description
-        let longDescription = "";
-        if (enAboutFile) {
-          const enAboutRaw = await githubFetch(enAboutFile.url);
-          longDescription = Buffer.from(enAboutRaw.content, "base64").toString("utf8");
-        }
-
-        // Fetch German description (optional)
-        let longDescriptionDe: string | undefined;
-        if (deAboutFile) {
-          const deAboutRaw = await githubFetch(deAboutFile.url);
-          longDescriptionDe = Buffer.from(deAboutRaw.content, "base64").toString("utf8");
-        }
-
-        const projectDestMediaDir = path.join(publicMediaDir, repoName);
-        fs.mkdirSync(projectDestMediaDir, { recursive: true });
-
-        // Download cover image
-        if (coverFile && coverFile.download_url) {
-          const ext = path.extname(coverFile.name);
-          const destCoverPath = path.join(projectDestMediaDir, `cover${ext}`);
-          const buffer = await downloadFileToBuffer(coverFile.download_url);
-          await saveAndCompressImage(buffer, destCoverPath);
-        }
-
-        // Download gallery files
-        if (galleryDir) {
-          const galleryContents = await githubFetch(galleryDir.url);
-          if (Array.isArray(galleryContents)) {
-            const galleryDestDir = path.join(projectDestMediaDir, "gallery");
-            fs.mkdirSync(galleryDestDir, { recursive: true });
-
-            for (const item of galleryContents) {
-              if (item.type === "file" && item.download_url) {
-                const destPath = path.join(galleryDestDir, item.name);
-                const buffer = await downloadFileToBuffer(item.download_url);
-                await saveAndCompressImage(buffer, destPath);
-              }
-            }
-          }
-        }
-
-        // Fetch languages
+        // Fetch languages (for skill scoring).
         let languages: Record<string, number> = {};
         try {
           languages = await githubFetch(
-            `https://api.github.com/repos/${repo.owner.login}/${repoName}/languages`
+            `https://api.github.com/repos/${owner}/${repoName}/languages`
           );
         } catch (e: any) {
           console.warn(`  Warning: Could not fetch languages for ${repoName}:`, e.message);
         }
 
-        // Add or overwrite the project in maps
+        const title = en.title || prettifyRepoName(repoName);
+
         projectsMap[slug] = {
           id: slug,
-          slug: slug,
-          title: metadata.title || repoName,
-          titleDe: metadata.titleDe,
-          description: metadata.description || repo.description || "",
-          descriptionDe: metadata.descriptionDe,
-          longDescription,
-          longDescriptionDe,
-          projectTypeDe: metadata.projectTypeDe,
-          projectType: metadata.projectType || repo.language || "Software Project",
-          developedAt: metadata.developedAt || repo.created_at,
-          liveUrl: metadata.liveUrl || repo.homepage || undefined,
-          repoUrl: metadata.publishLink && !repo.private ? (metadata.repoUrl || repo.html_url) : undefined,
-          tags:
-            metadata.tags && metadata.tags.length > 0
-              ? metadata.tags
-              : (repo.topics || []).filter(
-                  (t: string) => t !== "portfolio" && t !== "portfolio-config"
-                ),
+          slug,
+          title,
+          titleDe: de.title || undefined,
+          description: repo.description || "",
+          descriptionDe: repo.description || "",
+          longDescription: en.body,
+          longDescriptionDe: de.body,
+          projectType: repo.language || "Software Project",
+          developedAt: repo.created_at,
+          liveUrl: repo.homepage || undefined,
+          // The control topic — not repo visibility — decides whether to link.
+          repoUrl: linked ? repo.html_url : undefined,
+          tags,
           coverImage: null,
           gallery: null,
-          _weight: computeEffectiveWeight(metadata.weight || 1, repo),
+          _weight: computeEffectiveWeight(1, repo),
           _languages: languages,
+          _coverUrl: en.coverUrl || de.coverUrl || undefined,
+          _topicTags: topicTags,
         };
 
-        // Note: If private repository or publishLink is false, suppress the repo URL
-        if (repo.private || !metadata.publishLink) {
-          projectsMap[slug].repoUrl = undefined;
+        // No screenshot in the README → generate a branded title-card cover.
+        if (!projectsMap[slug]._coverUrl) {
+          projectsMap[slug]._coverUrl = await generateProjectCover(repoName, title, tags);
         }
 
-        console.log(`  ✓ Successfully synced ${repoName}`);
+        console.log(`  ✓ Successfully synced ${repoName} (${tags.length} tags, cover=${en.coverUrl || de.coverUrl ? "screenshot" : "generated"})`);
       } catch (err: any) {
         console.error(`  Error syncing repository ${repoName}:`, err.message);
       }
@@ -692,8 +817,23 @@ const main = async () => {
 
     const actualMediaDir = path.join(publicMediaDir, repoName);
 
-    // Cover Image resolution
-    if (fs.existsSync(actualMediaDir)) {
+    // Cover image: prefer the first README image (GitHub projects); fall back to
+    // a cover.* file (local projects).
+    const coverUrl = project._coverUrl;
+    if (coverUrl) {
+      const coverFsPath = path.join(rootDir, "public", coverUrl.replace(/^\//, ""));
+      const sizeKb = fs.existsSync(coverFsPath)
+        ? Math.round(fs.statSync(coverFsPath).size / 1024)
+        : null;
+      project.coverImage = {
+        id: "cover",
+        url: coverUrl,
+        alternativeText: `${project.title} Cover`,
+        width: 1200,
+        height: 900,
+        size: sizeKb,
+      };
+    } else if (fs.existsSync(actualMediaDir)) {
       const files = fs.readdirSync(actualMediaDir);
       const coverFile = files.find((f) => f.startsWith("cover."));
       if (coverFile) {
@@ -710,9 +850,10 @@ const main = async () => {
       }
     }
 
-    // Gallery Images resolution
+    // Gallery resolution (local projects only — GitHub projects render images
+    // inline in the README body, not as a separate gallery).
     const galleryDir = path.join(actualMediaDir, "gallery");
-    if (fs.existsSync(galleryDir)) {
+    if (!coverUrl && fs.existsSync(galleryDir)) {
       const files = fs.readdirSync(galleryDir);
       project.gallery = files.map((filename, index) => {
         const filePath = path.join(galleryDir, filename);
@@ -743,8 +884,11 @@ const main = async () => {
     return dateB - dateA;
   });
 
-  // Save projects.json (strip temporary internal key `_weight` before saving, but keep it in memory for skills)
-  const cleanProjectsList = finalProjectsList.map(({ _weight, ...rest }) => rest);
+  // Save projects.json — strip internal build-only keys (kept in memory for skills)
+  const cleanProjectsList = finalProjectsList.map(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ({ _weight, _languages, _coverUrl, _topicTags, ...rest }) => rest
+  );
   const dataDir = path.dirname(outputProjectsPath);
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -774,7 +918,7 @@ const main = async () => {
       0
     ) as number;
 
-    const processedLanguages = new Set<string>();
+    const processedKeys = new Set<string>();
 
     if (totalBytes > 0) {
       for (const [langName, bytes] of Object.entries(projectLanguages)) {
@@ -783,34 +927,34 @@ const main = async () => {
         if (percentage < 0.05) continue;
 
         const cleanLang = langName.trim().toLowerCase();
-        const mappedKey = languageMappings[cleanLang] || cleanLang;
+        const mapped = languageMappings[cleanLang] || cleanLang;
+        const hit = registryByNorm[normalizeTech(mapped)];
 
-        if (techRegistry[mappedKey]) {
+        if (hit) {
           const scoreContribution = percentage * weight;
-          skillScores[mappedKey] = (skillScores[mappedKey] || 0) + scoreContribution;
-          processedLanguages.add(mappedKey);
+          skillScores[hit.key] = (skillScores[hit.key] || 0) + scoreContribution;
+          processedKeys.add(hit.key);
 
-          // Dynamically add the language to the project's tags if not already present
-          const displayName = techRegistry[mappedKey].name;
-          if (!project.tags.includes(displayName)) {
-            project.tags.push(displayName);
+          // Surface the language as a tag if not already present
+          if (!project.tags.includes(hit.detail.name)) {
+            project.tags.push(hit.detail.name);
           }
         }
       }
     }
 
-    // Process all other tags (frameworks, libraries, tools)
-    // If a tag is a language that was already processed dynamically above, skip it to avoid double counting
+    // Process all other tags (frameworks, libraries, tools). Skip ones already
+    // counted as a language above to avoid double counting.
     for (const tag of project.tags) {
-      const cleanTag = tag.trim().toLowerCase();
-      if (processedLanguages.has(cleanTag)) continue;
-
-      if (techRegistry[cleanTag]) {
-        // Frameworks/libraries get full weight contribution
-        skillScores[cleanTag] = (skillScores[cleanTag] || 0) + weight;
-      } else {
-        console.warn(`  Warning: Tag "${tag}" (used in "${project.title}") is not defined in tech-registry.json`);
+      const hit = registryByNorm[normalizeTech(tag)];
+      if (!hit) {
+        console.warn(`  Note: Tag "${tag}" (in "${project.title}") has no tech-registry entry — shown as a plain tag, no icon/score.`);
+        continue;
       }
+      if (processedKeys.has(hit.key)) continue;
+      // Frameworks/libraries get full weight contribution
+      skillScores[hit.key] = (skillScores[hit.key] || 0) + weight;
+      processedKeys.add(hit.key);
     }
   }
 

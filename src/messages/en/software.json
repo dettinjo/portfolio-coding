@@ -70,10 +70,5 @@
   "SoftwarePageSEO": {
     "siteName": "Code by {name}",
     "description": "Explore a collection of my software development projects showcasing my skills in modern web technologies."
-  },
-  "ProjectGallery": {
-    "thumbnailAlt": "{prefix} - Screenshot {index}",
-    "scrollLeft": "Scroll left",
-    "scrollRight": "Scroll right"
   }
 }

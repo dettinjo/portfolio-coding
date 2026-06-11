@@ -70,10 +70,5 @@
   "SoftwarePageSEO": {
     "siteName": "Code von {name}",
     "description": "Entdecken eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
-  },
-  "ProjectGallery": {
-    "thumbnailAlt": "{prefix} - Screenshot {index}",
-    "scrollLeft": "Nach links scrollen",
-    "scrollRight": "Nach rechts scrollen"
   }
 }

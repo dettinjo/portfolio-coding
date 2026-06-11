@@ -9,13 +9,6 @@
     "title": "Code von {name}",
     "description": "Entdecken eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
   },
-  "GalleryLightbox": {
-    "dialogTitle": "{prefix} - Bild {index}",
-    "imageAlt": "{prefix} - Bild {index}",
-    "previousImage": "Voriges Bild",
-    "nextImage": "Nächstes Bild",
-    "close": "Gallerie schließen"
-  },
   "ImprintPage": {
     "title": "Impressum",
     "section1_title": "Angaben gemäß § 5 TMG",

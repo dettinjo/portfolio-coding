@@ -7,9 +7,6 @@ interface LongTextRendererProps {
   content: string | null | undefined;
 }
 
-// --- THIS IS THE DEFINITIVE FIX ---
-// We create a custom component to render inline code (`...`) blocks.
-// This gives us full control over the styling and ensures no extra characters are added.
 const CodeComponent = ({
   children,
   className,
@@ -17,14 +14,8 @@ const CodeComponent = ({
 }: React.ClassAttributes<HTMLElement> &
   React.HTMLAttributes<HTMLElement> &
   ExtraProps) => {
-  // react-markdown adds a `language-*` class for fenced code blocks (```).
-  // Inline code has no className. We only want to style the inline code.
   const isInlineCode = !className;
-
   if (isInlineCode) {
-    // These are the classes that Tailwind's `@tailwindcss/typography` (prose)
-    // applies to inline code. By setting them explicitly, we guarantee the
-    // correct appearance without any unwanted artifacts like visible backticks.
     return (
       <code
         className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
@@ -34,13 +25,58 @@ const CodeComponent = ({
       </code>
     );
   }
-
-  // For larger, fenced code blocks, we let them render normally for now.
   return (
     <code className={className} {...props}>
       {children}
     </code>
   );
+};
+
+// Inline screenshots: constrained, rounded, lazy-loaded. No gallery/lightbox.
+const ImgComponent = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  node,
+  ...props
+}: React.ImgHTMLAttributes<HTMLImageElement> & ExtraProps) => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    {...props}
+    alt={props.alt || ""}
+    loading="lazy"
+    className="m-0 h-auto max-h-[460px] w-auto rounded-xl border border-border object-contain shadow-md"
+  />
+);
+
+// A paragraph that contains only images is rendered as a responsive,
+// centered flex grid — so multiple screenshots sit side by side and wrap,
+// instead of stacking full-width. Normal paragraphs render as usual.
+const ParagraphComponent = ({
+  node,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement> & ExtraProps) => {
+  const kids = (node?.children ?? []) as Array<{
+    type: string;
+    tagName?: string;
+    value?: string;
+  }>;
+  const onlyImages =
+    kids.length > 0 &&
+    kids.some((c) => c.type === "element" && c.tagName === "img") &&
+    kids.every(
+      (c) =>
+        (c.type === "element" && c.tagName === "img") ||
+        (c.type === "text" && !(c.value ?? "").trim())
+    );
+
+  if (onlyImages) {
+    return (
+      <div className="not-prose my-8 flex flex-wrap items-start justify-center gap-4">
+        {children}
+      </div>
+    );
+  }
+  return <p {...props}>{children}</p>;
 };
 
 export function LongTextRenderer({ content }: LongTextRendererProps) {
@@ -49,12 +85,12 @@ export function LongTextRenderer({ content }: LongTextRendererProps) {
   }
 
   return (
-    // The `prose` class is still valuable for styling headings, lists, links, etc.
     <div className="prose prose-neutral dark:prose-invert max-w-none text-muted-foreground">
       <ReactMarkdown
         components={{
-          // We tell ReactMarkdown to use our custom component for all `code` elements.
           code: CodeComponent,
+          img: ImgComponent,
+          p: ParagraphComponent,
         }}
       >
         {content}

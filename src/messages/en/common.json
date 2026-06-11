@@ -9,13 +9,6 @@
     "title": "Code by {name}",
     "description": "Explore a collection of my software development projects showcasing my skills in modern web technologies."
   },
-  "GalleryLightbox": {
-    "dialogTitle": "{prefix} - Image {index}",
-    "imageAlt": "{prefix} - Image {index}",
-    "previousImage": "Previous image",
-    "nextImage": "Next image",
-    "close": "Close Gallery"
-  },
   "ImprintPage": {
     "title": "Imprint",
     "section1_title": "Information pursuant to § 5 TMG",

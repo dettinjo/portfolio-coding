@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
-import { ProjectGallery } from "@/components/ProjectGallery";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
 import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/data";
@@ -130,7 +129,6 @@ export default async function ProjectDetailPage({ params }: Props) {
     repoUrl,
     tags,
     coverImage,
-    gallery,
   } = project;
 
   // Use German localized fields when available, fall back to English
@@ -188,18 +186,6 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const hasLinks = liveUrl || repoUrl;
 
-  const hasDedicatedGallery = gallery && gallery.length > 1;
-  const coverImageSizeKB = coverImage?.size ?? 999;
-  const isIcon = !hasDedicatedGallery && coverImageSizeKB < 20;
-  const showGallery = !isIcon;
-
-  const galleryImages = showGallery
-    ? ((gallery && gallery.length > 0
-        ? gallery.map((img) => getMediaUrl(img))
-        : [getMediaUrl(coverImage)]
-      ).filter(Boolean) as string[])
-    : [];
-
   let formattedDate = null;
   if (developedAt) {
     const date = new Date(developedAt);
@@ -236,16 +222,6 @@ export default async function ProjectDetailPage({ params }: Props) {
                 {title}
               </h1>
             </header>
-
-            {showGallery && (
-              <div className="mt-8">
-                <ProjectGallery
-                  images={galleryImages}
-                  altPrefix={title}
-                  variant="inverted"
-                />
-              </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-16">
               <div className="md:col-span-2">
