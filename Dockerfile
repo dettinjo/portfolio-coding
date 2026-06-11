@@ -23,27 +23,10 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# NEXT_PUBLIC_* vars are baked into the JS bundle at build time.
-# Provide safe defaults so the build works in CI without explicit --build-arg.
-ARG NEXT_PUBLIC_FULL_NAME="Joel Dettinger"
-ARG NEXT_PUBLIC_EMAIL_ADDRESS=""
-ARG NEXT_PUBLIC_PHONE_NUMBER=""
-ARG NEXT_PUBLIC_STREET_ADDRESS=""
-ARG NEXT_PUBLIC_CITY_ADDRESS=""
-ARG NEXT_PUBLIC_GITHUB_USERNAME="dettinjo"
-ARG NEXT_PUBLIC_LINKEDIN_USERNAME="joeldettinger"
-ARG NEXT_PUBLIC_INSTAGRAM_USERNAME="joeldettinger"
-ARG NEXT_PUBLIC_SERVER_URL="https://codeby.joeldettinger.de"
-
-ENV NEXT_PUBLIC_FULL_NAME=$NEXT_PUBLIC_FULL_NAME
-ENV NEXT_PUBLIC_EMAIL_ADDRESS=$NEXT_PUBLIC_EMAIL_ADDRESS
-ENV NEXT_PUBLIC_PHONE_NUMBER=$NEXT_PUBLIC_PHONE_NUMBER
-ENV NEXT_PUBLIC_STREET_ADDRESS=$NEXT_PUBLIC_STREET_ADDRESS
-ENV NEXT_PUBLIC_CITY_ADDRESS=$NEXT_PUBLIC_CITY_ADDRESS
-ENV NEXT_PUBLIC_GITHUB_USERNAME=$NEXT_PUBLIC_GITHUB_USERNAME
-ENV NEXT_PUBLIC_LINKEDIN_USERNAME=$NEXT_PUBLIC_LINKEDIN_USERNAME
-ENV NEXT_PUBLIC_INSTAGRAM_USERNAME=$NEXT_PUBLIC_INSTAGRAM_USERNAME
-ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+# All personalization (name, socials, address, SEO, legal, serverUrl) is read
+# from the generated src/data/site.config.json — produced by fetch-portfolio.ts
+# during `npm run build` from the portfolio-config repo (or the committed
+# example fallback). No NEXT_PUBLIC_* build args are needed.
 
 # CACHEBUST forces the npm run build layer to re-run when project-repo data
 # changes (repository_dispatch builds). Pass a unique value (e.g. timestamp)

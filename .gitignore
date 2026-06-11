@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# local editor / agent state
+.claude/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -60,10 +63,15 @@ migration-data.json
 migration-assets/
 /public/media/projects/
 
+# local personal config (real values live in the portfolio-config repo;
+# this is an optional local/offline override and must never be committed)
+/config/site.config.json
+
 # generated build-time files
 /src/data/projects.json
 /src/data/skills.json
 /src/data/resume.json
-/src/data/personal.json
+/src/data/site.config.json
 /public/images/profile.webp
+/public/og-software.png
 /public/media/resume.pdf

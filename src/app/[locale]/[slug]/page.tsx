@@ -14,6 +14,7 @@ import { ProjectGallery } from "@/components/ProjectGallery";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
 import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/data";
+import { siteConfig } from "@/lib/config";
 import { getMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { LongTextRenderer } from "@/components/LongTextRenderer";
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { title, description, coverImage, localizations } = project;
   const relativeImageUrl = getMediaUrl(coverImage);
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const serverUrl = siteConfig.site.serverUrl;
   const imageUrl =
     relativeImageUrl && !relativeImageUrl.startsWith("http")
       ? `${serverUrl}${relativeImageUrl}`
@@ -88,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: imageUrl ? [{ url: imageUrl, alt: `Preview for ${title}` }] : [],
       type: "article",
       locale: locale,
-      siteName: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
+      siteName: siteConfig.person.fullName,
     },
     alternates: {
       canonical: serverUrl
@@ -138,7 +139,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const projectType = (locale === "de" && project.projectTypeDe) ? project.projectTypeDe : project.projectType;
   const longDescription = project.longDescription;
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const serverUrl = siteConfig.site.serverUrl;
   const relativeImageUrl = getMediaUrl(coverImage);
   const imageUrl =
     relativeImageUrl && !relativeImageUrl.startsWith("http")
@@ -157,7 +158,7 @@ export default async function ProjectDetailPage({ params }: Props) {
     image: imageUrl || undefined, // Added image to JSON-LD
     author: {
       "@type": "Person",
-      name: process.env.NEXT_PUBLIC_FULL_NAME || "Developer",
+      name: siteConfig.person.fullName,
     },
     offers: {
       "@type": "Offer",

@@ -1,5 +1,31 @@
 // Shared portfolio type definitions — safe to import in both client and server components
 
+// Single source of truth for all personalization. The published template ships
+// only config/site.config.example.json; the real values are generated into
+// src/data/site.config.json at build time (from the portfolio-config repo or a
+// local config fallback). See src/lib/config.ts.
+export interface SiteConfig {
+  person: {
+    fullName: string;
+    firstName: string; // derived from fullName when absent
+    headline: string;
+    email: string;
+    phone: string;
+    address: { street: string; city: string; country: string };
+    socials: { github: string; linkedin: string; instagram: string };
+  };
+  site: {
+    serverUrl: string;
+    defaultLocale: string;
+    seo: { description: { en: string; de: string } };
+  };
+  legal: {
+    hosting: { provider: string; address: string };
+    analytics: { tool: string; domain: string; cookieless: boolean };
+  };
+  contact: { smtpFrom: string };
+}
+
 export interface MediaImage {
   id: number | string;
   url: string;

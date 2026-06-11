@@ -1,11 +1,10 @@
 // src/app/sitemap.ts
 import { MetadataRoute } from "next";
 import { fetchAllProjectSlugs } from "@/lib/data";
-
-export const dynamic = "force-dynamic";
+import { siteConfig } from "@/lib/config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+  const serverUrl = siteConfig.site.serverUrl;
 
   // --- FETCH DYNAMIC SLUGS FOR BOTH LOCALES ---
   let enProjectSlugs: { slug: string }[] = [];

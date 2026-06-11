@@ -23,7 +23,7 @@
       "name": "{name}",
       "street": "{street}",
       "city": "{city}",
-      "country": "Deutschland"
+      "country": "{country}"
     },
     "section2_title": "Kontakt",
     "section2_content": {
@@ -54,9 +54,9 @@
     },
     "section3_title": "2. Datenerfassung auf dieser Website",
     "section3_hosting_title": "Hosting und Server-Log-Dateien",
-    "section3_hosting_content": "Diese Website wird auf einem dedizierten Server der Dogado GmbH, Am Rahser Bahnhof 4, 41189 Mönchengladbach, selbst gehostet. Der Server kann im Rahmen des normalen Betriebs standardmäßige Zugriffsprotokolldaten (IP-Adresse, Browsertyp, Zeitstempel, aufgerufene URL) erfassen. Diese Daten werden ausschließlich zu Sicherheits- und Verfügbarkeitszwecken verwendet und nicht an Dritte weitergegeben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.",
+    "section3_hosting_content": "Diese Website wird auf einem dedizierten Server der {hostingProvider}, {hostingAddress}, selbst gehostet. Der Server kann im Rahmen des normalen Betriebs standardmäßige Zugriffsprotokolldaten (IP-Adresse, Browsertyp, Zeitstempel, aufgerufene URL) erfassen. Diese Daten werden ausschließlich zu Sicherheits- und Verfügbarkeitszwecken verwendet und nicht an Dritte weitergegeben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.",
     "section3_tracking_title": "Analyse",
-    "section3_tracking_content": "Diese Website verwendet Umami, ein quelloffenes, selbst gehostetes Analyse-Tool (analytics.joeldettinger.de). Umami setzt keine Cookies und erhebt keine personenbezogenen Daten. Es werden ausschließlich anonymisierte Daten wie Seitenaufrufe, Verweisquellen und Gerätetyp erfasst. Die Daten werden ausschließlich auf meinem eigenen Server gespeichert und nicht an Dritte weitergegeben. Rechtsgrundlage ist mein berechtigtes Interesse an der Auswertung aggregierter Website-Nutzung (Art. 6 Abs. 1 lit. f DSGVO).",
+    "section3_tracking_content": "Diese Website verwendet {analyticsTool}, ein quelloffenes, selbst gehostetes Analyse-Tool ({analyticsDomain}). {analyticsTool} setzt keine Cookies und erhebt keine personenbezogenen Daten. Es werden ausschließlich anonymisierte Daten wie Seitenaufrufe, Verweisquellen und Gerätetyp erfasst. Die Daten werden ausschließlich auf meinem eigenen Server gespeichert und nicht an Dritte weitergegeben. Rechtsgrundlage ist mein berechtigtes Interesse an der Auswertung aggregierter Website-Nutzung (Art. 6 Abs. 1 lit. f DSGVO).",
     "section3_contact_title": "Kontaktformular",
     "section3_contact_content": "Wenn Sie unser Kontaktformular nutzen, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage intern verarbeitet. Diese Daten werden nicht an Dritte weitergegeben. Die Verarbeitung dieser Daten erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).",
     "section4_title": "3. Ihre Rechte als Betroffener",
@@ -64,7 +64,7 @@
   },
   "ResumePage": {
     "downloadPdf": "PDF herunterladen",
-    "resumeFilename": "Lebenslauf_Joel_Dettinger",
+    "resumeFilename": "Lebenslauf_{name}",
     "home": "Startseite",
     "summary": "Zusammenfassung",
     "experience": "Berufserfahrung",

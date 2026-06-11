@@ -20,7 +20,9 @@ import { Link } from "@/i18n/navigation";
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
   const locale = useLocale();
-  const avatarSrc = "/images/avatar.webp";
+  // Generated at build time from the config repo's profile image (or the
+  // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
+  const avatarSrc = "/images/profile.webp";
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
 

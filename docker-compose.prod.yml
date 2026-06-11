@@ -34,7 +34,8 @@ services:
     restart: unless-stopped
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_USER=dettinjo
+      # Target portfolio repo is derived from the token's user by default.
+      # Override with PORTFOLIO_REPO=owner/portfolio-coding if needed.
       - POLL_INTERVAL=300
     volumes:
       - portfolio-watcher-state:/data

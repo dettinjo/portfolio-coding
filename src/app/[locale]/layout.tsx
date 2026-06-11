@@ -12,6 +12,7 @@ import { Metadata } from "next";
 
 import "../globals.css";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/config";
 import { ThemeProvider } from "@/components/Theme-Provider";
 // const inter = Inter({ subsets: ["latin"] });
 
@@ -26,11 +27,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "HomePageSEO" });
-  const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio";
-  const firstName = fullName.split(" ")[0];
+  const firstName = siteConfig.person.firstName;
 
-  const serverUrl =
-    process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+  const serverUrl = siteConfig.site.serverUrl;
 
   return {
     title: t("title", { name: firstName }),
@@ -98,8 +97,8 @@ export default async function RootLocaleLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
-              name: process.env.NEXT_PUBLIC_FULL_NAME || "Portfolio",
-              url: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
+              name: siteConfig.person.fullName,
+              url: siteConfig.site.serverUrl,
             }),
           }}
         />

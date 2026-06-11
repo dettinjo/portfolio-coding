@@ -1,160 +1,109 @@
-<a id="readme-top"></a>
+# Portfolio — config-driven, GitHub-powered
 
-[![Issues][issues-shield]][issues-url]
-[![Issues][issues-shield]][issues-url]
-[![CC BY-NC 4.0 License][license-shield]][license-url]
+A fast, SEO-optimized, fully bilingual (EN/DE) developer portfolio built with
+Next.js (App Router) and `next-intl`. The template contains **zero personal
+data** — everything is injected at build time from a single config source and
+from your GitHub repositories.
 
-<br />
-<div align="center">
-  <a href="#">
-    <img src="public/favicon-dark.svg" alt="Logo" width="80" height="80">
-  </a>
+## How it works
 
-<h3 align="center">Software Portfolio | Next.js & Payload CMS</h3>
+```
+portfolio-config repo (private, topic: "portfolio-config")   ← the ONE place you personalize
+  .portfolio/site.config.json   name, email, address, socials, serverUrl, SEO, legal
+  .portfolio/profile.png        avatar
+  .portfolio/resume.json        CV data for the /resume page
+  .portfolio/resume.pdf         downloadable CV (optional)
+        │  (fetched at build time, never committed to this repo)
+        ▼
+this template repo  ──►  npm run build  ──►  static, personalized site
+        ▲
+        │  project repos: just add the GitHub topic "portfolio"
+```
 
-  <p align="center">
-    A personal portfolio showcasing software development projects, built with Next.js and Payload CMS.
-    <br />
-    <a href="#about-the-project"><strong>Explore the Features »</strong></a>
-    <br />
-    <br />
-    <a href="https://{process.env.NEXT_PUBLIC_SERVER_URL}">View Demo</a>
-    ·
-    <a href="https://github.com/dettinjo/portfolio_frontend/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    ·
-    <a href="https://github.com/dettinjo/portfolio_frontend/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
+At build time `scripts/fetch-portfolio.ts`:
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+1. Reads `site.config.json` (config repo → local `config/site.config.json` →
+   committed `config/site.config.example.json` fallback) into
+   `src/data/site.config.json`. `src/lib/config.ts` exposes it as `siteConfig`.
+2. Lists your GitHub repos and builds the project list from every repo tagged
+   **`portfolio`**.
+3. Aggregates skills from each project's languages, size, and recency.
 
-## About The Project
+Re-running the build (or a redeploy) refreshes everything — there is no runtime
+fetching.
 
-This repository contains a full-stack personal software portfolio. It leverages the power of Next.js for the frontend and Payload CMS as a headless content management system, both integrated into a single repository for a seamless development experience.
+## Personalizing
 
-Key architectural features:
-* **Unified Stack:** Next.js and Payload CMS run together, sharing types and reducing context switching.
-* **Headless & Dynamic:** Project data, skills, and resume details are managed via Payload and fetched dynamically.
-* **Modern User Experience:** Fully responsive, supports internationalization (EN/DE), and includes dark/light mode.
-* **Containerized:** Fully Dockerized Setup for consistent development and production environments, including a PostgreSQL database.
+Edit **`site.config.json`** — see [`config/site.config.example.json`](config/site.config.example.json)
+for the full schema (person, site/SEO, legal hosting + analytics, contact).
+Keep the real file in your private `portfolio-config` repo, or locally at
+`config/site.config.json` (gitignored). Secrets stay in env vars — see
+[`.env.example`](.env.example).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Adding a project
 
-### Built With
+**Minimum:** add the GitHub topic **`portfolio`** to any repo. It appears using
+the repo's description and tags derived from its languages/topics (English).
+Private repos show the description but no source link.
 
-This project is built with a modern, robust tech stack:
+**Optional enrichment** — add a `.portfolio/` folder to the repo:
 
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![TypeScript][TypeScript]][TypeScript-url]
-* [![Tailwind][TailwindCSS]][Tailwind-url]
-* [![Payload][Payload]][Payload-url]
-* [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
-* [![Docker][Docker]][Docker-url]
+```
+.portfolio/
+  metadata.json     title, projectType, tags, weight, developedAt, liveUrl, …
+  about.en.md       long description (English)
+  about.de.md       long description (German)
+  cover.png         cover image (any raster → webp, or .svg)
+  gallery/          additional screenshots
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+`metadata.json` (all fields optional — they override the synthesized defaults):
 
-## Getting Started
+```json
+{
+  "title": "My Project",
+  "titleDe": "Mein Projekt",
+  "description": "Short summary",
+  "descriptionDe": "Kurzbeschreibung",
+  "projectType": "Full-Stack Web Application",
+  "projectTypeDe": "Full-Stack Webanwendung",
+  "developedAt": "2024-01-01T00:00:00Z",
+  "weight": 1,
+  "publishLink": true,
+  "liveUrl": "https://example.com",
+  "repoUrl": "https://github.com/you/my-project",
+  "tags": ["Next.js", "TypeScript"]
+}
+```
 
-To get a local copy up and running, follow these simple steps.
+Tags should match keys in [`src/data/tech-registry.json`](src/data/tech-registry.json)
+to contribute to skill scoring and render an icon.
 
-### Prerequisites
+## Local development
 
-Ensure you have the following installed:
-* [Node.js](https://nodejs.org/) (v18 or higher recommended)
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Required for the PostgreSQL database)
+```bash
+cp .env.example .env.local        # add GITHUB_TOKEN (+ SMTP/UMAMI if needed)
+npm install
+npm run build                     # runs fetch-portfolio.ts, then next build
+npm run dev
+```
 
-### Installation
+Without a token the build falls back to the public GitHub API and the committed
+example config, so a clean clone always builds (with placeholder identity).
 
-1.  **Clone the repository**
-    ```sh
-    git clone https://github.com/dettinjo/portfolio_frontend.git
-    cd portfolio_frontend
-    ```
+## Deployment
 
-2.  **Install dependencies**
-    ```sh
-    npm install
-    ```
+GitHub Actions builds the image, pushes it to GHCR, and triggers a Coolify
+redeploy ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). The
+`portfolio-watcher` service polls for pushes to `portfolio`-tagged repos and
+fires a rebuild automatically. `GITHUB_TOKEN` is passed only as a BuildKit
+secret — never baked into an image layer.
 
-3.  **Environment Setup**
-    Copy the example environment file to `.env.local` and configure your variables.
-    ```sh
-    cp .env.example .env.local
-    ```
-    *Open `.env.local` and ensure parameters like `Use local database` or `Postgres connection string` are set correctly. The defaults usually work for local Docker development.*
+## Tech stack
 
-4.  **Start the Development Server**
-    This command will automatically start the PostgreSQL database container (via Docker Compose) and then launch the Next.js application.
-    ```sh
-    npm run dev
-    ```
-
-5.  **Access the Application**
-    *   **Frontend:** `http://localhost:3000`
-    *   **Admin Panel:** `http://localhost:3000/admin` (Create your first user here to get started)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Next.js 15 · React 19 · TypeScript · Tailwind CSS · next-intl · Framer Motion ·
+sharp · nodemailer · Umami (analytics) · Docker.
 
 ## License
 
-Distributed under the CC BY-NC 4.0 License. See `LICENSE` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-
-Project Link: [https://github.com/dettinjo/portfolio_frontend](https://github.com/dettinjo/portfolio_frontend)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Acknowledgments
-
-* [shadcn/ui](https://ui.shadcn.com/)
-* [next-intl](https://next-intl.dev/)
-* [payload-cms](https://payloadcms.com/)
-* [Lucide React](https://lucide.dev/)
-* [Devicon](https://devicon.dev/)
-* [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
-[issues-shield]: https://img.shields.io/github/issues/dettinjo/portfolio_frontend.svg?style=for-the-badge
-[issues-url]: https://github.com/dettinjo/portfolio_frontend/issues
-[license-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
-[license-url]: https://creativecommons.org/licenses/by-nc/4.0/
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[TypeScript]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
-[TypeScript-url]: https://www.typescriptlang.org/
-[TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
-[Tailwind-url]: https://tailwindcss.com/
-[Payload]: https://img.shields.io/badge/Payload-000000?style=for-the-badge&logo=payload&logoColor=white
-[Payload-url]: https://payloadcms.com/
-[PostgreSQL]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
-[PostgreSQL-url]: https://www.postgresql.org/
-[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
-[Docker-url]: https://www.docker.com/
+Distributed under the CC BY-NC 4.0 License. See `LICENSE` for details.

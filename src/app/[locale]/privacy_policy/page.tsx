@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
-import personalConfig from "@/data/personal.json";
+import { siteConfig } from "@/lib/config";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -17,10 +17,19 @@ export default async function PrivacyPolicyPage({ params }: Props) {
   const t = await getTranslations("PrivacyPage");
 
   const values = {
-    name: process.env.NEXT_PUBLIC_FULL_NAME || personalConfig.fullName,
-    street: process.env.NEXT_PUBLIC_STREET_ADDRESS || "",
-    city: process.env.NEXT_PUBLIC_CITY_ADDRESS || "",
-    email: process.env.NEXT_PUBLIC_EMAIL_ADDRESS || personalConfig.contactEmail,
+    name: siteConfig.person.fullName,
+    street: siteConfig.person.address.street,
+    city: siteConfig.person.address.city,
+    email: siteConfig.person.email,
+  };
+
+  // Legal text adapts to the actual deployment: hosting provider and analytics
+  // tool/domain come from site.config.json so the policy always matches reality.
+  const legalValues = {
+    hostingProvider: siteConfig.legal.hosting.provider,
+    hostingAddress: siteConfig.legal.hosting.address,
+    analyticsTool: siteConfig.legal.analytics.tool,
+    analyticsDomain: siteConfig.legal.analytics.domain,
   };
 
   const section2Content = [
@@ -53,13 +62,13 @@ export default async function PrivacyPolicyPage({ params }: Props) {
               <h3 className="text-lg font-semibold">
                 {t("section3_hosting_title")}
               </h3>
-              <p>{t("section3_hosting_content")}</p>
+              <p>{t("section3_hosting_content", legalValues)}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold">
                 {t("section3_tracking_title")}
               </h3>
-              <p>{t("section3_tracking_content")}</p>
+              <p>{t("section3_tracking_content", legalValues)}</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold">

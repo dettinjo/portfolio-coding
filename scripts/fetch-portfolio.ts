@@ -11,10 +11,17 @@ const registryPath = path.join(rootDir, "src", "data", "tech-registry.json");
 const outputProjectsPath = path.join(rootDir, "src", "data", "projects.json");
 const outputSkillsPath = path.join(rootDir, "src", "data", "skills.json");
 const outputResumePath = path.join(rootDir, "src", "data", "resume.json");
+const outputSiteConfigPath = path.join(rootDir, "src", "data", "site.config.json");
+const exampleSiteConfigPath = path.join(rootDir, "config", "site.config.example.json");
 const outputAvatarPath = path.join(rootDir, "public", "images", "profile.webp");
+const placeholderAvatarPath = path.join(rootDir, "public", "images", "avatar.placeholder.webp");
 const outputPdfPath = path.join(rootDir, "public", "media", "resume.pdf");
 
-const GITHUB_USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "dettinjo";
+// Username may be empty — when a token is present we list repos via /user/repos
+// (no username needed) and derive the owner from the results. Falls back to the
+// public endpoint only when an explicit username is supplied.
+let GITHUB_USERNAME =
+  process.env.GITHUB_USER || process.env.NEXT_PUBLIC_GITHUB_USERNAME || "";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const PORTFOLIO_CONFIG_REPO = process.env.PORTFOLIO_CONFIG_REPO;
 
@@ -141,6 +148,46 @@ const saveAndCompressImage = async (buffer: Buffer, destPath: string): Promise<s
   }
 };
 
+// Turn a repo name into a human title: "kube-url-shortener" → "Kube Url Shortener".
+const prettifyRepoName = (name: string): string =>
+  name
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+// Synthesize project metadata from the GitHub repo object when a repo has the
+// "portfolio" topic but no curated .portfolio/metadata.json (topic-only setup).
+const synthesizeMetadata = (repo: any): ProjectMetadata => ({
+  title: prettifyRepoName(repo.name),
+  description: repo.description || "",
+  projectType: repo.language || "Software Project",
+  developedAt: repo.created_at,
+  weight: 1,
+  // Public repos link to source; private repos show description only.
+  publishLink: !repo.private,
+  liveUrl: repo.homepage || null,
+  repoUrl: repo.private ? null : repo.html_url,
+  tags: (repo.topics || []).filter(
+    (t: string) => t !== "portfolio" && t !== "portfolio-config"
+  ),
+});
+
+// Per-project complexity multiplier derived from signals already present on the
+// repo object (no extra API calls): codebase size (repo.size, KB, log-scaled)
+// and recency (repo.pushed_at, decaying over ~3 years). Combined with the
+// manual `weight` field this feeds the skill-level scoring.
+const computeEffectiveWeight = (manualWeight: number, repo: any): number => {
+  const sizeKb = repo.size || 0;
+  const sizeScore = Math.min(Math.log10(sizeKb + 1) / 3, 1); // ~0..1
+  const pushedAt = repo.pushed_at || repo.updated_at || repo.created_at;
+  const monthsSincePush = pushedAt
+    ? (Date.now() - new Date(pushedAt).getTime()) / (1000 * 60 * 60 * 24 * 30)
+    : 36;
+  const recencyScore = Math.max(0, 1 - monthsSincePush / 36); // 1 now → 0 at 3y
+  return manualWeight * (1 + 0.5 * sizeScore + 0.3 * recencyScore);
+};
+
 const main = async () => {
   console.log("Starting portfolio synchronization...");
 
@@ -165,21 +212,51 @@ const main = async () => {
       try {
         allRepos = await githubFetch("https://api.github.com/user/repos?per_page=100&type=all");
       } catch {
-        console.warn("  /user/repos returned an error (token may be scoped to this repo only). Falling back to public endpoint.");
-        allRepos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+        if (GITHUB_USERNAME) {
+          console.warn("  /user/repos returned an error (token may be scoped to this repo only). Falling back to public endpoint.");
+          allRepos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+        } else {
+          console.warn("  /user/repos returned an error and no GITHUB_USER is set for the public fallback.");
+        }
       }
-    } else {
+    } else if (GITHUB_USERNAME) {
       allRepos = await githubFetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+    } else {
+      console.warn("  No GITHUB_TOKEN and no GITHUB_USER set — cannot list repositories.");
     }
     console.log(`  Fetched ${allRepos.length} repositories.`);
   } catch (err: any) {
     console.warn("Could not fetch repositories from GitHub. Using local fallback only.", err.message);
   }
 
+  // Resolve the authenticated user's login from /user (the reliable owner
+  // identity for the token). Deriving it from the repo list is wrong when the
+  // account has collaborator repos owned by others. An explicit GITHUB_USER /
+  // NEXT_PUBLIC_GITHUB_USERNAME still takes precedence.
+  if (!GITHUB_USERNAME && GITHUB_TOKEN) {
+    try {
+      const me = await githubFetch("https://api.github.com/user");
+      GITHUB_USERNAME = me?.login || "";
+      if (GITHUB_USERNAME) {
+        console.log(`  Authenticated GitHub user: ${GITHUB_USERNAME}`);
+      }
+    } catch {
+      console.warn("  Could not resolve authenticated user from /user.");
+    }
+  }
+
+  // Keep only repos owned by this user — collaborator repos (e.g. group
+  // assignments) that happen to carry the topic should not appear.
+  if (GITHUB_USERNAME) {
+    allRepos = allRepos.filter((r) => r.owner?.login === GITHUB_USERNAME);
+    console.log(`  ${allRepos.length} repositories owned by ${GITHUB_USERNAME}.`);
+  }
+
   // ─── 1. FETCH CONFIG FROM GITHUB OR LOCAL ──────────────────────────────────
   console.log("Checking portfolio configuration (resume.json, profile image, PDF)...");
 
   let resumeConfigFetched = false;
+  let siteConfigFetched = false;
   const localConfigDir = path.join(rootDir, "config");
 
   // Resolve config repo: explicit env var overrides auto-detection.
@@ -204,6 +281,17 @@ const main = async () => {
       ).catch(() => null);
 
       if (contents && Array.isArray(contents)) {
+        const siteConfigFile = contents.find((c) => c.name === "site.config.json");
+        if (siteConfigFile) {
+          console.log("  Fetching remote site.config.json...");
+          const cfgRaw = await githubFetch(siteConfigFile.url);
+          const cfgString = Buffer.from(cfgRaw.content, "base64").toString("utf8");
+          JSON.parse(cfgString); // validate JSON
+          fs.writeFileSync(outputSiteConfigPath, cfgString, "utf8");
+          siteConfigFetched = true;
+          console.log("    ✓ Successfully synced remote site.config.json");
+        }
+
         const resumeFile = contents.find((c) => c.name === "resume.json");
         if (resumeFile) {
           console.log("  Fetching remote resume.json...");
@@ -288,6 +376,64 @@ const main = async () => {
       fs.copyFileSync(localPdf, outputPdfPath);
       console.log("  ✓ Copied resume.pdf from local config folder");
     }
+  }
+
+  // Local site.config.json fallback — independent of resume so an offline/local
+  // override works even when the resume came from the config repo.
+  const localSiteConfig = path.join(localConfigDir, "site.config.json");
+  if (!siteConfigFetched && fs.existsSync(localSiteConfig)) {
+    fs.copyFileSync(localSiteConfig, outputSiteConfigPath);
+    siteConfigFetched = true;
+    console.log("  ✓ Loaded site.config.json from local config folder");
+  }
+
+  // Guarantee a usable site.config.json exists for the Next.js build. The
+  // committed example is the last-resort fallback so a clean clone always builds
+  // (with placeholder identity) even without a config repo or local config.
+  if (!siteConfigFetched) {
+    if (fs.existsSync(exampleSiteConfigPath)) {
+      fs.copyFileSync(exampleSiteConfigPath, outputSiteConfigPath);
+      console.log("  ✓ Using config/site.config.example.json (no remote/local config found)");
+    } else if (!fs.existsSync(outputSiteConfigPath)) {
+      console.warn("  No site.config found and no example available — writing minimal defaults.");
+      fs.writeFileSync(outputSiteConfigPath, JSON.stringify({ person: {}, site: {}, legal: {}, contact: {} }, null, 2), "utf8");
+    }
+  }
+
+  // Guarantee a profile image exists so the hero and resume pages always render.
+  // Falls back to the committed generic placeholder when no avatar was provided.
+  if (!fs.existsSync(outputAvatarPath) && fs.existsSync(placeholderAvatarPath)) {
+    const imagesDir = path.dirname(outputAvatarPath);
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+    }
+    fs.copyFileSync(placeholderAvatarPath, outputAvatarPath);
+    console.log("  ✓ Using generic placeholder for profile.webp (no avatar provided)");
+  }
+
+  // Generate the Open Graph share image from the resolved config so it always
+  // matches the deployed identity (no personal name baked into the template).
+  try {
+    const cfg = JSON.parse(fs.readFileSync(outputSiteConfigPath, "utf8"));
+    const esc = (s: string) =>
+      String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const ogName = esc(cfg.person?.fullName || "Portfolio");
+    const ogTagline = esc(cfg.person?.headline || "Software Developer Portfolio");
+    const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#19191F"/>
+  <rect x="36" y="36" width="1128" height="558" rx="20" fill="none" stroke="#ffffff18" stroke-width="1.5"/>
+  <g transform="translate(490, 130) scale(9.17)">
+    <polyline points="4 17 10 11 4 5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="12" y1="19" x2="20" y2="19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="600" y="430" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="62" font-weight="700" fill="#FAFAFA" letter-spacing="-1">${ogName}</text>
+  <text x="600" y="505" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="30" font-weight="400" fill="#ffffff60" letter-spacing="0.5">${ogTagline}</text>
+</svg>`;
+    const ogOut = path.join(rootDir, "public", "og-software.png");
+    await sharp(Buffer.from(ogSvg)).resize(1200, 630).png({ compressionLevel: 9 }).toFile(ogOut);
+    console.log("  ✓ Generated public/og-software.png from site config");
+  } catch (e: any) {
+    console.warn("  Could not generate OG image:", e.message);
   }
 
   if (!fs.existsSync(outputResumePath)) {
@@ -409,32 +555,31 @@ const main = async () => {
       console.log(`Syncing repository: ${repoName}...`);
 
       try {
-        // Query the contents of .portfolio/
+        // .portfolio/ is optional. When present it curates the project; when
+        // absent the project is synthesized from the repo (topic-only setup).
         const contents = await githubFetch(
           `https://api.github.com/repos/${repo.owner.login}/${repoName}/contents/.portfolio`
         ).catch(() => null);
+        const hasFolder = Array.isArray(contents);
 
-        if (!contents || !Array.isArray(contents)) {
-          console.log(`  Skipping ${repoName}: .portfolio/ folder not found or accessible.`);
-          continue;
+        // Find file details (only meaningful when a .portfolio/ folder exists)
+        const metadataFile = hasFolder ? contents.find((c) => c.name === "metadata.json") : null;
+        const enAboutFile = hasFolder ? contents.find((c) => c.name === "about.en.md") : null;
+        const deAboutFile = hasFolder ? contents.find((c) => c.name === "about.de.md") : null;
+        const coverFile = hasFolder ? contents.find((c) => c.name.startsWith("cover.")) : null;
+        const galleryDir = hasFolder ? contents.find((c) => c.name === "gallery" && c.type === "dir") : null;
+
+        // Resolve metadata: curated metadata.json if present, otherwise
+        // synthesized from the GitHub repo object.
+        let metadata: ProjectMetadata;
+        if (metadataFile) {
+          const metadataRaw = await githubFetch(metadataFile.url);
+          const metadataString = Buffer.from(metadataRaw.content, "base64").toString("utf8");
+          metadata = JSON.parse(metadataString);
+        } else {
+          metadata = synthesizeMetadata(repo);
+          console.log(`  ${repoName}: no .portfolio/metadata.json — using repo metadata (topic-only).`);
         }
-
-        // Find file details
-        const metadataFile = contents.find((c) => c.name === "metadata.json");
-        const enAboutFile = contents.find((c) => c.name === "about.en.md");
-        const deAboutFile = contents.find((c) => c.name === "about.de.md");
-        const coverFile = contents.find((c) => c.name.startsWith("cover."));
-        const galleryDir = contents.find((c) => c.name === "gallery" && c.type === "dir");
-
-        if (!metadataFile) {
-          console.warn(`  Skipping ${repoName}: metadata.json not found in .portfolio/`);
-          continue;
-        }
-
-        // Fetch metadata
-        const metadataRaw = await githubFetch(metadataFile.url);
-        const metadataString = Buffer.from(metadataRaw.content, "base64").toString("utf8");
-        const metadata: ProjectMetadata = JSON.parse(metadataString);
 
         // Fetch English description
         let longDescription = "";
@@ -503,10 +648,15 @@ const main = async () => {
           developedAt: metadata.developedAt || repo.created_at,
           liveUrl: metadata.liveUrl || repo.homepage || undefined,
           repoUrl: metadata.publishLink && !repo.private ? (metadata.repoUrl || repo.html_url) : undefined,
-          tags: metadata.tags && metadata.tags.length > 0 ? metadata.tags : (repo.topics || []),
+          tags:
+            metadata.tags && metadata.tags.length > 0
+              ? metadata.tags
+              : (repo.topics || []).filter(
+                  (t: string) => t !== "portfolio" && t !== "portfolio-config"
+                ),
           coverImage: null,
           gallery: null,
-          _weight: metadata.weight || 1,
+          _weight: computeEffectiveWeight(metadata.weight || 1, repo),
           _languages: languages,
         };
 

@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/config";
 
 export default function robots(): MetadataRoute.Robots {
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "";
+  const serverUrl = siteConfig.site.serverUrl;
 
   return {
     rules: [

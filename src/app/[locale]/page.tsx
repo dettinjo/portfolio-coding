@@ -11,13 +11,11 @@ import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/data";
-import personalConfig from "@/data/personal.json";
+import { siteConfig } from "@/lib/config";
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
-
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -27,11 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     namespace: "software.SoftwarePageSEO",
   });
 
-  const fullName = personalConfig.fullName || "Developer";
-  const firstName = fullName.split(" ")[0];
+  const fullName = siteConfig.person.fullName;
+  const firstName = siteConfig.person.firstName;
   const siteTitle = t("siteName", { name: firstName });
 
-  const serverUrl = personalConfig.serverUrl || "";
+  const serverUrl = siteConfig.site.serverUrl;
 
   return {
     title: siteTitle,
@@ -91,7 +89,7 @@ export default async function DevPage({ params }: Props) {
 
   const cleanProjectsData = projectsData ? projectsData.filter(Boolean) : null;
 
-  const serverUrl = personalConfig.serverUrl || "";
+  const serverUrl = siteConfig.site.serverUrl;
 
   const jsonLd: WithContext<CollectionPage> = {
     "@context": "https://schema.org",
@@ -113,7 +111,7 @@ export default async function DevPage({ params }: Props) {
   const websiteJsonLd: WithContext<WebSite> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: `${personalConfig.fullName || "Developer"} - Portfolio`,
+    name: `${siteConfig.person.fullName} - Portfolio`,
     url: `${serverUrl}${locale === "de" ? "/de" : ""}`,
     potentialAction: {
       "@type": "SearchAction",

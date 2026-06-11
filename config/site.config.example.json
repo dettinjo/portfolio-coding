@@ -1,0 +1,42 @@
+{
+  "person": {
+    "fullName": "Jane Doe",
+    "headline": "Software Engineer",
+    "email": "hello@example.com",
+    "phone": "",
+    "address": {
+      "street": "",
+      "city": "",
+      "country": "Germany"
+    },
+    "socials": {
+      "github": "janedoe",
+      "linkedin": "",
+      "instagram": ""
+    }
+  },
+  "site": {
+    "serverUrl": "http://localhost:3000",
+    "defaultLocale": "en",
+    "seo": {
+      "description": {
+        "en": "A collection of my software development projects showcasing modern web technologies.",
+        "de": "Eine Sammlung meiner Softwareentwicklungsprojekte mit modernen Web-Technologien."
+      }
+    }
+  },
+  "legal": {
+    "hosting": {
+      "provider": "Example Hosting Provider",
+      "address": "Street 1, 12345 City, Country"
+    },
+    "analytics": {
+      "tool": "Umami",
+      "domain": "analytics.example.com",
+      "cookieless": true
+    }
+  },
+  "contact": {
+    "smtpFrom": "server@example.com"
+  }
+}

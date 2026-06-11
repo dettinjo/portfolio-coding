@@ -23,7 +23,7 @@
       "name": "{name}",
       "street": "{street}",
       "city": "{city}",
-      "country": "Germany"
+      "country": "{country}"
     },
     "section2_title": "Contact",
     "section2_content": {
@@ -54,9 +54,9 @@
     },
     "section3_title": "2. Data Collection on This Website",
     "section3_hosting_title": "Hosting and Server Log Files",
-    "section3_hosting_content": "This website is self-hosted on a dedicated server by Dogado GmbH, Am Rahser Bahnhof 4, 41189 Mönchengladbach, Germany. The server may automatically record standard access log data (IP address, browser type, timestamp, requested URL) as part of normal server operation. This data is used solely for security and availability purposes and is not shared with third parties. The legal basis is Art. 6(1)(f) GDPR.",
+    "section3_hosting_content": "This website is self-hosted on a dedicated server by {hostingProvider}, {hostingAddress}. The server may automatically record standard access log data (IP address, browser type, timestamp, requested URL) as part of normal server operation. This data is used solely for security and availability purposes and is not shared with third parties. The legal basis is Art. 6(1)(f) GDPR.",
     "section3_tracking_title": "Analytics",
-    "section3_tracking_content": "This website uses Umami, an open-source, self-hosted analytics tool (analytics.joeldettinger.de). Umami does not use cookies and does not collect any personally identifiable information. Only anonymised data such as page views, referrers, and device type are recorded. The data is stored exclusively on my own server and is not shared with third parties. The legal basis is my legitimate interest in understanding aggregate website usage (Art. 6(1)(f) GDPR).",
+    "section3_tracking_content": "This website uses {analyticsTool}, an open-source, self-hosted analytics tool ({analyticsDomain}). {analyticsTool} does not use cookies and does not collect any personally identifiable information. Only anonymised data such as page views, referrers, and device type are recorded. The data is stored exclusively on my own server and is not shared with third parties. The legal basis is my legitimate interest in understanding aggregate website usage (Art. 6(1)(f) GDPR).",
     "section3_contact_title": "Contact Form",
     "section3_contact_content": "When you use our contact form, the information provided is processed internally for the purpose of handling your request. This data is not passed to third parties. The processing is based on your consent (Art. 6(1)(a) GDPR).",
     "section4_title": "3. Your Rights as a Data Subject",
@@ -64,7 +64,7 @@
   },
   "ResumePage": {
     "downloadPdf": "Download PDF",
-    "resumeFilename": "Resume_Joel_Dettinger",
+    "resumeFilename": "Resume_{name}",
     "home": "Home",
     "summary": "Summary",
     "experience": "Experience",

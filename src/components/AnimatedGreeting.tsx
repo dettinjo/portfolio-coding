@@ -3,12 +3,12 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { siteConfig } from "@/lib/config";
 
 export function AnimatedGreeting() {
   const t = useTranslations("software.SoftwareHeroSection");
 
-  const fullName = process.env.NEXT_PUBLIC_FULL_NAME || "";
-  const firstName = fullName.split(" ")[0];
+  const firstName = siteConfig.person.firstName;
   const greetingText = t("greeting", { name: firstName });
 
   const count = useMotionValue(0);

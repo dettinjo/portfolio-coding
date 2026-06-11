@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
-import personalConfig from "@/data/personal.json";
+import { siteConfig } from "@/lib/config";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -17,18 +17,19 @@ export default async function ImprintPage({ params }: Props) {
   const t = await getTranslations("ImprintPage");
 
   const values = {
-    name: process.env.NEXT_PUBLIC_FULL_NAME || personalConfig.fullName,
-    street: process.env.NEXT_PUBLIC_STREET_ADDRESS || "",
-    city: process.env.NEXT_PUBLIC_CITY_ADDRESS || "",
-    phone: process.env.NEXT_PUBLIC_PHONE_NUMBER || "",
-    email: process.env.NEXT_PUBLIC_EMAIL_ADDRESS || personalConfig.contactEmail,
+    name: siteConfig.person.fullName,
+    street: siteConfig.person.address.street,
+    city: siteConfig.person.address.city,
+    country: siteConfig.person.address.country,
+    phone: siteConfig.person.phone,
+    email: siteConfig.person.email,
   };
 
   const section1Content = [
     t("section1_content.name", values),
     t("section1_content.street", values),
     t("section1_content.city", values),
-    t("section1_content.country"),
+    t("section1_content.country", values),
   ];
 
   const section2Content = [

@@ -5,7 +5,7 @@ on:
     branches: [main]
   repository_dispatch:
     # Triggered by project repos and the config repo when their data changes.
-    # Payload: { "repo": "dettinjo/kube-url-shortener" } (for logging)
+    # Payload: { "repo": "owner/some-project" } (for logging)
     types: [portfolio-data-changed]
   schedule:
     # Fallback safety net — the portfolio-watcher poller handles real-time triggers;
@@ -63,17 +63,10 @@ jobs:
           # repos only, rate-limited to 60 req/hr).
           secrets: |
             GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
+          # All personalization comes from the portfolio-config repo via
+          # fetch-portfolio.ts at build time — no NEXT_PUBLIC_* build args needed.
           build-args: |
             CACHEBUST=${{ steps.cachebust.outputs.value }}
-            NEXT_PUBLIC_FULL_NAME=${{ secrets.NEXT_PUBLIC_FULL_NAME || 'Joel Dettinger' }}
-            NEXT_PUBLIC_EMAIL_ADDRESS=${{ secrets.NEXT_PUBLIC_EMAIL_ADDRESS || '' }}
-            NEXT_PUBLIC_PHONE_NUMBER=${{ secrets.NEXT_PUBLIC_PHONE_NUMBER || '' }}
-            NEXT_PUBLIC_STREET_ADDRESS=${{ secrets.NEXT_PUBLIC_STREET_ADDRESS || '' }}
-            NEXT_PUBLIC_CITY_ADDRESS=${{ secrets.NEXT_PUBLIC_CITY_ADDRESS || '' }}
-            NEXT_PUBLIC_GITHUB_USERNAME=${{ secrets.NEXT_PUBLIC_GITHUB_USERNAME || 'dettinjo' }}
-            NEXT_PUBLIC_LINKEDIN_USERNAME=${{ secrets.NEXT_PUBLIC_LINKEDIN_USERNAME || 'joeldettinger' }}
-            NEXT_PUBLIC_INSTAGRAM_USERNAME=${{ secrets.NEXT_PUBLIC_INSTAGRAM_USERNAME || 'joeldettinger' }}
-            NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL || 'https://codeby.joeldettinger.de' }}
 
       # Runtime secrets (SMTP_PASS, UMAMI_WEBSITE_ID, etc.) are injected at
       # container startup via Coolify — they must never appear as build args.
@@ -88,7 +81,7 @@ jobs:
           envs: COOLIFY_TOKEN
           script: |
             # Pull the new image (built by GitHub Actions, never built on server)
-            docker pull ghcr.io/dettinjo/portfolio-coding:latest
+            docker pull ghcr.io/${{ github.repository }}:latest
             # Trigger Coolify to redeploy (Coolify will pull latest compose, see the new image, and recreate container)
             curl -s -X GET \
               "http://localhost:8000/api/v1/deploy?uuid=ikws0k0oc440k0cs08csws08&force=false" \

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import personalConfig from "@/data/personal.json";
+import { siteConfig } from "@/lib/config";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -13,13 +13,25 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    // SMTP credentials are deployment secrets — no personal fallbacks.
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    if (!smtpHost || !smtpUser || !smtpPass) {
+      console.error("Contact form: SMTP_HOST/SMTP_USER/SMTP_PASS are not configured.");
+      return NextResponse.json(
+        { error: "Email service is not configured" },
+        { status: 500 }
+      );
+    }
+
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "web207.dogado.net",
+      host: smtpHost,
       port: Number(process.env.SMTP_PORT || 465),
       secure: true,
       auth: {
-        user: process.env.SMTP_USER || "admin@joeldettinger.de",
-        pass: process.env.SMTP_PASS,
+        user: smtpUser,
+        pass: smtpPass,
       },
     });
 
@@ -45,11 +57,12 @@ export const POST = async (req: NextRequest) => {
         <p>${message.replace(/\n/g, "<br>")}</p>
       `;
 
-    const recipientEmail = personalConfig.contactEmail || "hello@joeldettinger.de";
-    const senderName = personalConfig.fullName || "Portfolio Owner";
+    const recipientEmail = siteConfig.person.email;
+    const senderName = siteConfig.person.fullName;
+    const fromAddress = process.env.SMTP_FROM || siteConfig.contact.smtpFrom || smtpUser;
 
     await transporter.sendMail({
-      from: `"${senderName}" <${process.env.SMTP_USER || "admin@joeldettinger.de"}>`,
+      from: `"${senderName}" <${fromAddress}>`,
       to: recipientEmail,
       subject,
       html,

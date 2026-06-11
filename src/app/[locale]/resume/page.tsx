@@ -66,7 +66,9 @@ export default async function ResumePage({
           <PrintButton
             // Label for the download button
             label={t("downloadPdf")}
-            filename={t("resumeFilename")}
+            filename={t("resumeFilename", {
+              name: (basics.name || "Resume").replace(/\s+/g, "_"),
+            })}
           />
         </div>
 
