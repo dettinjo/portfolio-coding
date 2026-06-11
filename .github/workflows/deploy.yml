@@ -22,19 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute cache-bust value
-        id: cachebust
-        # On repository_dispatch and schedule triggers the portfolio data may have
-        # changed in external repos — bust the npm build cache so fetch-portfolio.ts
-        # always re-runs. On push triggers the code changed so the layer rebuilds
-        # naturally; pass a fixed value to keep the cache warm for subsequent runs.
-        run: |
-          if [[ "${{ github.event_name }}" == "repository_dispatch" || "${{ github.event_name }}" == "schedule" ]]; then
-            echo "value=$(date +%s)" >> $GITHUB_OUTPUT
-          else
-            echo "value=1" >> $GITHUB_OUTPUT
-          fi
-
+      # Use the built-in docker driver (no moby/buildkit pull from Docker Hub,
+      # which was timing out on the runners). It does not support the GHA cache
+      # backend — that's fine: building uncached means fetch-portfolio.ts always
+      # re-runs, so project/config data is always fresh on every build.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -53,9 +44,6 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
-          # GitHub Actions cache — builds stay fast without touching the server
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
           # PORTFOLIO_GITHUB_TOKEN is a PAT with repo scope — passed as a
           # BuildKit secret so it's available to fetch-portfolio.ts during
           # `npm run build` without being baked into any image layer.
@@ -63,10 +51,6 @@ jobs:
           # repos only, rate-limited to 60 req/hr).
           secrets: |
             GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
-          # All personalization comes from the portfolio-config repo via
-          # fetch-portfolio.ts at build time — no NEXT_PUBLIC_* build args needed.
-          build-args: |
-            CACHEBUST=${{ steps.cachebust.outputs.value }}
 
       # Runtime secrets (SMTP_PASS, UMAMI_WEBSITE_ID, etc.) are injected at
       # container startup via Coolify — they must never appear as build args.

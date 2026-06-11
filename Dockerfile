@@ -28,11 +28,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # during `npm run build` from the portfolio-config repo (or the committed
 # example fallback). No NEXT_PUBLIC_* build args are needed.
 
-# CACHEBUST forces the npm run build layer to re-run when project-repo data
-# changes (repository_dispatch builds). Pass a unique value (e.g. timestamp)
-# to bust the cache; leave empty / omit for normal cached builds.
-ARG CACHEBUST=1
-
 # GITHUB_TOKEN is mounted as a BuildKit secret for the build step only.
 # It lets fetch-portfolio.ts access GitHub repos and download project images.
 # The secret is never stored in any image layer.
