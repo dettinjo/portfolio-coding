@@ -74,6 +74,7 @@ interface SoftwareProject {
   liveUrl?: string;
   repoUrl?: string;
   tags: string[];
+  categories?: string[];
   coverImage: any | null;
   gallery: any[] | null;
   localizations?: Array<{
@@ -933,6 +934,15 @@ const main = async () => {
       });
     }
 
+    // Categories this project spans (from its tags' registry categories),
+    // ordered by the CATEGORIES map — used by the front-end filter.
+    const catSet = new Set<string>();
+    for (const tag of project.tags || []) {
+      const hit = registryByNorm[normalizeTech(tag)];
+      if (hit?.detail.category) catSet.add(hit.detail.category);
+    }
+    project.categories = Object.keys(CATEGORIES).filter((c) => catSet.has(c));
+
     project.localizations = [
       { id: project.slug, slug: project.slug, locale: "en" },
       { id: project.slug, slug: project.slug, locale: "de" },
@@ -964,6 +974,18 @@ const main = async () => {
   // ─── 4. AGGREGATE SKILLS & CALCULATE LEVELS ───────────────────────────────
   console.log("Aggregating skills levels...");
   const skillScores: Record<string, number> = {};
+  // Richer per-skill signals for relevance ranking (deeper than the 1-5 level):
+  //  - projectCount: breadth — how many distinct projects use it
+  //  - lastUsed: recency — the most recent project's dev date (ms epoch)
+  const skillProjectCount: Record<string, number> = {};
+  const skillLastUsed: Record<string, number> = {};
+  const noteSkillUse = (key: string, devISO?: string) => {
+    skillProjectCount[key] = (skillProjectCount[key] || 0) + 1;
+    const ts = devISO ? Date.parse(devISO) : NaN;
+    if (!Number.isNaN(ts) && ts > (skillLastUsed[key] || 0)) {
+      skillLastUsed[key] = ts;
+    }
+  };
 
   // Custom language name mappings from GitHub to registry keys
   const languageMappings: Record<string, string> = {
@@ -998,6 +1020,7 @@ const main = async () => {
           const scoreContribution = percentage * weight;
           skillScores[hit.key] = (skillScores[hit.key] || 0) + scoreContribution;
           processedKeys.add(hit.key);
+          noteSkillUse(hit.key, project.developedAt);
 
           // Surface the language as a tag if not already present
           if (!project.tags.includes(hit.detail.name)) {
@@ -1019,6 +1042,7 @@ const main = async () => {
       // Frameworks/libraries get full weight contribution
       skillScores[hit.key] = (skillScores[hit.key] || 0) + weight;
       processedKeys.add(hit.key);
+      noteSkillUse(hit.key, project.developedAt);
     }
   }
 
@@ -1029,6 +1053,21 @@ const main = async () => {
     mobile: [],
     devops: [],
     ai: [],
+  };
+
+  // Continuous relevance score per skill, used purely to rank within a category
+  // and cap it at the top N. Intentionally richer than the 1-5 `level`: it blends
+  // depth of use (the existing summed score), breadth (distinct project count),
+  // and recency (exponential decay on how long ago it was last used).
+  const skillRelevance: Record<string, number> = {};
+  const nowMs = Date.now();
+  const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
+  const computeRelevance = (key: string, finalScore: number) => {
+    const breadth = skillProjectCount[key] || 0;
+    const last = skillLastUsed[key];
+    const ageYears = last ? (nowMs - last) / YEAR_MS : 6; // unknown date → treat as old
+    const recency = Math.exp(-Math.max(0, ageYears) / 2); // ~1.4yr half-life, 0..1
+    return finalScore * 1.0 + breadth * 1.5 + recency * 2.0;
   };
 
   for (const [techKey, score] of Object.entries(skillScores)) {
@@ -1050,6 +1089,8 @@ const main = async () => {
     if (registryEntry.levelOverride !== undefined) {
       level = registryEntry.levelOverride;
     }
+
+    skillRelevance[techKey] = computeRelevance(techKey, finalScore);
 
     // Skip skills with no icon — they'd render as blank tiles in the grid.
     // They still contributed to scoring above; just omit them from the output.
@@ -1074,24 +1115,30 @@ const main = async () => {
     }
   }
 
+  // Keep each category from growing unbounded as more projects are added: rank by
+  // the detailed relevance score and surface only the most relevant ones.
+  const MAX_SKILLS_PER_CATEGORY = 12; // 6 rows in the 2-column grid
+
   // Construct final categories list and sort them
   const finalCategories = Object.keys(CATEGORIES).map((catKey) => {
     const catMeta = CATEGORIES[catKey];
     const skills = skillsByCategory[catKey] || [];
 
-    // Sort skills inside the category by level desc, then name asc
+    // Sort by relevance desc, then level desc, then name — and cap at the top N.
     skills.sort((a, b) => {
-      if (b.level !== a.level) {
-        return b.level - a.level;
-      }
+      const ra = skillRelevance[a.id] || 0;
+      const rb = skillRelevance[b.id] || 0;
+      if (rb !== ra) return rb - ra;
+      if (b.level !== a.level) return b.level - a.level;
       return a.name.localeCompare(b.name);
     });
+    const topSkills = skills.slice(0, MAX_SKILLS_PER_CATEGORY);
 
     return {
       id: catKey,
       name: catMeta.name,
       order: catMeta.order,
-      skills,
+      skills: topSkills,
     };
   });
 
