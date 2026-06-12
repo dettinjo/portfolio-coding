@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { Metadata } from "next";
 import { WithContext, SoftwareApplication, BreadcrumbList } from "schema-dts";
-import { fetchSoftwareProjectBySlug, getTechDetailsMap } from "@/lib/data";
+import { fetchSoftwareProjectBySlug } from "@/lib/data";
+import { resolveTech } from "@/lib/tech";
 import { siteConfig } from "@/lib/config";
 import { getMediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -104,10 +105,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   // UPDATED: Await the promise to safely access slug and locale.
   const { slug, locale } = await params;
 
-  const [project, techDetailsMap] = await Promise.all([
-    fetchSoftwareProjectBySlug(slug, locale),
-    getTechDetailsMap(),
-  ]);
+  const project = await fetchSoftwareProjectBySlug(slug, locale);
 
   if (!project) {
     notFound();
@@ -259,15 +257,14 @@ export default async function ProjectDetailPage({ params }: Props) {
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {(tags || []).map((tag) => {
-                          const cleanTag = tag.trim().toLowerCase();
-                          const techDetails = techDetailsMap[cleanTag];
-                          const iconClassName = techDetails?.iconClassName;
+                          const tech = resolveTech(tag);
+                          const iconClassName = tech.iconClassName;
 
-                          if (techDetails?.url) {
+                          if (tech.url) {
                             return (
                               <a
                                 key={tag}
-                                href={techDetails.url}
+                                href={tech.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={cn(

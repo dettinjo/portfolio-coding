@@ -210,6 +210,38 @@ const main = async () => {
     console.warn(`Tech registry not found at ${registryPath}`);
   }
 
+  // Merge devicon's manifest into the registry so ANY technology gets an icon
+  // automatically (registry stays as an optional override for url/category).
+  const deviconPath = path.join(rootDir, "node_modules", "devicon", "devicon.json");
+  if (fs.existsSync(deviconPath)) {
+    const devicon: any[] = JSON.parse(fs.readFileSync(deviconPath, "utf8"));
+    const prettify = (s: string) =>
+      s.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const deviconClass = (e: any): string | null => {
+      const fonts: string[] = e.versions?.font ?? [];
+      if (!fonts.length) return null;
+      const v = fonts.includes("plain") ? "plain" : fonts.includes("original") ? "original" : fonts[0];
+      return `devicon-${e.name}-${v}`;
+    };
+    const have = new Set(Object.keys(techRegistry).map((k) => normalizeTech(k)));
+    for (const k of Object.keys(techRegistry)) {
+      const n = (techRegistry[k] as TechDetail).name;
+      if (n) have.add(normalizeTech(n));
+    }
+    for (const e of devicon) {
+      const names = [e.name, ...(e.altnames ?? [])];
+      if (names.some((nm: string) => have.has(normalizeTech(nm)))) continue;
+      const cls = deviconClass(e);
+      if (!cls) continue;
+      techRegistry[normalizeTech(e.name)] = {
+        name: prettify(e.name),
+        category: "backend", // default bucket; override in tech-registry.json
+        iconClassName: cls,
+        url: null,
+      };
+    }
+  }
+
   // Normalized lookup: maps normalizeTech(key) and normalizeTech(name) → registry
   // entry, so GitHub topic slugs resolve to the canonical registry entry.
   const registryByNorm: Record<string, { key: string; detail: TechDetail }> = {};
@@ -256,13 +288,14 @@ const main = async () => {
   ): Promise<{ title: string; body: string; coverUrl: string | null }> => {
     const destDir = path.join(publicMediaDir, repoName);
     let title = "";
-    let coverUrl: string | null = null;
 
     const lines = markdown.replace(/\r\n/g, "\n").split("\n");
     const kept: string[] = [];
     for (const line of lines) {
       // Drop the language-switcher line, e.g. "[English](README.md) · [Deutsch](README.de.md)"
       if (/\]\(README(\.[a-z]{2})?\.md\)/i.test(line) && /^\s*\[/.test(line)) continue;
+      // Drop portfolio metadata comments, e.g. "<!-- portfolio:date=2022-07-01 -->"
+      if (/^\s*<!--\s*portfolio:/i.test(line)) continue;
       // Capture & drop the first top-level H1 as the title
       const h1 = line.match(/^#\s+(.+?)\s*$/);
       if (h1 && !title) {
@@ -273,46 +306,65 @@ const main = async () => {
     }
     let body = kept.join("\n").trim();
 
-    // Download + rewrite every markdown image whose src is a repo-relative path.
-    const imgRe = /!\[([^\]]*)\]\(([^)]+)\)/g;
-    const replacements: Array<{ from: string; to: string }> = [];
+    // Download a repo-relative image into public/media and return its local URL.
+    const localize = async (srcPath: string): Promise<string | null> => {
+      if (/^https?:\/\//i.test(srcPath)) return null; // external — leave as-is
+      const cleanPath = srcPath.replace(/^\.?\//, "");
+      if (downloaded.has(cleanPath)) return downloaded.get(cleanPath)!;
+      try {
+        const meta = await githubFetch(
+          `https://api.github.com/repos/${owner}/${repoName}/contents/${cleanPath}`
+        );
+        if (meta && meta.download_url) {
+          fs.mkdirSync(destDir, { recursive: true });
+          const buffer = await downloadFileToBuffer(meta.download_url);
+          const savedName = await saveAndCompressImage(buffer, path.join(destDir, path.basename(cleanPath)));
+          const localUrl = `/media/projects/${repoName}/${savedName}`;
+          downloaded.set(cleanPath, localUrl);
+          return localUrl;
+        }
+      } catch (e: any) {
+        console.warn(`    Could not fetch README image ${cleanPath}:`, e.message);
+      }
+      return null;
+    };
+
+    // Collect image refs from both markdown ![](src) and HTML <img src="src">,
+    // in document order, so the cover = the first image in the README.
+    const refs: Array<{ src: string; index: number }> = [];
     let m: RegExpExecArray | null;
-    while ((m = imgRe.exec(body)) !== null) {
-      const srcPath = m[2].trim();
-      if (/^https?:\/\//i.test(srcPath)) {
-        if (!coverUrl) coverUrl = srcPath; // external image, leave as-is
+    const mdRe = /!\[[^\]]*\]\(([^)]+)\)/g;
+    while ((m = mdRe.exec(body)) !== null) refs.push({ src: m[1].trim(), index: m.index });
+    const htmlRe = /<img\b[^>]*?\ssrc=["']([^"']+)["'][^>]*>/gi;
+    while ((m = htmlRe.exec(body)) !== null) refs.push({ src: m[1].trim(), index: m.index });
+    refs.sort((a, b) => a.index - b.index);
+
+    let coverUrl: string | null = null;
+    const seen = new Set<string>();
+    for (const ref of refs) {
+      if (/^https?:\/\//i.test(ref.src)) {
+        if (!coverUrl) coverUrl = ref.src;
         continue;
       }
-      const cleanPath = srcPath.replace(/^\.?\//, "");
-      const base = path.basename(cleanPath);
-      let localUrl = downloaded.get(cleanPath) || null;
-      if (!localUrl) {
-        try {
-          const meta = await githubFetch(
-            `https://api.github.com/repos/${owner}/${repoName}/contents/${cleanPath}`
-          );
-          if (meta && meta.download_url) {
-            fs.mkdirSync(destDir, { recursive: true });
-            const buffer = await downloadFileToBuffer(meta.download_url);
-            const savedName = await saveAndCompressImage(
-              buffer,
-              path.join(destDir, base)
-            );
-            localUrl = `/media/projects/${repoName}/${savedName}`;
-            downloaded.set(cleanPath, localUrl);
-          }
-        } catch (e: any) {
-          console.warn(`    Could not fetch README image ${cleanPath}:`, e.message);
-        }
-      }
-      if (localUrl) {
-        replacements.push({ from: m[2], to: localUrl });
-        if (!coverUrl) coverUrl = localUrl;
+      const local = await localize(ref.src);
+      if (!local) continue;
+      if (!coverUrl) coverUrl = local;
+      if (!seen.has(ref.src)) {
+        body = body.split(`(${ref.src})`).join(`(${local})`); // markdown
+        body = body.split(`"${ref.src}"`).join(`"${local}"`).split(`'${ref.src}'`).join(`'${local}'`); // html
+        seen.add(ref.src);
       }
     }
-    for (const r of replacements) body = body.split(`(${r.from})`).join(`(${r.to})`);
 
     return { title, body, coverUrl };
+  };
+
+  // Optional development-date override embedded in the README as an HTML comment:
+  // "<!-- portfolio:date=2022-07-01 -->". Lets a repo created later than the
+  // project was actually built report the real date.
+  const parseDateOverride = (markdown: string): string | null => {
+    const m = markdown.match(/<!--\s*portfolio:date=([0-9]{4}-[0-9]{2}-[0-9]{2})\s*-->/i);
+    return m ? m[1] : null;
   };
 
   // Generate a branded title-card cover for projects whose README has no image,
@@ -772,7 +824,7 @@ const main = async () => {
           longDescription: en.body,
           longDescriptionDe: de.body,
           projectType: repo.language || "Software Project",
-          developedAt: repo.created_at,
+          developedAt: parseDateOverride(enReadme || "") || repo.created_at,
           liveUrl: repo.homepage || undefined,
           // The control topic — not repo visibility — decides whether to link.
           repoUrl: linked ? repo.html_url : undefined,
@@ -822,15 +874,27 @@ const main = async () => {
     const coverUrl = project._coverUrl;
     if (coverUrl) {
       const coverFsPath = path.join(rootDir, "public", coverUrl.replace(/^\//, ""));
-      const sizeKb = fs.existsSync(coverFsPath)
-        ? Math.round(fs.statSync(coverFsPath).size / 1024)
-        : null;
+      let width = 1200;
+      let height = 900;
+      let sizeKb: number | null = null;
+      if (fs.existsSync(coverFsPath)) {
+        sizeKb = Math.round(fs.statSync(coverFsPath).size / 1024);
+        try {
+          const meta = await sharp(coverFsPath).metadata();
+          if (meta.width && meta.height) {
+            width = meta.width;
+            height = meta.height;
+          }
+        } catch {
+          /* svg without intrinsic size — keep defaults */
+        }
+      }
       project.coverImage = {
-        id: "cover",
+        id: coverUrl.toLowerCase().endsWith(".svg") ? "cover-icon" : "cover",
         url: coverUrl,
         alternativeText: `${project.title} Cover`,
-        width: 1200,
-        height: 900,
+        width,
+        height,
         size: sizeKb,
       };
     } else if (fs.existsSync(actualMediaDir)) {

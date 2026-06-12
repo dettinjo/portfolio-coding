@@ -40,6 +40,11 @@ export function AnimatedProjectCard({
 
   const { coverImage, slug } = project;
   const imageUrl = getMediaUrl(coverImage);
+  // Technology-icon covers are SVGs — shown as a centered glyph. Screenshot
+  // covers (.webp) are shown full, at their aspect, with rounded corners.
+  const isIconCover =
+    coverImage?.id === "cover-icon" ||
+    (imageUrl ?? "").toLowerCase().endsWith(".svg");
 
   const locale = useLocale();
 
@@ -76,22 +81,34 @@ export function AnimatedProjectCard({
         {/* The rest of the component remains the same */}
         <div
           className={cn(
-            "h-64 md:h-auto md:w-1/2 p-8 md:p-16",
+            "h-64 md:h-auto md:w-1/2 flex items-center justify-center",
+            isIconCover ? "p-10 md:p-20" : "p-6 md:p-12",
             index % 2 === 1 ? "md:order-last" : ""
           )}
         >
-          {imageUrl && (
-            <div className="relative w-full h-full">
+          {imageUrl &&
+            (isIconCover ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={imageUrl}
+                  alt={`${title} icon`}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  priority={index < 2}
+                  className="object-contain"
+                />
+              </div>
+            ) : (
               <Image
                 src={imageUrl}
                 alt={`Preview for ${title}`}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
+                width={coverImage?.width || 1200}
+                height={coverImage?.height || 900}
+                sizes="(max-width: 768px) 80vw, 40vw"
                 priority={index < 2}
-                className="object-contain"
+                className="max-h-[320px] w-auto h-auto rounded-2xl object-contain shadow-lg"
               />
-            </div>
-          )}
+            ))}
         </div>
         <div className="flex flex-col md:w-1/2 p-10 md:p-16">
           <div className="flex-grow">
