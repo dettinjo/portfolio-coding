@@ -24,7 +24,19 @@
     "connectionFailedTitle": "Verbindung fehlgeschlagen",
     "connectionFailedMessage": "Konnte Projekte nicht laden. Bitte überprüfen Sie die Datenbankverbindung.",
     "emptyTitle": "Keine Projekte gefunden",
-    "emptyMessage": "Bitte fügen Sie Projekte im CMS hinzu, um sie hier zu sehen."
+    "emptyMessage": "Bitte fügen Sie Projekte im CMS hinzu, um sie hier zu sehen.",
+    "search_label": "Suchen & filtern",
+    "search_placeholder": "Projekte suchen oder Filter hinzufügen…",
+    "filter_reset": "Zurücksetzen",
+    "result_count": "{count, plural, =1 {# Projekt} other {# Projekte}}",
+    "noResults": "Keine Projekte entsprechen deinen Filtern.",
+    "prev_page": "Vorherige Seite",
+    "next_page": "Nächste Seite",
+    "category_frontend": "Frontend",
+    "category_backend": "Backend",
+    "category_mobile": "Mobile",
+    "category_devops": "DevOps",
+    "category_ai": "AI"
   },
   "SoftwareSkillsSection": {
     "title": "Technologien & Kompetenzen",
@@ -32,6 +44,7 @@
     "category_frontend": "Frontend",
     "category_backend": "Backend",
     "category_devops": "DevOps & Tools",
+    "clickHint": "Tipp: Klicke auf eine Technologie, um die Projekte zu sehen, die sie verwenden.",
     "legend_beginner": "Grundlagen",
     "legend_expert": "Experte",
     "connectionFailedTitle": "Verbindung fehlgeschlagen",

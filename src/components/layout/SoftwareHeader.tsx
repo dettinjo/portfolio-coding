@@ -6,6 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { Link } from "@/i18n/navigation";
 import { MobileNav } from "./MobileHeader";
+import { handleHashNav } from "@/lib/scroll";
 import { Terminal } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
@@ -60,6 +61,7 @@ export function SoftwareHeader({ showNavLinks = false }: SoftwareHeaderProps) {
               <a
                 key={link.href}
                 href={link.href}
+                onClick={(e) => handleHashNav(e, link.href)}
                 className="text-muted-foreground transition-colors hover:text-foreground"
                 data-umami-event="nav_clicked"
                 data-umami-event-section={link.href.replace("#", "")}

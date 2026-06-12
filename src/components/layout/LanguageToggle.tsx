@@ -24,10 +24,12 @@ export function LanguageToggle() {
   const handleLanguageSwitch = () => {
     track("language_switched", { from: currentLocale, to: nextLocale });
     startTransition(() => {
+      // scroll:false keeps the reader where they are — switching language
+      // shouldn't yank them back to the top of the page.
       if (alternateSlugs && alternateSlugs[nextLocale]) {
-        router.replace(alternateSlugs[nextLocale], { locale: nextLocale });
+        router.replace(alternateSlugs[nextLocale], { locale: nextLocale, scroll: false });
       } else {
-        router.replace(pathname, { locale: nextLocale });
+        router.replace(pathname, { locale: nextLocale, scroll: false });
       }
     });
   };
