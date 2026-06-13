@@ -482,10 +482,37 @@ const main = async () => {
   let siteConfigFetched = false;
   const localConfigDir = path.join(rootDir, "config");
 
+  // Demo mode: serve the committed template dataset under demo/ so a public live
+  // demo (no secrets) renders a full, realistic site. Triggers on an explicit
+  // PORTFOLIO_DEMO flag, or automatically on a clean clone (no token AND no repos
+  // discovered). A real build (token present, or a config repo / public repos
+  // found) never enters demo mode.
+  const demoDir = path.join(rootDir, "demo");
+  const DEMO_MODE =
+    !!process.env.PORTFOLIO_DEMO || (!GITHUB_TOKEN && allRepos.length === 0);
+  if (DEMO_MODE) {
+    console.log("DEMO MODE — using bundled template dataset under demo/ (no GitHub data).");
+    const demoSiteConfig = path.join(demoDir, "site.config.json");
+    if (fs.existsSync(demoSiteConfig)) {
+      fs.copyFileSync(demoSiteConfig, outputSiteConfigPath);
+      siteConfigFetched = true;
+    }
+    const demoResume = path.join(demoDir, "resume.json");
+    if (fs.existsSync(demoResume)) {
+      fs.copyFileSync(demoResume, outputResumePath);
+      resumeConfigFetched = true;
+    }
+    const demoAvatar = path.join(demoDir, "profile.webp");
+    if (fs.existsSync(demoAvatar)) {
+      fs.mkdirSync(path.dirname(outputAvatarPath), { recursive: true });
+      fs.copyFileSync(demoAvatar, outputAvatarPath);
+    }
+  }
+
   // Resolve config repo: explicit env var overrides auto-detection.
   // Auto-detection: find the repo tagged with the "portfolio-config" topic.
-  let configRepoName: string | null = PORTFOLIO_CONFIG_REPO || null;
-  if (!configRepoName && allRepos.length > 0) {
+  let configRepoName: string | null = DEMO_MODE ? null : PORTFOLIO_CONFIG_REPO || null;
+  if (!DEMO_MODE && !configRepoName && allRepos.length > 0) {
     const autoDetected = allRepos.find(
       (r) => r.topics && r.topics.includes("portfolio-config")
     );
@@ -683,10 +710,15 @@ const main = async () => {
   const projectsMap: Record<string, SoftwareProject> = {};
 
   // ─── 1. LOAD LOCAL PROJECTS ───────────────────────────────────────────────
-  if (fs.existsSync(localProjectsDir)) {
-    const localDirs = fs.readdirSync(localProjectsDir);
+  // In demo mode the bundled demo/projects tree is the source; otherwise the
+  // optional projects-local/ folder is used for hand-authored local projects.
+  const effectiveLocalProjectsDir = DEMO_MODE
+    ? path.join(demoDir, "projects")
+    : localProjectsDir;
+  if (fs.existsSync(effectiveLocalProjectsDir)) {
+    const localDirs = fs.readdirSync(effectiveLocalProjectsDir);
     for (const dirName of localDirs) {
-      const projPath = path.join(localProjectsDir, dirName);
+      const projPath = path.join(effectiveLocalProjectsDir, dirName);
       if (!fs.statSync(projPath).isDirectory()) continue;
 
       const portfolioPath = path.join(projPath, ".portfolio");
@@ -769,11 +801,13 @@ const main = async () => {
   // metadata files. The localized README is the project detail (images inline);
   // the repo description is the card overview; topics are the tags.
   try {
-    const portfolioRepos = allRepos.filter(
-      (repo) =>
-        repo.topics &&
-        (repo.topics.includes(TOPIC_LINKED) || repo.topics.includes(TOPIC_UNLINKED))
-    );
+    const portfolioRepos = DEMO_MODE
+      ? []
+      : allRepos.filter(
+          (repo) =>
+            repo.topics &&
+            (repo.topics.includes(TOPIC_LINKED) || repo.topics.includes(TOPIC_UNLINKED))
+        );
 
     console.log(`Found ${portfolioRepos.length} portfolio repositories (topics: ${TOPIC_LINKED}, ${TOPIC_UNLINKED}).`);
 
