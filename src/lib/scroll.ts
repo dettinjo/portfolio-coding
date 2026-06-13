@@ -28,10 +28,6 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 let scrolling = false;
 const listeners = new Set<(v: boolean) => void>();
 
-export function getIsScrolling() {
-  return scrolling;
-}
-
 function setScrolling(v: boolean) {
   if (scrolling === v) return;
   scrolling = v;

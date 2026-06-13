@@ -58,17 +58,6 @@ const deviconClass = (e: DeviconEntry): string | null => {
   return `devicon-${e.name}-${v}`;
 };
 
-// Preferred SVG variant name for cover icons — colored "original" looks best.
-export const deviconSvgVariant = (e: DeviconEntry): string | null => {
-  const svgs = e.versions?.svg ?? [];
-  if (svgs.length === 0) return null;
-  return svgs.includes("original")
-    ? "original"
-    : svgs.includes("plain")
-      ? "plain"
-      : svgs[0];
-};
-
 const deviconByNorm: Record<string, DeviconEntry> = {};
 for (const e of devicon) {
   deviconByNorm[normalizeTech(e.name)] = e;
@@ -80,9 +69,6 @@ for (const [key, val] of Object.entries(registry)) {
   registryByNorm[normalizeTech(key)] = val;
   if (val.name) registryByNorm[normalizeTech(val.name)] = val;
 }
-
-export const lookupDevicon = (raw: string): DeviconEntry | undefined =>
-  deviconByNorm[normalizeTech(raw)];
 
 // Resolve a tag/tech name to display details. Registry override wins; devicon
 // fills in the icon (and name/color); sensible fallbacks otherwise.

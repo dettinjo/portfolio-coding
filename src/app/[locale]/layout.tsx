@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/config";
 import { withBasePath } from "@/lib/basePath";
 import { ThemeProvider } from "@/components/Theme-Provider";
-// const inter = Inter({ subsets: ["latin"] });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

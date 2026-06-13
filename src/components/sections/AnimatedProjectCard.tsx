@@ -18,8 +18,6 @@ interface AnimatedProjectCardProps {
   onScrollProgressChange: (progress: number) => void;
 }
 
-// const AnimatedLink = motion(Link);
-
 export function AnimatedProjectCard({
   project,
   index,
