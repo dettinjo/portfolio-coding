@@ -1,0 +1,23 @@
+{
+  "title": "Aurora Analytics Dashboard",
+  "titleDe": "Aurora Analytics-Dashboard",
+  "description": "A real-time analytics dashboard with live charts, theming and a fully keyboard-accessible UI, built with Nuxt.",
+  "descriptionDe": "Ein Echtzeit-Analyse-Dashboard mit Live-Charts, Theming und vollständig tastaturbedienbarer Oberfläche – gebaut mit Nuxt.",
+  "projectType": "Frontend Web Application",
+  "projectTypeDe": "Frontend-Webanwendung",
+  "developedAt": "2025-02-18T00:00:00Z",
+  "weight": 2,
+  "publishLink": false,
+  "liveUrl": "https://aurora.example.com",
+  "repoUrl": null,
+  "tags": [
+    "Vue.js",
+    "Nuxt",
+    "Vuetify",
+    "Sass",
+    "Vite"
+  ],
+  "languages": {
+    "JavaScript": 90000
+  }
+}

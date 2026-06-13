@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SkillIcon } from "@/components/SkillIcon";
 import { Separator } from "@/components/ui/separator";
 import { ProficiencyBar } from "@/components/ProficiencyBar";
+import { useProjectFilter } from "./ProjectFilterContext";
+import { useIsScrolling } from "@/lib/scroll";
 import { useState, useEffect } from "react";
 
 // --- Interfaces ---
@@ -43,21 +45,33 @@ function useMediaQuery(query: string) {
 function SkillItem({ skill, category }: { skill: Skill; category: string }) {
   const [isHovered, setIsHovered] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 1280px)"); // xl breakpoint
+  const filter = useProjectFilter();
+  const scrolling = useIsScrolling();
 
   // On mobile (!isDesktop), content is always valid.
-  // On desktop, content is valid if hovered.
-  const showDetails = !isDesktop || isHovered;
+  // On desktop, content is valid if hovered — but never while a programmatic
+  // scroll is running, so a skill can't expand under a stationary cursor and
+  // interrupt the scroll animation.
+  const showDetails = !isDesktop || (isHovered && !scrolling);
+
+  // Clicking a skill filters the projects by that technology and scrolls to them
+  // (instead of opening the tech website — those links live on the detail pages).
+  // requestScroll defers the scroll until the Projects section has re-rendered
+  // with the filtered list, so it lands at the top instead of a stale position.
+  const handleClick = () => {
+    filter.addTech(skill.name);
+    filter.requestScroll();
+  };
 
   return (
     <div
       key={skill.name}
-      className="relative group/skill flex items-center justify-center 
+      className="relative group/skill flex items-center justify-center
                  xl:h-16 xl:w-16"
     >
-      <motion.a
-        href={skill.url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <motion.button
+        type="button"
+        onClick={handleClick}
         layout
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
@@ -120,7 +134,7 @@ function SkillItem({ skill, category }: { skill: Skill; category: string }) {
             )}
           </AnimatePresence>
         </div>
-      </motion.a>
+      </motion.button>
     </div>
   );
 }

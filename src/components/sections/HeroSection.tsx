@@ -15,6 +15,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { AnimatedGreeting } from "@/components/AnimatedGreeting";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
 
 export function HeroSection() {
@@ -22,7 +23,7 @@ export function HeroSection() {
   const locale = useLocale();
   // Generated at build time from the config repo's profile image (or the
   // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
-  const avatarSrc = "/images/profile.webp";
+  const avatarSrc = withBasePath("/images/profile.webp");
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
 

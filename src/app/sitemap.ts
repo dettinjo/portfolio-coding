@@ -3,6 +3,9 @@ import { MetadataRoute } from "next";
 import { fetchAllProjectSlugs } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
 
+// Static so it can be emitted under `output: export` (GitHub Pages demo).
+export const dynamic = "force-static";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const serverUrl = siteConfig.site.serverUrl;
 

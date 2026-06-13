@@ -1,6 +1,7 @@
 // Client-safe helper functions for media URL resolution
 
 import type { MediaImage } from "./types";
+import { withBasePath } from "./basePath";
 
 /**
  * Resolve a media URL from a MediaImage object or raw string.
@@ -13,8 +14,8 @@ export function getMediaUrl(
   if (!image) return null;
 
   if (typeof image === "string") {
-    return image.startsWith("http") ? image : image;
+    return image.startsWith("http") ? image : withBasePath(image);
   }
 
-  return image.url || null;
+  return image.url ? withBasePath(image.url) : null;
 }

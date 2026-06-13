@@ -1,0 +1,23 @@
+{
+  "title": "Ledger — Personal Finance",
+  "titleDe": "Ledger — Persönliche Finanzen",
+  "description": "A private Ruby on Rails budgeting app with recurring transactions, category budgets and spending insights.",
+  "descriptionDe": "Eine private Ruby-on-Rails-Budget-App mit wiederkehrenden Buchungen, Kategorie-Budgets und Ausgaben-Insights.",
+  "projectType": "Full-Stack Web App (private)",
+  "projectTypeDe": "Full-Stack-Webanwendung (privat)",
+  "developedAt": "2024-03-08T00:00:00Z",
+  "weight": 1,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Ruby",
+    "Ruby on Rails",
+    "PostgreSQL",
+    "Redis",
+    "Sass"
+  ],
+  "languages": {
+    "Ruby": 70000
+  }
+}

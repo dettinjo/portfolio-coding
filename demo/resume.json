@@ -1,0 +1,155 @@
+{
+  "basics": {
+    "name": "Alex Rivera",
+    "headline": "Full-Stack Engineer",
+    "email": "hello@example.com",
+    "location": "Berlin, Germany",
+    "url": {
+      "href": "https://portfolio-demo.example.com"
+    },
+    "picture": {
+      "url": "/images/profile.webp"
+    }
+  },
+  "display": {
+    "experience": 4,
+    "education": 3
+  },
+  "sections": {
+    "summary": {
+      "name": "Summary",
+      "visible": true,
+      "content": "Full-stack engineer who builds well-tested web apps and the cloud infrastructure to run them. Comfortable from Vue UIs to AWS provisioning."
+    },
+    "experience": {
+      "name": "Experience",
+      "visible": true,
+      "items": [
+        {
+          "id": "e1",
+          "visible": true,
+          "company": "Northwind Labs",
+          "position": "Senior Full-Stack Engineer",
+          "date": "2023 — Present",
+          "location": "Berlin",
+          "summary": "Lead the web platform team; shipped a real-time analytics suite on Vue/Nuxt and a Go API serving 40M requests/day."
+        },
+        {
+          "id": "e2",
+          "visible": true,
+          "company": "Cloudpeak GmbH",
+          "position": "Software Engineer",
+          "date": "2021 — 2023",
+          "location": "Munich",
+          "summary": "Built CI/CD and AWS infrastructure as code; cut deploy times by 70% with Jenkins pipelines and Ansible."
+        },
+        {
+          "id": "e3",
+          "visible": true,
+          "company": "Freelance",
+          "position": "Mobile & Web Developer",
+          "date": "2019 — 2021",
+          "location": "Remote",
+          "summary": "Delivered Flutter apps and Rails backends for early-stage clients."
+        }
+      ]
+    },
+    "education": {
+      "name": "Education",
+      "visible": true,
+      "items": [
+        {
+          "id": "ed1",
+          "visible": true,
+          "institution": "TU Berlin",
+          "studyType": "M.Sc. Computer Science",
+          "area": "Distributed systems & machine learning",
+          "date": "2019 — 2021"
+        },
+        {
+          "id": "ed2",
+          "visible": true,
+          "institution": "University of Freiburg",
+          "studyType": "B.Sc. Computer Science",
+          "area": "Software engineering",
+          "date": "2016 — 2019"
+        }
+      ]
+    },
+    "skills": {
+      "name": "Skills",
+      "visible": true,
+      "items": [
+        {
+          "id": "s1",
+          "visible": true,
+          "name": "Vue.js / Nuxt",
+          "level": 5
+        },
+        {
+          "id": "s2",
+          "visible": true,
+          "name": "Go / APIs",
+          "level": 5
+        },
+        {
+          "id": "s3",
+          "visible": true,
+          "name": "Python / ML",
+          "level": 4
+        },
+        {
+          "id": "s4",
+          "visible": true,
+          "name": "AWS / Ansible",
+          "level": 4
+        },
+        {
+          "id": "s5",
+          "visible": true,
+          "name": "Flutter / Dart",
+          "level": 3
+        }
+      ]
+    },
+    "languages": {
+      "name": "Languages",
+      "visible": true,
+      "items": [
+        {
+          "id": "l1",
+          "visible": true,
+          "name": "English",
+          "level": 5
+        },
+        {
+          "id": "l2",
+          "visible": true,
+          "name": "German",
+          "level": 5
+        },
+        {
+          "id": "l3",
+          "visible": true,
+          "name": "Spanish",
+          "level": 3
+        }
+      ]
+    },
+    "profiles": {
+      "name": "Profiles",
+      "visible": true,
+      "items": [
+        {
+          "id": "p1",
+          "visible": true,
+          "network": "GitHub",
+          "username": "octocat",
+          "url": {
+            "href": "https://github.com/octocat"
+          }
+        }
+      ]
+    }
+  }
+}

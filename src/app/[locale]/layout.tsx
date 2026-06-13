@@ -13,6 +13,7 @@ import { Metadata } from "next";
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/config";
+import { withBasePath } from "@/lib/basePath";
 import { ThemeProvider } from "@/components/Theme-Provider";
 // const inter = Inter({ subsets: ["latin"] });
 
@@ -36,17 +37,17 @@ export async function generateMetadata({
     description: t("description", { name: firstName }),
     metadataBase: new URL(serverUrl),
     icons: {
-      apple: { url: "/favicon-light.svg", type: "image/svg+xml" },
+      apple: { url: withBasePath("/favicon-light.svg"), type: "image/svg+xml" },
       other: [
         {
           rel: "icon",
-          url: "/favicon-light.svg",
+          url: withBasePath("/favicon-light.svg"),
           media: "(prefers-color-scheme: light)",
           type: "image/svg+xml",
         },
         {
           rel: "icon",
-          url: "/favicon-dark.svg",
+          url: withBasePath("/favicon-dark.svg"),
           media: "(prefers-color-scheme: dark)",
           type: "image/svg+xml",
         },

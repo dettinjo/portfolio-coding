@@ -4,6 +4,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { handleHashNav } from "@/lib/scroll";
 
 interface ScrollIndicatorProps {
   href: string;
@@ -37,6 +38,7 @@ export function ScrollIndicator({ href }: ScrollIndicatorProps) {
     <motion.a
       ref={ref}
       href={href}
+      onClick={(e) => handleHashNav(e, href)}
       aria-label="Scroll to next section"
       className="flex justify-center"
       style={{ opacity }}

@@ -1,0 +1,24 @@
+{
+  "title": "Lexicon — NLP Classification Toolkit",
+  "titleDe": "Lexicon — NLP-Klassifikations-Toolkit",
+  "description": "A text-classification toolkit: TensorFlow/Keras models trained on pandas pipelines, with scikit-learn baselines and Jupyter notebooks.",
+  "descriptionDe": "Ein Toolkit zur Textklassifikation: TensorFlow-/Keras-Modelle auf pandas-Pipelines trainiert, mit scikit-learn-Baselines und Jupyter-Notebooks.",
+  "projectType": "AI / ML Application",
+  "projectTypeDe": "KI- / ML-Anwendung",
+  "developedAt": "2024-12-12T00:00:00Z",
+  "weight": 2,
+  "publishLink": false,
+  "liveUrl": "https://lexicon.example.com",
+  "repoUrl": null,
+  "tags": [
+    "TensorFlow",
+    "Keras",
+    "scikit-learn",
+    "Pandas",
+    "NumPy",
+    "Jupyter"
+  ],
+  "languages": {
+    "Python": 85000
+  }
+}

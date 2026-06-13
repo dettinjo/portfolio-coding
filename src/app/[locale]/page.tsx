@@ -7,6 +7,7 @@ import { ContactSection } from "@/components/sections/ContactSection";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 import { SkillsSection } from "@/components/sections/SkillsSection";
+import { ProjectFilterProvider } from "@/components/sections/ProjectFilterContext";
 import { ResumeCTASection } from "@/components/sections/ResumeCTASection";
 import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
@@ -137,23 +138,25 @@ export default async function DevPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <HeroSection />
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="py-24">
-            <ProjectsSection projects={cleanProjectsData} />
+        <ProjectFilterProvider>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="py-24">
+              <ProjectsSection projects={cleanProjectsData} />
+            </div>
+            <ScrollIndicator href="#skills" />
+            <div className="py-24">
+              <SkillsSection skills={skillsForDisplay} />
+            </div>
+            <div className="py-12">
+              <ScrollIndicator href="#resume-cta" />
+            </div>
+            <ResumeCTASection />
+            <ScrollIndicator href="#kontakt" />
+            <div className="pt-24 pb-64 md:pb-96">
+              <ContactSection />
+            </div>
           </div>
-          <ScrollIndicator href="#skills" />
-          <div className="py-24">
-            <SkillsSection skills={skillsForDisplay} />
-          </div>
-          <div className="py-12">
-            <ScrollIndicator href="#resume-cta" />
-          </div>
-          <ResumeCTASection />
-          <ScrollIndicator href="#kontakt" />
-          <div className="pt-24 pb-64 md:pb-96">
-            <ContactSection />
-          </div>
-        </div>
+        </ProjectFilterProvider>
       </main>
       <Footer />
       <BackToTopButton />

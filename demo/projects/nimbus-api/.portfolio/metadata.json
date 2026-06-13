@@ -1,0 +1,23 @@
+{
+  "title": "Nimbus Go Microservice API",
+  "titleDe": "Nimbus Go-Microservice-API",
+  "description": "A high-throughput Go API with a GraphQL gateway, PostgreSQL persistence and Redis-backed caching and queues.",
+  "descriptionDe": "Eine durchsatzstarke Go-API mit GraphQL-Gateway, PostgreSQL-Persistenz und Redis-gestütztem Caching und Queues.",
+  "projectType": "Backend / API",
+  "projectTypeDe": "Backend / API",
+  "developedAt": "2024-09-05T00:00:00Z",
+  "weight": 2,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Go",
+    "PostgreSQL",
+    "Redis",
+    "RabbitMQ",
+    "GraphQL"
+  ],
+  "languages": {
+    "Go": 88000
+  }
+}

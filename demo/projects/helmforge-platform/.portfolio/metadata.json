@@ -1,0 +1,24 @@
+{
+  "title": "HelmForge — Cloud Provisioning Platform",
+  "titleDe": "HelmForge — Cloud-Provisioning-Plattform",
+  "description": "Reproducible AWS infrastructure provisioned with Ansible, delivered through Jenkins pipelines with Prometheus + Grafana observability.",
+  "descriptionDe": "Reproduzierbare AWS-Infrastruktur via Ansible bereitgestellt, ausgeliefert über Jenkins-Pipelines mit Prometheus- und Grafana-Observability.",
+  "projectType": "DevOps / Infrastructure",
+  "projectTypeDe": "DevOps / Infrastruktur",
+  "developedAt": "2025-03-30T00:00:00Z",
+  "weight": 2,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Ansible",
+    "Amazon Web Services",
+    "Jenkins",
+    "Prometheus",
+    "Grafana"
+  ],
+  "languages": {
+    "Shell": 24000,
+    "Python": 12000
+  }
+}

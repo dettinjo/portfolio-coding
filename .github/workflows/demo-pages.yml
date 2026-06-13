@@ -1,0 +1,76 @@
+name: Deploy demo to GitHub Pages
+
+# Publishes a public, secret-free live demo of the template (the bundled demo/
+# dataset) as a static site on GitHub Pages. Separate from deploy.yml, which
+# builds and deploys the real, server-rendered site with your data.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent Pages deployment.
+concurrency:
+  group: demo-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      STATIC_EXPORT: "1"
+      PORTFOLIO_DEMO: "1"
+      NEXT_PUBLIC_STATIC_DEMO: "1"
+      # GitHub project page is served from /<repo>/. If you serve the demo from a
+      # custom domain (CNAME) at the root, set both of these to an empty string.
+      PAGES_BASE_PATH: /portfolio-coding
+      NEXT_PUBLIC_BASE_PATH: /portfolio-coding
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # A static export (output: export) cannot include dynamic Route Handlers or
+      # middleware. The demo has no backend, so drop them for this build only —
+      # the CI checkout is disposable and the committed source is untouched.
+      - name: Strip server-only pieces for static export
+        run: rm -rf src/app/api src/middleware.ts
+
+      # Runs fetch-portfolio.ts in demo mode (no token → bundled demo/ dataset),
+      # then `next build` with output: export → ./out
+      - run: npm run build
+
+      - name: Add Pages extras (.nojekyll + root redirect)
+        run: |
+          touch out/.nojekyll
+          cat > out/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en"><head><meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=./en/">
+          <link rel="canonical" href="./en/"><title>Redirecting…</title></head>
+          <body>Redirecting to <a href="./en/">the demo</a>…</body></html>
+          HTML
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

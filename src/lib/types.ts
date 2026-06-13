@@ -69,6 +69,7 @@ export interface SoftwareProject {
   liveUrl?: string;
   repoUrl?: string;
   tags: string[];
+  categories?: string[]; // tech categories this project spans (for filtering)
   coverImage: MediaImage | null;
   gallery: MediaImage[] | null;
   localizations?: Array<{

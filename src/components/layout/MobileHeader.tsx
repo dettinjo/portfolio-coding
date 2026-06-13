@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
+import { handleHashNav } from "@/lib/scroll";
 import { Menu, X } from "lucide-react";
 
 interface NavLink {
@@ -56,6 +57,7 @@ export function MobileNav({ navLinks, children }: MobileNavProps) {
                   <SheetClose asChild key={link.href}>
                     <a
                       href={link.href}
+                      onClick={(e) => handleHashNav(e, link.href)}
                       className="text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}

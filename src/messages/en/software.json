@@ -24,7 +24,19 @@
     "connectionFailedTitle": "Connection Failed",
     "connectionFailedMessage": "Could not load projects. Please check the database connection.",
     "emptyTitle": "No Projects Found",
-    "emptyMessage": "Please add some projects in the CMS to see them here."
+    "emptyMessage": "Please add some projects in the CMS to see them here.",
+    "search_label": "Search & filter",
+    "search_placeholder": "Search projects, or add a filter…",
+    "filter_reset": "Clear all",
+    "result_count": "{count, plural, =1 {# project} other {# projects}}",
+    "noResults": "No projects match your filters.",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "category_frontend": "Frontend",
+    "category_backend": "Backend",
+    "category_mobile": "Mobile",
+    "category_devops": "DevOps",
+    "category_ai": "AI"
   },
   "SoftwareSkillsSection": {
     "title": "Technologies & Skills",
@@ -32,6 +44,7 @@
     "category_frontend": "Frontend",
     "category_backend": "Backend",
     "category_devops": "DevOps & Tools",
+    "clickHint": "Tip: click a technology to see the projects that use it.",
     "legend_beginner": "Familiar",
     "legend_expert": "Expert",
     "connectionFailedTitle": "Connection Failed",

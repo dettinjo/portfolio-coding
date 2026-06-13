@@ -33,6 +33,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
         <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
           {t("subtitle")}
         </p>
+        <p className="mt-3 text-sm text-muted-foreground/70">{t("clickHint")}</p>
       </div>
 
       {skills === null ? (
