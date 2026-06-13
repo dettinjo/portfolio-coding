@@ -1,0 +1,25 @@
+{
+  "title": "Ledger — Personal Finance",
+  "titleDe": "Ledger — Persönliche Finanzen",
+  "description": "A private Android budgeting app with offline-first sync, recurring transactions and spending insights.",
+  "descriptionDe": "Eine private Android-Budget-App mit Offline-First-Sync, wiederkehrenden Buchungen und Ausgaben-Insights.",
+  "projectType": "Android Mobile App (private)",
+  "projectTypeDe": "Android Mobile App (privat)",
+  "developedAt": "2024-03-08T00:00:00Z",
+  "weight": 1,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Kotlin",
+    "Android",
+    "Android Jetpack",
+    "Room DB",
+    "Retrofit",
+    "MVVM",
+    "Glide"
+  ],
+  "languages": {
+    "Kotlin": 61000
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "title": "Lexicon — LLM Fact Auditor",
+  "titleDe": "Lexicon — LLM-Faktenprüfer",
+  "description": "An NLP service that fact-checks LLM answers against Wikidata, with entity linking and confidence scoring.",
+  "descriptionDe": "Ein NLP-Dienst, der LLM-Antworten gegen Wikidata prüft – mit Entity-Linking und Konfidenz-Scoring.",
+  "projectType": "AI / NLP Application",
+  "projectTypeDe": "KI- / NLP-Anwendung",
+  "developedAt": "2024-12-12T00:00:00Z",
+  "weight": 2,
+  "publishLink": true,
+  "liveUrl": "https://lexicon.example.com",
+  "repoUrl": "https://github.com/alexrivera/lexicon-ai",
+  "tags": [
+    "Python",
+    "PyTorch",
+    "Transformers",
+    "spaCy",
+    "NLTK",
+    "LLM",
+    "NLP",
+    "Fact-Checking",
+    "Entity Linking",
+    "Wikidata",
+    "Flask"
+  ],
+  "languages": {
+    "Python": 73000
+  }
+}

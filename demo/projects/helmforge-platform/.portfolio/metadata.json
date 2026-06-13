@@ -1,0 +1,33 @@
+{
+  "title": "HelmForge — Kubernetes IaC Platform",
+  "titleDe": "HelmForge — Kubernetes-IaC-Plattform",
+  "description": "Reproducible Kubernetes clusters on Azure described entirely as code, with GitLab CI/CD and automatic TLS.",
+  "descriptionDe": "Reproduzierbare Kubernetes-Cluster auf Azure, vollständig als Code beschrieben – mit GitLab CI/CD und automatischem TLS.",
+  "projectType": "DevOps / Infrastructure",
+  "projectTypeDe": "DevOps / Infrastruktur",
+  "developedAt": "2025-03-30T00:00:00Z",
+  "weight": 2,
+  "publishLink": true,
+  "liveUrl": null,
+  "repoUrl": "https://github.com/alexrivera/helmforge-platform",
+  "tags": [
+    "Terraform",
+    "Terragrunt",
+    "Kubernetes",
+    "Docker",
+    "Docker Compose",
+    "NGINX",
+    "GitLab CI/CD",
+    "Shell Scripting",
+    "Microsoft Azure",
+    "Ingress",
+    "cert-manager",
+    "SSL/TLS",
+    "Infrastructure as Code (IaC)"
+  ],
+  "languages": {
+    "HCL": 52000,
+    "Shell": 21000,
+    "Dockerfile": 4000
+  }
+}

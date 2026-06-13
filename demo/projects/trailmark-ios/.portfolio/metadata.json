@@ -1,0 +1,26 @@
+{
+  "title": "TrailMark — iOS Hiking Companion",
+  "titleDe": "TrailMark — iOS-Wanderbegleiter",
+  "description": "A SwiftUI hiking app with offline maps, live GPS tracking and iCloud sync across devices.",
+  "descriptionDe": "Eine SwiftUI-Wander-App mit Offline-Karten, Live-GPS-Tracking und iCloud-Sync über alle Geräte.",
+  "projectType": "iOS Mobile App",
+  "projectTypeDe": "iOS Mobile App",
+  "developedAt": "2023-06-22T00:00:00Z",
+  "weight": 1,
+  "publishLink": true,
+  "liveUrl": "https://apps.apple.com/app/trailmark",
+  "repoUrl": "https://github.com/alexrivera/trailmark-ios",
+  "tags": [
+    "Swift",
+    "SwiftUI",
+    "CloudKit",
+    "MapKit",
+    "CoreLocation",
+    "Xcode",
+    "iOS",
+    "Core Data"
+  ],
+  "languages": {
+    "Swift": 94000
+  }
+}
