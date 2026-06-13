@@ -2,7 +2,7 @@
   "basics": {
     "name": "Alex Rivera",
     "headline": "Full-Stack Engineer",
-    "email": "alex.rivera@example.com",
+    "email": "hello@example.com",
     "location": "Berlin, Germany",
     "url": {
       "href": "https://portfolio-demo.example.com"
@@ -19,7 +19,7 @@
     "summary": {
       "name": "Summary",
       "visible": true,
-      "content": "Full-stack engineer who builds typed, well-tested web apps and the infrastructure to run them. Comfortable from React UIs to Kubernetes."
+      "content": "Full-stack engineer who builds well-tested web apps and the cloud infrastructure to run them. Comfortable from Vue UIs to AWS provisioning."
     },
     "experience": {
       "name": "Experience",
@@ -32,7 +32,7 @@
           "position": "Senior Full-Stack Engineer",
           "date": "2023 — Present",
           "location": "Berlin",
-          "summary": "Lead the web platform team; shipped a real-time analytics suite on Next.js and a typed Node.js API serving 40M requests/day."
+          "summary": "Lead the web platform team; shipped a real-time analytics suite on Vue/Nuxt and a Go API serving 40M requests/day."
         },
         {
           "id": "e2",
@@ -41,7 +41,7 @@
           "position": "Software Engineer",
           "date": "2021 — 2023",
           "location": "Munich",
-          "summary": "Built CI/CD and Kubernetes infrastructure as code; cut deploy times by 70% with GitLab pipelines and Terraform."
+          "summary": "Built CI/CD and AWS infrastructure as code; cut deploy times by 70% with Jenkins pipelines and Ansible."
         },
         {
           "id": "e3",
@@ -50,7 +50,7 @@
           "position": "Mobile & Web Developer",
           "date": "2019 — 2021",
           "location": "Remote",
-          "summary": "Delivered SwiftUI and Android apps and supporting backends for early-stage clients."
+          "summary": "Delivered Flutter apps and Rails backends for early-stage clients."
         }
       ]
     },
@@ -83,31 +83,31 @@
         {
           "id": "s1",
           "visible": true,
-          "name": "TypeScript / React",
+          "name": "Vue.js / Nuxt",
           "level": 5
         },
         {
           "id": "s2",
           "visible": true,
-          "name": "Node.js / APIs",
+          "name": "Go / APIs",
           "level": 5
         },
         {
           "id": "s3",
           "visible": true,
-          "name": "Python / NLP",
+          "name": "Python / ML",
           "level": 4
         },
         {
           "id": "s4",
           "visible": true,
-          "name": "Kubernetes / Terraform",
+          "name": "AWS / Ansible",
           "level": 4
         },
         {
           "id": "s5",
           "visible": true,
-          "name": "Swift / Kotlin",
+          "name": "Flutter / Dart",
           "level": 3
         }
       ]
@@ -143,19 +143,10 @@
         {
           "id": "p1",
           "visible": true,
-          "network": "LinkedIn",
-          "username": "alexrivera",
-          "url": {
-            "href": "https://linkedin.com/in/alexrivera"
-          }
-        },
-        {
-          "id": "p2",
-          "visible": true,
           "network": "GitHub",
-          "username": "alexrivera",
+          "username": "octocat",
           "url": {
-            "href": "https://github.com/alexrivera"
+            "href": "https://github.com/octocat"
           }
         }
       ]

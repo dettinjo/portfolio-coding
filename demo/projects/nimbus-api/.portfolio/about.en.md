@@ -1,20 +1,24 @@
 ## Overview
 
-A typed Node.js API with JWT auth, rate limiting and a GraphQL gateway over a MongoDB data layer.
+A high-throughput Go API with a GraphQL gateway, PostgreSQL persistence and Redis-backed caching and queues.
 
 <p align="center">
-  <img src="/media/projects/nimbus-api/gallery/shot1.webp" alt="Nimbus REST &amp; GraphQL API screenshot 1" width="32%" />
-  <img src="/media/projects/nimbus-api/gallery/shot2.webp" alt="Nimbus REST &amp; GraphQL API screenshot 2" width="32%" />
-  <img src="/media/projects/nimbus-api/gallery/shot3.webp" alt="Nimbus REST &amp; GraphQL API screenshot 3" width="32%" />
+  <img src="/media/projects/nimbus-api/gallery/shot1.webp" alt="Nimbus Go Microservice API screenshot 1" width="32%" />
+  <img src="/media/projects/nimbus-api/gallery/shot2.webp" alt="Nimbus Go Microservice API screenshot 2" width="32%" />
+  <img src="/media/projects/nimbus-api/gallery/shot3.webp" alt="Nimbus Go Microservice API screenshot 3" width="32%" />
 </p>
 
 ## Features
 
-- End-to-end typed handlers with Zod request validation
-- JWT access/refresh tokens and per-route rate limiting
-- GraphQL gateway stitched over REST resources
-- Containerized with a multi-stage Docker build
+- Idiomatic Go services with context-based cancellation
+- GraphQL gateway over a normalized PostgreSQL schema
+- Redis caching + RabbitMQ work queues for async jobs
+- Load-tested to 20k req/s with graceful shutdown
 
 ## Tech stack
 
-Node.js · Express.js · MongoDB · Mongoose · REST API · JWT · GraphQL · TypeScript
+Go · PostgreSQL · Redis · RabbitMQ · GraphQL
+
+## Note
+
+This is a private project — the source code is not publicly linked.

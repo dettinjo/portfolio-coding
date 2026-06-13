@@ -249,13 +249,15 @@ function renderShot(style: string, title: string, sub: string, accent: string, s
   }
 }
 
-function avatarSvg(initials: string, accent: string): string {
+// A simple contact silhouette on a TRANSPARENT background, in a neutral gray that
+// reads on both the light page and the theme-inverted (foreground) avatar circle.
+// This lets the hero's themed/scroll-inverting circular background show through,
+// matching the real site's behavior (no real photo in the demo).
+function avatarSvg(): string {
+  const gray = "#9aa1ab";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
-    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(accent, 30)}"/><stop offset="1" stop-color="${shade(accent, -80)}"/></linearGradient></defs>
-    <rect width="640" height="640" fill="url(#g)"/>
-    <circle cx="320" cy="250" r="120" fill="#ffffffcc"/>
-    <path d="M120 640 C120 470 230 410 320 410 C410 410 520 470 520 640 Z" fill="#ffffffcc"/>
-    <text x="320" y="285" text-anchor="middle" font-family="${FONT}" font-size="120" font-weight="800" fill="${shade(accent, -90)}">${esc(initials)}</text>
+    <circle cx="320" cy="250" r="118" fill="${gray}"/>
+    <path d="M132 612 C132 452 236 392 320 392 C404 392 508 452 508 612 Z" fill="${gray}"/>
   </svg>`;
 }
 
@@ -282,6 +284,11 @@ type Demo = {
   shotLabels: string[];
 };
 
+// NOTE: a deliberately *different* tech stack from the template author's own —
+// Vue/Nuxt, Go, Flutter, Ansible/AWS, TensorFlow, Rails — to demonstrate that
+// icons resolve dynamically from devicon and tech links resolve from the registry
+// for technologies the author never used. No project has a real repo, so none
+// declare a repoUrl (the detail page hides the source link when absent).
 const DEMOS: Demo[] = [
   {
     slug: "aurora-dashboard",
@@ -289,30 +296,30 @@ const DEMOS: Demo[] = [
     accent: "#6366F1",
     developedAt: "2025-02-18",
     weight: 2,
-    publishLink: true,
-    repoUrl: "https://github.com/alexrivera/aurora-dashboard",
+    publishLink: false,
+    repoUrl: null,
     liveUrl: "https://aurora.example.com",
     title: "Aurora Analytics Dashboard",
     titleDe: "Aurora Analytics-Dashboard",
     projectType: "Frontend Web Application",
     projectTypeDe: "Frontend-Webanwendung",
     description:
-      "A real-time analytics dashboard with live charts, theming and a fully keyboard-accessible UI, built on the App Router.",
+      "A real-time analytics dashboard with live charts, theming and a fully keyboard-accessible UI, built with Nuxt.",
     descriptionDe:
-      "Ein Echtzeit-Analyse-Dashboard mit Live-Charts, Theming und vollständig tastaturbedienbarer Oberfläche – gebaut mit dem App Router.",
-    tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "next-intl", "Material-UI"],
-    languages: { TypeScript: 82000, CSS: 14000, JavaScript: 6000 },
+      "Ein Echtzeit-Analyse-Dashboard mit Live-Charts, Theming und vollständig tastaturbedienbarer Oberfläche – gebaut mit Nuxt.",
+    tags: ["Vue.js", "Nuxt", "Vuetify", "Sass", "Vite"],
+    languages: { JavaScript: 90000 },
     features: [
-      "Streaming server components with optimistic UI updates",
-      "Light/dark theming driven by CSS variables",
-      "Animated, virtualized data tables (60fps on 10k rows)",
-      "Fully internationalized (EN/DE) with next-intl",
+      "Server-rendered Vue with Nuxt and a composable store",
+      "Light/dark theming driven by Sass design tokens",
+      "Reactive, virtualized data tables (60fps on 10k rows)",
+      "Lightning-fast HMR and builds with Vite",
     ],
     featuresDe: [
-      "Streaming Server Components mit optimistischen UI-Updates",
-      "Hell/Dunkel-Theming über CSS-Variablen",
-      "Animierte, virtualisierte Datentabellen (60fps bei 10k Zeilen)",
-      "Vollständig internationalisiert (EN/DE) mit next-intl",
+      "Server-gerendertes Vue mit Nuxt und einem Composable-Store",
+      "Hell/Dunkel-Theming über Sass-Design-Tokens",
+      "Reaktive, virtualisierte Datentabellen (60fps bei 10k Zeilen)",
+      "Blitzschnelles HMR und Builds mit Vite",
     ],
     shotLabels: ["Overview", "Reports", "Settings"],
   },
@@ -322,65 +329,65 @@ const DEMOS: Demo[] = [
     accent: "#10B981",
     developedAt: "2024-09-05",
     weight: 2,
-    publishLink: true,
-    repoUrl: "https://github.com/alexrivera/nimbus-api",
+    publishLink: false,
+    repoUrl: null,
     liveUrl: null,
-    title: "Nimbus REST & GraphQL API",
-    titleDe: "Nimbus REST- & GraphQL-API",
+    title: "Nimbus Go Microservice API",
+    titleDe: "Nimbus Go-Microservice-API",
     projectType: "Backend / API",
     projectTypeDe: "Backend / API",
     description:
-      "A typed Node.js API with JWT auth, rate limiting and a GraphQL gateway over a MongoDB data layer.",
+      "A high-throughput Go API with a GraphQL gateway, PostgreSQL persistence and Redis-backed caching and queues.",
     descriptionDe:
-      "Eine typisierte Node.js-API mit JWT-Auth, Rate-Limiting und einem GraphQL-Gateway über einer MongoDB-Datenschicht.",
-    tags: ["Node.js", "Express.js", "MongoDB", "Mongoose", "REST API", "JWT", "GraphQL", "TypeScript"],
-    languages: { TypeScript: 64000, JavaScript: 18000 },
+      "Eine durchsatzstarke Go-API mit GraphQL-Gateway, PostgreSQL-Persistenz und Redis-gestütztem Caching und Queues.",
+    tags: ["Go", "PostgreSQL", "Redis", "RabbitMQ", "GraphQL"],
+    languages: { Go: 88000 },
     features: [
-      "End-to-end typed handlers with Zod request validation",
-      "JWT access/refresh tokens and per-route rate limiting",
-      "GraphQL gateway stitched over REST resources",
-      "Containerized with a multi-stage Docker build",
+      "Idiomatic Go services with context-based cancellation",
+      "GraphQL gateway over a normalized PostgreSQL schema",
+      "Redis caching + RabbitMQ work queues for async jobs",
+      "Load-tested to 20k req/s with graceful shutdown",
     ],
     featuresDe: [
-      "Durchgängig typisierte Handler mit Zod-Validierung",
-      "JWT Access-/Refresh-Tokens und Rate-Limiting pro Route",
-      "GraphQL-Gateway über REST-Ressourcen gelegt",
-      "Containerisiert mit mehrstufigem Docker-Build",
+      "Idiomatische Go-Services mit Context-basiertem Cancellation",
+      "GraphQL-Gateway über ein normalisiertes PostgreSQL-Schema",
+      "Redis-Caching + RabbitMQ-Work-Queues für Async-Jobs",
+      "Lasttest bis 20k req/s mit Graceful Shutdown",
     ],
-    shotLabels: ["Routes", "Schema", "CI"],
+    shotLabels: ["Handlers", "Schema", "CI"],
   },
   {
-    slug: "trailmark-ios",
+    slug: "trailmark-app",
     style: "mobile",
     accent: "#14B8A6",
     developedAt: "2023-06-22",
     weight: 1,
-    publishLink: true,
-    repoUrl: "https://github.com/alexrivera/trailmark-ios",
-    liveUrl: "https://apps.apple.com/app/trailmark",
-    title: "TrailMark — iOS Hiking Companion",
-    titleDe: "TrailMark — iOS-Wanderbegleiter",
-    projectType: "iOS Mobile App",
-    projectTypeDe: "iOS Mobile App",
+    publishLink: false,
+    repoUrl: null,
+    liveUrl: null,
+    title: "TrailMark — Cross-Platform Hiking App",
+    titleDe: "TrailMark — Plattformübergreifende Wander-App",
+    projectType: "Cross-Platform Mobile App",
+    projectTypeDe: "Plattformübergreifende Mobile App",
     description:
-      "A SwiftUI hiking app with offline maps, live GPS tracking and iCloud sync across devices.",
+      "A Flutter hiking app with offline maps, live GPS tracking and Firebase sync across iOS and Android.",
     descriptionDe:
-      "Eine SwiftUI-Wander-App mit Offline-Karten, Live-GPS-Tracking und iCloud-Sync über alle Geräte.",
-    tags: ["Swift", "SwiftUI", "CloudKit", "MapKit", "CoreLocation", "Xcode", "iOS", "Core Data"],
-    languages: { Swift: 94000 },
+      "Eine Flutter-Wander-App mit Offline-Karten, Live-GPS-Tracking und Firebase-Sync über iOS und Android.",
+    tags: ["Flutter", "Dart", "Firebase"],
+    languages: { Dart: 90000 },
     features: [
-      "Offline vector maps with route recording via CoreLocation",
-      "iCloud (CloudKit) sync of trails across devices",
-      "Local persistence with Core Data + lightweight migrations",
-      "Live Activities and a home-screen widget",
+      "Single Flutter codebase for iOS and Android",
+      "Offline vector maps with live route recording",
+      "Firebase auth + Firestore sync across devices",
+      "Custom animations driven by Dart's async streams",
     ],
     featuresDe: [
-      "Offline-Vektorkarten mit Routenaufzeichnung via CoreLocation",
-      "iCloud-(CloudKit-)Sync der Touren über alle Geräte",
-      "Lokale Persistenz mit Core Data + schlanken Migrationen",
-      "Live Activities und ein Home-Screen-Widget",
+      "Eine Flutter-Codebasis für iOS und Android",
+      "Offline-Vektorkarten mit Live-Routenaufzeichnung",
+      "Firebase-Auth + Firestore-Sync über alle Geräte",
+      "Eigene Animationen über Darts Async-Streams",
     ],
-    shotLabels: ["Map", "Track", "Profile"],
+    shotLabels: ["Map", "Track", "Saved"],
   },
   {
     slug: "helmforge-platform",
@@ -388,32 +395,32 @@ const DEMOS: Demo[] = [
     accent: "#F59E0B",
     developedAt: "2025-03-30",
     weight: 2,
-    publishLink: true,
-    repoUrl: "https://github.com/alexrivera/helmforge-platform",
+    publishLink: false,
+    repoUrl: null,
     liveUrl: null,
-    title: "HelmForge — Kubernetes IaC Platform",
-    titleDe: "HelmForge — Kubernetes-IaC-Plattform",
+    title: "HelmForge — Cloud Provisioning Platform",
+    titleDe: "HelmForge — Cloud-Provisioning-Plattform",
     projectType: "DevOps / Infrastructure",
     projectTypeDe: "DevOps / Infrastruktur",
     description:
-      "Reproducible Kubernetes clusters on Azure described entirely as code, with GitLab CI/CD and automatic TLS.",
+      "Reproducible AWS infrastructure provisioned with Ansible, delivered through Jenkins pipelines with Prometheus + Grafana observability.",
     descriptionDe:
-      "Reproduzierbare Kubernetes-Cluster auf Azure, vollständig als Code beschrieben – mit GitLab CI/CD und automatischem TLS.",
-    tags: ["Terraform", "Terragrunt", "Kubernetes", "Docker", "Docker Compose", "NGINX", "GitLab CI/CD", "Shell Scripting", "Microsoft Azure", "Ingress", "cert-manager", "SSL/TLS", "Infrastructure as Code (IaC)"],
-    languages: { HCL: 52000, Shell: 21000, Dockerfile: 4000 },
+      "Reproduzierbare AWS-Infrastruktur via Ansible bereitgestellt, ausgeliefert über Jenkins-Pipelines mit Prometheus- und Grafana-Observability.",
+    tags: ["Ansible", "Amazon Web Services", "Jenkins", "Prometheus", "Grafana"],
+    languages: { Shell: 24000, Python: 12000 },
     features: [
-      "Whole stack (AKS, networking, DNS) as Terraform/Terragrunt modules",
-      "NGINX ingress + cert-manager for automatic Let's Encrypt TLS",
-      "GitLab CI/CD pipelines with plan/apply gates",
-      "One-command bootstrap and teardown scripts",
+      "Idempotent AWS provisioning with Ansible roles",
+      "Jenkins pipelines with promote/rollback stages",
+      "Prometheus metrics + Grafana dashboards and alerts",
+      "One-command bootstrap and teardown",
     ],
     featuresDe: [
-      "Gesamter Stack (AKS, Netzwerk, DNS) als Terraform/Terragrunt-Module",
-      "NGINX-Ingress + cert-manager für automatisches Let's-Encrypt-TLS",
-      "GitLab-CI/CD-Pipelines mit Plan-/Apply-Gates",
-      "Bootstrap- und Teardown-Skripte per Befehl",
+      "Idempotentes AWS-Provisioning mit Ansible-Rollen",
+      "Jenkins-Pipelines mit Promote-/Rollback-Stufen",
+      "Prometheus-Metriken + Grafana-Dashboards und Alerts",
+      "Bootstrap und Teardown per Befehl",
     ],
-    shotLabels: ["Apply", "Cluster", "Pipeline"],
+    shotLabels: ["Provision", "Inventory", "Pipeline"],
   },
   {
     slug: "lexicon-ai",
@@ -421,36 +428,36 @@ const DEMOS: Demo[] = [
     accent: "#8B5CF6",
     developedAt: "2024-12-12",
     weight: 2,
-    publishLink: true,
-    repoUrl: "https://github.com/alexrivera/lexicon-ai",
+    publishLink: false,
+    repoUrl: null,
     liveUrl: "https://lexicon.example.com",
-    title: "Lexicon — LLM Fact Auditor",
-    titleDe: "Lexicon — LLM-Faktenprüfer",
-    projectType: "AI / NLP Application",
-    projectTypeDe: "KI- / NLP-Anwendung",
+    title: "Lexicon — NLP Classification Toolkit",
+    titleDe: "Lexicon — NLP-Klassifikations-Toolkit",
+    projectType: "AI / ML Application",
+    projectTypeDe: "KI- / ML-Anwendung",
     description:
-      "An NLP service that fact-checks LLM answers against Wikidata, with entity linking and confidence scoring.",
+      "A text-classification toolkit: TensorFlow/Keras models trained on pandas pipelines, with scikit-learn baselines and Jupyter notebooks.",
     descriptionDe:
-      "Ein NLP-Dienst, der LLM-Antworten gegen Wikidata prüft – mit Entity-Linking und Konfidenz-Scoring.",
-    tags: ["Python", "PyTorch", "Transformers", "spaCy", "NLTK", "LLM", "NLP", "Fact-Checking", "Entity Linking", "Wikidata", "Flask"],
-    languages: { Python: 73000 },
+      "Ein Toolkit zur Textklassifikation: TensorFlow-/Keras-Modelle auf pandas-Pipelines trainiert, mit scikit-learn-Baselines und Jupyter-Notebooks.",
+    tags: ["TensorFlow", "Keras", "scikit-learn", "Pandas", "NumPy", "Jupyter"],
+    languages: { Python: 85000 },
     features: [
-      "Claim extraction and entity linking against Wikidata",
-      "Transformer-based stance detection with confidence scores",
-      "Flask service exposing a streaming verification API",
-      "Evaluation harness with precision/recall reporting",
+      "Keras models with reproducible training configs",
+      "pandas/NumPy feature pipelines and scikit-learn baselines",
+      "Experiment tracking and evaluation in Jupyter",
+      "Precision/recall reporting with confusion matrices",
     ],
     featuresDe: [
-      "Claim-Extraktion und Entity-Linking gegen Wikidata",
-      "Transformer-basierte Stance-Detection mit Konfidenzwerten",
-      "Flask-Dienst mit streamender Verifizierungs-API",
-      "Evaluations-Harness mit Precision-/Recall-Auswertung",
+      "Keras-Modelle mit reproduzierbaren Trainings-Konfigs",
+      "pandas-/NumPy-Feature-Pipelines und scikit-learn-Baselines",
+      "Experiment-Tracking und Auswertung in Jupyter",
+      "Precision-/Recall-Auswertung mit Konfusionsmatrizen",
     ],
-    shotLabels: ["Audit", "Sources", "Metrics"],
+    shotLabels: ["Classify", "Dataset", "Metrics"],
   },
   {
-    slug: "ledger-mobile",
-    style: "mobile",
+    slug: "ledger-app",
+    style: "dashboard",
     accent: "#F43F5E",
     developedAt: "2024-03-08",
     weight: 1,
@@ -459,27 +466,27 @@ const DEMOS: Demo[] = [
     liveUrl: null,
     title: "Ledger — Personal Finance",
     titleDe: "Ledger — Persönliche Finanzen",
-    projectType: "Android Mobile App (private)",
-    projectTypeDe: "Android Mobile App (privat)",
+    projectType: "Full-Stack Web App (private)",
+    projectTypeDe: "Full-Stack-Webanwendung (privat)",
     description:
-      "A private Android budgeting app with offline-first sync, recurring transactions and spending insights.",
+      "A private Ruby on Rails budgeting app with recurring transactions, category budgets and spending insights.",
     descriptionDe:
-      "Eine private Android-Budget-App mit Offline-First-Sync, wiederkehrenden Buchungen und Ausgaben-Insights.",
-    tags: ["Kotlin", "Android", "Android Jetpack", "Room DB", "Retrofit", "MVVM", "Glide"],
-    languages: { Kotlin: 61000 },
+      "Eine private Ruby-on-Rails-Budget-App mit wiederkehrenden Buchungen, Kategorie-Budgets und Ausgaben-Insights.",
+    tags: ["Ruby", "Ruby on Rails", "PostgreSQL", "Redis", "Sass"],
+    languages: { Ruby: 70000 },
     features: [
-      "Offline-first storage with Room and background sync",
-      "MVVM architecture with Jetpack ViewModels and Flow",
-      "Recurring transactions and category budgets",
+      "Rails app with Hotwire for live, server-rendered updates",
+      "Recurring transactions and per-category budgets",
+      "Background jobs (Sidekiq + Redis) for imports",
       "Monthly spending insights and charts",
     ],
     featuresDe: [
-      "Offline-First-Speicher mit Room und Hintergrund-Sync",
-      "MVVM-Architektur mit Jetpack ViewModels und Flow",
-      "Wiederkehrende Buchungen und Kategorie-Budgets",
+      "Rails-App mit Hotwire für serverseitige Live-Updates",
+      "Wiederkehrende Buchungen und Budgets pro Kategorie",
+      "Background-Jobs (Sidekiq + Redis) für Importe",
       "Monatliche Ausgaben-Insights und Diagramme",
     ],
-    shotLabels: ["Balance", "Budgets", "Insights"],
+    shotLabels: ["Balance", "Budgets", "Reports"],
   },
 ];
 
@@ -522,10 +529,12 @@ const SITE_CONFIG = {
     fullName: "Alex Rivera",
     firstName: "Alex",
     headline: "Full-Stack Engineer",
-    email: "alex.rivera@example.com",
+    email: "hello@example.com",
     phone: "",
     address: { street: "", city: "Berlin", country: "Germany" },
-    socials: { github: "alexrivera", linkedin: "alexrivera", instagram: "" },
+    // Fictional demo persona. Handles point only at GitHub's official "octocat"
+    // example account — never a real individual's profile. LinkedIn is omitted.
+    socials: { github: "octocat", linkedin: "", instagram: "" },
   },
   site: {
     serverUrl: "https://portfolio-demo.example.com",
@@ -548,7 +557,7 @@ const RESUME = {
   basics: {
     name: "Alex Rivera",
     headline: "Full-Stack Engineer",
-    email: "alex.rivera@example.com",
+    email: "hello@example.com",
     location: "Berlin, Germany",
     url: { href: "https://portfolio-demo.example.com" },
     picture: { url: "/images/profile.webp" },
@@ -559,15 +568,15 @@ const RESUME = {
       name: "Summary",
       visible: true,
       content:
-        "Full-stack engineer who builds typed, well-tested web apps and the infrastructure to run them. Comfortable from React UIs to Kubernetes.",
+        "Full-stack engineer who builds well-tested web apps and the cloud infrastructure to run them. Comfortable from Vue UIs to AWS provisioning.",
     },
     experience: {
       name: "Experience",
       visible: true,
       items: [
-        { id: "e1", visible: true, company: "Northwind Labs", position: "Senior Full-Stack Engineer", date: "2023 — Present", location: "Berlin", summary: "Lead the web platform team; shipped a real-time analytics suite on Next.js and a typed Node.js API serving 40M requests/day." },
-        { id: "e2", visible: true, company: "Cloudpeak GmbH", position: "Software Engineer", date: "2021 — 2023", location: "Munich", summary: "Built CI/CD and Kubernetes infrastructure as code; cut deploy times by 70% with GitLab pipelines and Terraform." },
-        { id: "e3", visible: true, company: "Freelance", position: "Mobile & Web Developer", date: "2019 — 2021", location: "Remote", summary: "Delivered SwiftUI and Android apps and supporting backends for early-stage clients." },
+        { id: "e1", visible: true, company: "Northwind Labs", position: "Senior Full-Stack Engineer", date: "2023 — Present", location: "Berlin", summary: "Lead the web platform team; shipped a real-time analytics suite on Vue/Nuxt and a Go API serving 40M requests/day." },
+        { id: "e2", visible: true, company: "Cloudpeak GmbH", position: "Software Engineer", date: "2021 — 2023", location: "Munich", summary: "Built CI/CD and AWS infrastructure as code; cut deploy times by 70% with Jenkins pipelines and Ansible." },
+        { id: "e3", visible: true, company: "Freelance", position: "Mobile & Web Developer", date: "2019 — 2021", location: "Remote", summary: "Delivered Flutter apps and Rails backends for early-stage clients." },
       ],
     },
     education: {
@@ -582,11 +591,11 @@ const RESUME = {
       name: "Skills",
       visible: true,
       items: [
-        { id: "s1", visible: true, name: "TypeScript / React", level: 5 },
-        { id: "s2", visible: true, name: "Node.js / APIs", level: 5 },
-        { id: "s3", visible: true, name: "Python / NLP", level: 4 },
-        { id: "s4", visible: true, name: "Kubernetes / Terraform", level: 4 },
-        { id: "s5", visible: true, name: "Swift / Kotlin", level: 3 },
+        { id: "s1", visible: true, name: "Vue.js / Nuxt", level: 5 },
+        { id: "s2", visible: true, name: "Go / APIs", level: 5 },
+        { id: "s3", visible: true, name: "Python / ML", level: 4 },
+        { id: "s4", visible: true, name: "AWS / Ansible", level: 4 },
+        { id: "s5", visible: true, name: "Flutter / Dart", level: 3 },
       ],
     },
     languages: {
@@ -602,8 +611,7 @@ const RESUME = {
       name: "Profiles",
       visible: true,
       items: [
-        { id: "p1", visible: true, network: "LinkedIn", username: "alexrivera", url: { href: "https://linkedin.com/in/alexrivera" } },
-        { id: "p2", visible: true, network: "GitHub", username: "alexrivera", url: { href: "https://github.com/alexrivera" } },
+        { id: "p1", visible: true, network: "GitHub", username: "octocat", url: { href: "https://github.com/octocat" } },
       ],
     },
   },
@@ -646,8 +654,8 @@ async function main() {
     console.log(`  ✓ ${d.slug} (${d.shotLabels.length} shots)`);
   }
 
-  // Avatar.
-  await toWebp(avatarSvg("AR", "#6366F1"), path.join(demoDir, "profile.webp"));
+  // Avatar (transparent contact silhouette).
+  await toWebp(avatarSvg(), path.join(demoDir, "profile.webp"));
   console.log("  ✓ profile.webp");
 
   // Config + resume.

@@ -224,6 +224,22 @@ const main = async () => {
       const v = fonts.includes("plain") ? "plain" : fonts.includes("original") ? "original" : fonts[0];
       return `devicon-${e.name}-${v}`;
     };
+    // Index devicon by name + altnames for lookup.
+    const deviconByName: Record<string, any> = {};
+    for (const e of devicon) {
+      deviconByName[normalizeTech(e.name)] = e;
+      for (const a of e.altnames ?? []) deviconByName[normalizeTech(a)] = e;
+    }
+    // Backfill icons for registry entries that only declare category/url (icon
+    // left null) — the icon is resolved dynamically from devicon, so adding a
+    // tech needs nothing more than its category and homepage URL.
+    for (const k of Object.keys(techRegistry)) {
+      const entry = techRegistry[k] as TechDetail;
+      if (!entry.iconClassName) {
+        const e = deviconByName[normalizeTech(k)] || deviconByName[normalizeTech(entry.name || "")];
+        if (e) entry.iconClassName = deviconClass(e);
+      }
+    }
     const have = new Set(Object.keys(techRegistry).map((k) => normalizeTech(k)));
     for (const k of Object.keys(techRegistry)) {
       const n = (techRegistry[k] as TechDetail).name;

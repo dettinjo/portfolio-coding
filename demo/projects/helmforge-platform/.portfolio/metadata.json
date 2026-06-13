@@ -1,33 +1,24 @@
 {
-  "title": "HelmForge — Kubernetes IaC Platform",
-  "titleDe": "HelmForge — Kubernetes-IaC-Plattform",
-  "description": "Reproducible Kubernetes clusters on Azure described entirely as code, with GitLab CI/CD and automatic TLS.",
-  "descriptionDe": "Reproduzierbare Kubernetes-Cluster auf Azure, vollständig als Code beschrieben – mit GitLab CI/CD und automatischem TLS.",
+  "title": "HelmForge — Cloud Provisioning Platform",
+  "titleDe": "HelmForge — Cloud-Provisioning-Plattform",
+  "description": "Reproducible AWS infrastructure provisioned with Ansible, delivered through Jenkins pipelines with Prometheus + Grafana observability.",
+  "descriptionDe": "Reproduzierbare AWS-Infrastruktur via Ansible bereitgestellt, ausgeliefert über Jenkins-Pipelines mit Prometheus- und Grafana-Observability.",
   "projectType": "DevOps / Infrastructure",
   "projectTypeDe": "DevOps / Infrastruktur",
   "developedAt": "2025-03-30T00:00:00Z",
   "weight": 2,
-  "publishLink": true,
+  "publishLink": false,
   "liveUrl": null,
-  "repoUrl": "https://github.com/alexrivera/helmforge-platform",
+  "repoUrl": null,
   "tags": [
-    "Terraform",
-    "Terragrunt",
-    "Kubernetes",
-    "Docker",
-    "Docker Compose",
-    "NGINX",
-    "GitLab CI/CD",
-    "Shell Scripting",
-    "Microsoft Azure",
-    "Ingress",
-    "cert-manager",
-    "SSL/TLS",
-    "Infrastructure as Code (IaC)"
+    "Ansible",
+    "Amazon Web Services",
+    "Jenkins",
+    "Prometheus",
+    "Grafana"
   ],
   "languages": {
-    "HCL": 52000,
-    "Shell": 21000,
-    "Dockerfile": 4000
+    "Shell": 24000,
+    "Python": 12000
   }
 }

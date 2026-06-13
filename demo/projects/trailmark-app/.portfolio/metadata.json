@@ -1,0 +1,21 @@
+{
+  "title": "TrailMark — Cross-Platform Hiking App",
+  "titleDe": "TrailMark — Plattformübergreifende Wander-App",
+  "description": "A Flutter hiking app with offline maps, live GPS tracking and Firebase sync across iOS and Android.",
+  "descriptionDe": "Eine Flutter-Wander-App mit Offline-Karten, Live-GPS-Tracking und Firebase-Sync über iOS und Android.",
+  "projectType": "Cross-Platform Mobile App",
+  "projectTypeDe": "Plattformübergreifende Mobile App",
+  "developedAt": "2023-06-22T00:00:00Z",
+  "weight": 1,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Flutter",
+    "Dart",
+    "Firebase"
+  ],
+  "languages": {
+    "Dart": 90000
+  }
+}

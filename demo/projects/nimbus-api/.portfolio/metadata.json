@@ -1,27 +1,23 @@
 {
-  "title": "Nimbus REST & GraphQL API",
-  "titleDe": "Nimbus REST- & GraphQL-API",
-  "description": "A typed Node.js API with JWT auth, rate limiting and a GraphQL gateway over a MongoDB data layer.",
-  "descriptionDe": "Eine typisierte Node.js-API mit JWT-Auth, Rate-Limiting und einem GraphQL-Gateway über einer MongoDB-Datenschicht.",
+  "title": "Nimbus Go Microservice API",
+  "titleDe": "Nimbus Go-Microservice-API",
+  "description": "A high-throughput Go API with a GraphQL gateway, PostgreSQL persistence and Redis-backed caching and queues.",
+  "descriptionDe": "Eine durchsatzstarke Go-API mit GraphQL-Gateway, PostgreSQL-Persistenz und Redis-gestütztem Caching und Queues.",
   "projectType": "Backend / API",
   "projectTypeDe": "Backend / API",
   "developedAt": "2024-09-05T00:00:00Z",
   "weight": 2,
-  "publishLink": true,
+  "publishLink": false,
   "liveUrl": null,
-  "repoUrl": "https://github.com/alexrivera/nimbus-api",
+  "repoUrl": null,
   "tags": [
-    "Node.js",
-    "Express.js",
-    "MongoDB",
-    "Mongoose",
-    "REST API",
-    "JWT",
-    "GraphQL",
-    "TypeScript"
+    "Go",
+    "PostgreSQL",
+    "Redis",
+    "RabbitMQ",
+    "GraphQL"
   ],
   "languages": {
-    "TypeScript": 64000,
-    "JavaScript": 18000
+    "Go": 88000
   }
 }

@@ -1,29 +1,24 @@
 {
-  "title": "Lexicon — LLM Fact Auditor",
-  "titleDe": "Lexicon — LLM-Faktenprüfer",
-  "description": "An NLP service that fact-checks LLM answers against Wikidata, with entity linking and confidence scoring.",
-  "descriptionDe": "Ein NLP-Dienst, der LLM-Antworten gegen Wikidata prüft – mit Entity-Linking und Konfidenz-Scoring.",
-  "projectType": "AI / NLP Application",
-  "projectTypeDe": "KI- / NLP-Anwendung",
+  "title": "Lexicon — NLP Classification Toolkit",
+  "titleDe": "Lexicon — NLP-Klassifikations-Toolkit",
+  "description": "A text-classification toolkit: TensorFlow/Keras models trained on pandas pipelines, with scikit-learn baselines and Jupyter notebooks.",
+  "descriptionDe": "Ein Toolkit zur Textklassifikation: TensorFlow-/Keras-Modelle auf pandas-Pipelines trainiert, mit scikit-learn-Baselines und Jupyter-Notebooks.",
+  "projectType": "AI / ML Application",
+  "projectTypeDe": "KI- / ML-Anwendung",
   "developedAt": "2024-12-12T00:00:00Z",
   "weight": 2,
-  "publishLink": true,
+  "publishLink": false,
   "liveUrl": "https://lexicon.example.com",
-  "repoUrl": "https://github.com/alexrivera/lexicon-ai",
+  "repoUrl": null,
   "tags": [
-    "Python",
-    "PyTorch",
-    "Transformers",
-    "spaCy",
-    "NLTK",
-    "LLM",
-    "NLP",
-    "Fact-Checking",
-    "Entity Linking",
-    "Wikidata",
-    "Flask"
+    "TensorFlow",
+    "Keras",
+    "scikit-learn",
+    "Pandas",
+    "NumPy",
+    "Jupyter"
   ],
   "languages": {
-    "Python": 73000
+    "Python": 85000
   }
 }
