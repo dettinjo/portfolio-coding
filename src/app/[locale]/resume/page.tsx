@@ -1,6 +1,7 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Globe, Mail, MapPin, Phone, Linkedin, Github } from "lucide-react";
 import { UtilityHeader } from "@/components/layout/UtilityHeader";
 import { Avatar } from "@/components/ui/avatar";
@@ -11,9 +12,10 @@ import { ProficiencyBar } from "@/components/ProficiencyBar";
 import resumeData from "@/data/resume.json";
 import { ResumeData } from "@/types/resume";
 import { ResumeAutoPrint } from "@/components/resume/ResumeAutoPrint";
+import { withBasePath } from "@/lib/basePath";
 
 const data = resumeData as unknown as ResumeData;
-const avatarPath = "/images/profile.webp";
+const avatarPath = withBasePath("/images/profile.webp");
 
 // Apply per-section display limits defined in resume.json `display` block.
 // All raw items are preserved in the JSON — only rendering is restricted.
@@ -34,14 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ResumePage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ print?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+  setRequestLocale(locale); // keep this page statically renderable (no headers())
   const t = await getTranslations("ResumePage");
   const { basics, sections } = data;
-  const params = await searchParams;
-  const isPrintMode = params?.print === "true";
 
   // Get LinkedIn and GitHub profiles
   const linkedinProfile = sections.profiles?.items?.find(
@@ -54,15 +56,18 @@ export default async function ResumePage({
   return (
     // Outer page background: respects site theme. For print, we remove outer padding so the content background (zinc-950 or white) occupies the full page.
     <div className="min-h-screen bg-background/90 print:bg-background print:min-h-screen print:w-full print:p-0 print:box-border print:overflow-hidden">
-      {/* ResumeAutoPrint is only needed for the old browser-print fallback */}
-      {!isPrintMode && <ResumeAutoPrint />}
-      <div className={isPrintMode ? "hidden" : "print:hidden"}>
+      {/* Auto-triggers window.print() when opened with ?print=true (client-side).
+          Wrapped in Suspense because useSearchParams requires it under static export. */}
+      <Suspense fallback={null}>
+        <ResumeAutoPrint />
+      </Suspense>
+      <div className="print:hidden">
         <UtilityHeader />
       </div>
 
       <div className="py-12 print:p-0">
         {/* Floating Download Button - Hidden in Puppeteer print mode and real print */}
-        <div className={`fixed bottom-8 right-8 z-50 ${isPrintMode ? "hidden" : "print:hidden"}`}>
+        <div className="fixed bottom-8 right-8 z-50 print:hidden">
           <PrintButton
             // Label for the download button
             label={t("downloadPdf")}

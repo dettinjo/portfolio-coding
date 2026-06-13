@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import { type ExtraProps } from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { withBasePath } from "@/lib/basePath";
 
 interface LongTextRendererProps {
   content: string | null | undefined;
@@ -49,6 +50,7 @@ const ImgComponent = ({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       {...props}
+      src={withBasePath(props.src as string | undefined)}
       alt={props.alt || ""}
       loading="lazy"
       className={

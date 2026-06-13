@@ -38,6 +38,12 @@ export function ContactSection() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmissionStatus("submitting");
+    // The static demo (GitHub Pages) has no backend — simulate the success
+    // state instead of POSTing to a route that doesn't exist there.
+    if (process.env.NEXT_PUBLIC_STATIC_DEMO === "1") {
+      setTimeout(() => setSubmissionStatus("success"), 600);
+      return;
+    }
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
     try {
