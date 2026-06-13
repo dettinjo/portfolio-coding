@@ -71,8 +71,6 @@ export default async function DevPage({ params }: Props) {
 
   const projectsData = projects;
   const skillsDataForDisplay = skillCategories;
-  // const projectsData: any[] = [];
-  // const skillsDataForDisplay: any[] = [];
 
   const t = await getTranslations({
     locale: locale,

@@ -1,11 +1,10 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export function ResumeAutoPrint() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const hasPrinted = useRef(false);
 
   useEffect(() => {
@@ -13,18 +12,10 @@ export function ResumeAutoPrint() {
 
     if (shouldPrint && !hasPrinted.current) {
       hasPrinted.current = true;
-      
-      // Small delay to ensure rendering is complete
-      setTimeout(() => {
-        window.print();
-        
-        // Optional: Remove the query param after printing
-        // const newParams = new URLSearchParams(searchParams.toString());
-        // newParams.delete("print");
-        // router.replace(`?${newParams.toString()}`, { scroll: false });
-      }, 500);
+      // Small delay to ensure rendering is complete before printing.
+      setTimeout(() => window.print(), 500);
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   return null;
 }

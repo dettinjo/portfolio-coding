@@ -58,9 +58,7 @@ next-env.d.ts
 # logs
 *.log
 
-# migration
-migration-data.json
-migration-assets/
+# generated project media (built by fetch-portfolio.ts)
 /public/media/projects/
 
 # local personal config (real values live in the portfolio-config repo;
