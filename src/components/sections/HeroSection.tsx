@@ -91,7 +91,9 @@ export function HeroSection() {
               "h-48 w-48 sm:h-56 sm:w-56 border-4 lg:size-[418px] group",
               "transition-all duration-500 ease-in-out",
               "border-foreground",
-              isAvatarActive ? "bg-foreground" : "bg-background"
+              isPlaceholder
+                ? (isAvatarActive ? "bg-foreground" : "bg-background")
+                : (isAvatarActive ? "bg-white" : "bg-zinc-950")
             )}
           >
             <Image
