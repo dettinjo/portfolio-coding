@@ -18,6 +18,10 @@
   "site": {
     "serverUrl": "http://localhost:3000",
     "defaultLocale": "en",
+    "locales": [
+      "en",
+      "de"
+    ],
     "seo": {
       "description": {
         "en": "A collection of my software development projects showcasing modern web technologies.",

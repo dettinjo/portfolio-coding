@@ -7,7 +7,15 @@ import Image from "next/image";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import type { SoftwareProject } from "@/lib/types";
 import { getMediaUrl } from "@/lib/media";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Terminal,
+  Database,
+  Layout,
+  Smartphone,
+  Cpu,
+  FolderGit,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -16,6 +24,24 @@ interface AnimatedProjectCardProps {
   index: number;
   isActive: boolean;
   onScrollProgressChange: (progress: number) => void;
+}
+
+function getCategoryIcon(project: SoftwareProject) {
+  const category = project.categories?.[0] || "";
+  switch (category) {
+    case "frontend":
+      return Layout;
+    case "backend":
+      return Database;
+    case "mobile":
+      return Smartphone;
+    case "devops":
+      return Cpu;
+    case "ai":
+      return Terminal;
+    default:
+      return FolderGit;
+  }
 }
 
 export function AnimatedProjectCard({
@@ -84,8 +110,8 @@ export function AnimatedProjectCard({
             index % 2 === 1 ? "md:order-last" : ""
           )}
         >
-          {imageUrl &&
-            (isIconCover ? (
+          {imageUrl ? (
+            isIconCover ? (
               <div className="relative w-full h-full">
                 <Image
                   src={imageUrl}
@@ -106,7 +132,18 @@ export function AnimatedProjectCard({
                 priority={index < 2}
                 className="max-h-[320px] w-auto h-auto rounded-2xl object-contain shadow-lg"
               />
-            ))}
+            )
+          ) : (
+            <div className={cn(
+              "w-full aspect-[4/3] max-w-[420px] rounded-2xl flex items-center justify-center border border-foreground/10 shadow-inner transition-colors duration-500",
+              isActive ? "bg-background text-foreground" : "bg-foreground text-background"
+            )}>
+              {(() => {
+                const IconComponent = getCategoryIcon(project);
+                return <IconComponent className="w-16 h-16 opacity-80" />;
+              })()}
+            </div>
+          )}
         </div>
         <div className="flex flex-col md:w-1/2 p-10 md:p-16">
           <div className="flex-grow">

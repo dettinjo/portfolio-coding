@@ -19,6 +19,11 @@
   "site": {
     "serverUrl": "https://portfolio-demo.example.com",
     "defaultLocale": "en",
+    "locales": [
+      "en",
+      "de",
+      "es"
+    ],
     "seo": {
       "description": {
         "en": "Demo portfolio of Alex Rivera — a config-driven, GitHub-powered developer portfolio template.",

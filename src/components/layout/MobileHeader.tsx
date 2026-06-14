@@ -39,7 +39,7 @@ export function MobileNav({ navLinks, children }: MobileNavProps) {
             <SheetTitle>Mobile Navigation Menu</SheetTitle>
           </SheetHeader>
         </VisuallyHidden>
-        <div className="flex h-full flex-col justify-end items-end p-0">
+        <div className="flex h-full flex-col justify-center items-end p-0">
           <SheetClose asChild>
             <Button
               variant="ghost"

@@ -37,11 +37,18 @@ const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
         github: person.socials?.github ?? "",
         linkedin: person.socials?.linkedin ?? "",
         instagram: person.socials?.instagram ?? "",
+        email: person.socials?.email ?? person.email ?? "",
+        x: person.socials?.x ?? "",
+        youtube: person.socials?.youtube ?? "",
+        devto: person.socials?.devto ?? "",
+        stackoverflow: person.socials?.stackoverflow ?? "",
+        ...person.socials,
       },
     },
     site: {
       serverUrl: site.serverUrl ?? "http://localhost:3000",
       defaultLocale: site.defaultLocale ?? "en",
+      locales: (site.locales?.filter((l): l is string => typeof l === "string") ?? ["en", "de"]),
       seo: {
         description: {
           en: site.seo?.description?.en ?? "",

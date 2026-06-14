@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Github, Linkedin, Instagram, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/config";
 import { useUmami } from "@/hooks/useUmami";
+import { socialRegistry } from "@/lib/socials";
 
 const socials = siteConfig.person.socials;
 
@@ -94,40 +95,28 @@ export function ContactSection() {
             <p className="mt-4 text-lg leading-8 text-muted-foreground transition-colors duration-300 group-data-[active=true]:text-background/80">
               {t("subtitle")}
             </p>
-            <div className="mt-8 flex items-center justify-start gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-start gap-4">
               <p className="text-sm text-muted-foreground transition-colors duration-300 group-data-[active=true]:text-background/70">
                 {t("socials_text")}
               </p>
-              {socials.github && (
-                <a
-                  href={`https://github.com/${socials.github}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub"
-                >
-                  <Github className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-                </a>
-              )}
-              {socials.linkedin && (
-                <a
-                  href={`https://linkedin.com/in/${socials.linkedin}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-                </a>
-              )}
-              {socials.instagram && (
-                <a
-                  href={`https://instagram.com/${socials.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
-                </a>
-              )}
+              {Object.entries(socials)
+                .filter(([_, value]) => Boolean(value))
+                .map(([key, value]) => {
+                  const config = socialRegistry[key];
+                  if (!config) return null;
+                  const Icon = config.icon;
+                  return (
+                    <a
+                      key={key}
+                      href={config.getUrl(value as string)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={config.name}
+                    >
+                      <Icon className="h-6 w-6 text-muted-foreground transition-colors hover:text-foreground group-data-[active=true]:text-background/70 group-data-[active=true]:hover:text-background" />
+                    </a>
+                  );
+                })}
             </div>
           </motion.div>
 

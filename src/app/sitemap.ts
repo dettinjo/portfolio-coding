@@ -2,6 +2,7 @@
 import { MetadataRoute } from "next";
 import { fetchAllProjectSlugs } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
+import { routing } from "@/i18n/routing";
 
 // Static so it can be emitted under `output: export` (GitHub Pages demo).
 export const dynamic = "force-static";
@@ -9,138 +10,71 @@ export const dynamic = "force-static";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const serverUrl = siteConfig.site.serverUrl;
 
-  // --- FETCH DYNAMIC SLUGS FOR BOTH LOCALES ---
-  let enProjectSlugs: { slug: string }[] = [];
-  let deProjectSlugs: { slug: string }[] = [];
-
-  try {
-    const results = await Promise.all([
-      fetchAllProjectSlugs("en"),
-      fetchAllProjectSlugs("de"),
-    ]);
-    enProjectSlugs = results[0] as { slug: string }[];
-    deProjectSlugs = results[1] as { slug: string }[];
-  } catch (error) {
-    console.warn(
-      "Database not available or empty, skipping sitemap generation for projects.",
-      error
-    );
+  // Fetch dynamic slugs for all configured locales
+  const projectSlugsPerLocale: Record<string, { slug: string }[]> = {};
+  for (const locale of routing.locales) {
+    try {
+      projectSlugsPerLocale[locale] = await fetchAllProjectSlugs(locale);
+    } catch (error) {
+      console.warn(
+        `Database not available or empty, skipping sitemap generation for projects in locale "${locale}".`,
+        error
+      );
+      projectSlugsPerLocale[locale] = [];
+    }
   }
 
-  // --- MAP SLUGS TO SITEMAP ENTRIES ---
-  const enSoftwareProjectPages = enProjectSlugs.map(({ slug }) => ({
-    url: `${serverUrl}/${slug}`,
-    lastModified: new Date(),
-  }));
+  // Helper to build a localized path
+  const getLocalizedUrl = (path: string, locale: string) => {
+    if (locale === routing.defaultLocale) {
+      return path ? `${serverUrl}/${path}` : `${serverUrl}`;
+    }
+    return path ? `${serverUrl}/${locale}/${path}` : `${serverUrl}/${locale}`;
+  };
 
-  const deSoftwareProjectPages = deProjectSlugs.map(({ slug }) => ({
-    url: `${serverUrl}/de/${slug}`,
-    lastModified: new Date(),
-  }));
+  const staticRoutePaths = ["", "imprint", "privacy_policy", "resume"];
+  const priorities: Record<string, number> = {
+    "": 1.0,
+    resume: 0.8,
+    imprint: 0.5,
+    privacy_policy: 0.5,
+  };
 
-  // --- DEFINE STATIC AND TOP-LEVEL PAGES FOR BOTH LOCALES ---
-  // --- DEFINE STATIC AND TOP-LEVEL PAGES FOR BOTH LOCALES ---
-  // --- DEFINE STATIC AND TOP-LEVEL PAGES FOR BOTH LOCALES ---
-  const staticEnRoutes = [
-    {
-      url: `${serverUrl}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 1.0,
-      alternates: {
-        languages: {
-          en: `${serverUrl}`,
-          de: `${serverUrl}/de`,
+  // Generate static routes dynamically for all locales
+  const staticRoutes: MetadataRoute.Sitemap = [];
+  for (const locale of routing.locales) {
+    for (const path of staticRoutePaths) {
+      const isHome = path === "";
+      staticRoutes.push({
+        url: getLocalizedUrl(path, locale),
+        lastModified: new Date(),
+        changeFrequency: isHome ? ("weekly" as const) : undefined,
+        priority: priorities[path] ?? 0.5,
+        alternates: {
+          languages: Object.fromEntries(
+            routing.locales.map((loc) => [loc, getLocalizedUrl(path, loc)])
+          ),
         },
-      },
-    },
-    {
-      url: `${serverUrl}/imprint`,
-      lastModified: new Date(),
-      priority: 0.5,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/imprint`,
-          de: `${serverUrl}/de/imprint`,
-        },
-      },
-    },
-    {
-      url: `${serverUrl}/privacy_policy`,
-      lastModified: new Date(),
-      priority: 0.5,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/privacy_policy`,
-          de: `${serverUrl}/de/privacy_policy`,
-        },
-      },
-    },
-    {
-      url: `${serverUrl}/resume`,
-      lastModified: new Date(),
-      priority: 0.8,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/resume`,
-          de: `${serverUrl}/de/resume`,
-        },
-      },
-    },
-  ];
+      });
+    }
+  }
 
-  const staticDeRoutes = [
-    {
-      url: `${serverUrl}/de`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 1.0,
-      alternates: {
-        languages: {
-          en: `${serverUrl}`,
-          de: `${serverUrl}/de`,
+  // Generate dynamic project pages dynamically for all locales
+  const projectPages: MetadataRoute.Sitemap = [];
+  for (const locale of routing.locales) {
+    const slugs = projectSlugsPerLocale[locale] || [];
+    for (const { slug } of slugs) {
+      projectPages.push({
+        url: getLocalizedUrl(slug, locale),
+        lastModified: new Date(),
+        alternates: {
+          languages: Object.fromEntries(
+            routing.locales.map((loc) => [loc, getLocalizedUrl(slug, loc)])
+          ),
         },
-      },
-    },
-    {
-      url: `${serverUrl}/de/imprint`,
-      lastModified: new Date(),
-      priority: 0.5,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/imprint`,
-          de: `${serverUrl}/de/imprint`,
-        },
-      },
-    },
-    {
-      url: `${serverUrl}/de/privacy_policy`,
-      lastModified: new Date(),
-      priority: 0.5,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/privacy_policy`,
-          de: `${serverUrl}/de/privacy_policy`,
-        },
-      },
-    },
-    {
-      url: `${serverUrl}/de/resume`,
-      lastModified: new Date(),
-      priority: 0.8,
-      alternates: {
-        languages: {
-          en: `${serverUrl}/resume`,
-          de: `${serverUrl}/de/resume`,
-        },
-      },
-    },
-  ];
+      });
+    }
+  }
 
-  return [
-    ...staticEnRoutes,
-    ...staticDeRoutes,
-    ...enSoftwareProjectPages,
-    ...deSoftwareProjectPages,
-  ];
+  return [...staticRoutes, ...projectPages];
 }

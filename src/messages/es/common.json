@@ -1,0 +1,69 @@
+{
+  "Footer": {
+    "made_with": "Hecho con",
+    "by_me": "por mí",
+    "imprint": "Aviso Legal",
+    "privacy": "Política de Privacidad"
+  },
+  "HomePageSEO": {
+    "title": "Código por {name}",
+    "description": "Explora una colección de mis proyectos de desarrollo de software que muestran mis habilidades en tecnologías web modernas."
+  },
+  "ImprintPage": {
+    "title": "Aviso Legal",
+    "section1_title": "Información conforme a la § 5 TMG",
+    "section1_content": {
+      "name": "{name}",
+      "street": "{street}",
+      "city": "{city}",
+      "country": "{country}"
+    },
+    "section2_title": "Contacto",
+    "section2_content": {
+      "phone": "Teléfono: {phone}",
+      "email": "Correo electrónico: {email}"
+    },
+    "section3_title": "Responsable del contenido conforme a la § 18 Abs. 2 MStV",
+    "section3_content": {
+      "name": "{name}",
+      "address": "{street}, {city}"
+    },
+    "disclaimer_title": "Descargo de responsabilidad",
+    "disclaimer_links_title": "Responsabilidad por enlaces",
+    "disclaimer_links_content": "Este sitio contiene enlaces a sitios web externos de terceros, sobre cuyo contenido no tengo ninguna influencia. No puedo asumir ninguna responsabilidad por este contenido externo. El proveedor u operador correspondiente de esas páginas es siempre el responsable de su contenido.",
+    "disclaimer_copyright_title": "Derechos de autor",
+    "disclaimer_copyright_content": "El contenido y las obras de este sitio web están sujetos a la legislación alemana sobre derechos de autor. La reproducción, edición, distribución o cualquier tipo de explotación fuera de los límites de la ley de derechos de autor requieren mi consentimiento por escrito."
+  },
+  "PrivacyPage": {
+    "title": "Política de Privacidad",
+    "section1_title": "1. Protección de datos de un vistazo",
+    "section1_content": "Esta política de privacidad le informa sobre la naturaleza, el alcance y el propósito del tratamiento de datos personales en nuestro sitio web.",
+    "section2_title": "Responsable del tratamiento",
+    "section2_content": {
+      "name": "{name}",
+      "street": "{street}",
+      "city": "{city}",
+      "email": "Correo electrónico: {email}"
+    },
+    "section3_title": "2. Recopilación de datos en este sitio web",
+    "section3_hosting_title": "Alojamiento y archivos de registro del servidor",
+    "section3_hosting_content": "Este sitio web está autoalojado en un servidor dedicado por {hostingProvider}, {hostingAddress}. El servidor puede registrar automáticamente datos de acceso estándar (dirección IP, tipo de navegador, marca de tiempo, URL solicitada) como parte de su funcionamiento normal. Estos datos se utilizan únicamente con fines de seguridad y disponibilidad y no se comparten con terceros. La base legal es el Art. 6(1)(f) del RGPD.",
+    "section3_tracking_title": "Analítica",
+    "section3_tracking_content": "Este sitio web utiliza {analyticsTool}, una herramienta de analítica de código abierto y autoalojada ({analyticsDomain}). {analyticsTool} does not use cookies and does not collect any personally identifiable information. Only anonymised data such as page views, referrers, and device type are recorded. The data is stored exclusively on my own server and is not shared with third parties. The legal basis is my legitimate interest in understanding aggregate website usage (Art. 6(1)(f) GDPR).",
+    "section3_contact_title": "Formulario de contacto",
+    "section3_contact_content": "Cuando utiliza nuestro formulario de contacto, la información facilitada se procesa internamente con el fin de gestionar su solicitud. Estos datos no se ceden a terceros. El tratamiento se basa en su consentimiento (Art. 6(1)(a) del RGPD).",
+    "section4_title": "3. Sus derechos como interesado",
+    "section4_content": "En el marco de las disposiciones legales aplicables, tiene derecho en todo momento a recibir información gratuita sobre sus datos personales almacenados, su origen y destinatarios, y la finalidad del tratamiento de los datos y, en su caso, derecho a la rectificación o supresión de los mismos."
+  },
+  "ResumePage": {
+    "downloadPdf": "Descargar PDF",
+    "resumeFilename": "Curriculum_{name}",
+    "home": "Inicio",
+    "summary": "Resumen",
+    "experience": "Experiencia",
+    "education": "Educación",
+    "skills": "Habilidades",
+    "languages": "Idiomas",
+    "contact": "Contacto"
+  }
+}

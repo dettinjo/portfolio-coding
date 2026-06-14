@@ -12,11 +12,22 @@ export interface SiteConfig {
     email: string;
     phone: string;
     address: { street: string; city: string; country: string };
-    socials: { github: string; linkedin: string; instagram: string };
+    socials: {
+      github?: string;
+      linkedin?: string;
+      instagram?: string;
+      email?: string;
+      x?: string;
+      youtube?: string;
+      devto?: string;
+      stackoverflow?: string;
+      [key: string]: string | undefined;
+    };
   };
   site: {
     serverUrl: string;
     defaultLocale: string;
+    locales: string[];
     seo: { description: { en: string; de: string } };
   };
   legal: {

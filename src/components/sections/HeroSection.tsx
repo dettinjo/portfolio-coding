@@ -43,27 +43,27 @@ export function HeroSection() {
     <section
       ref={heroRef}
       id="hero"
-      className="relative flex min-h-screen items-center justify-center"
+      className="relative flex min-h-screen items-center justify-center py-20 lg:py-0"
     >
-      <div className="max-w-6xl mx-auto px-6 flex flex-col-reverse items-center gap-12 text-center lg:grid lg:grid-cols-2 lg:text-left">
+      <div className="max-w-6xl mx-auto px-6 flex flex-col-reverse items-center gap-8 lg:gap-12 text-center lg:grid lg:grid-cols-2 lg:text-left w-full">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center lg:items-start"
+          className="flex flex-col items-center lg:items-start w-full"
         >
           <AnimatedGreeting />
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-muted-foreground">
             {t("intro")}
           </p>
-          <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
-            <Button asChild>
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto lg:mx-0">
+            <Button asChild className="w-full sm:w-auto">
               <Link href="#projekte">{t("button_projects")}</Link>
             </Button>
             <Button
               asChild
               variant="outline"
-              className="hover:bg-foreground hover:text-background transition-colors"
+              className="w-full sm:w-auto hover:bg-foreground hover:text-background transition-colors"
             >
               <Link href="/resume" locale={locale}>
                 {t("button_resume")}
@@ -86,24 +86,25 @@ export function HeroSection() {
           <Avatar
             data-active={isAvatarActive}
             className={cn(
-              "h-56 w-56 border-4 lg:size-[418px] group",
+              "h-48 w-48 sm:h-56 sm:w-56 border-4 lg:size-[418px] group",
               "transition-all duration-500 ease-in-out",
-              "bg-transparent border-muted-foreground",
-              "data-[active=true]:bg-foreground",
-              "data-[active=true]:border-foreground"
+              "bg-transparent border-foreground",
+              "data-[active=true]:bg-foreground"
             )}
           >
             <Image
               src={avatarSrc}
               alt="Profile picture of me"
               fill
-              sizes="(max-width: 1024px) 224px, 418px"
+              sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 418px"
               priority
               className={cn(
                 // Anchor the bottom of the photo to the bottom of the circle so
                 // the head keeps headroom at the top instead of being cropped.
-                "object-cover object-bottom origin-bottom transition-transform duration-500 ease-in-out",
-                "group-data-[active=true]:scale-105"
+                "object-cover object-bottom origin-bottom transition-all duration-500 ease-in-out",
+                "group-data-[active=true]:scale-105",
+                "group-data-[active=true]:brightness-0 group-data-[active=true]:invert",
+                "dark:group-data-[active=true]:brightness-0 dark:group-data-[active=true]:invert-0"
               )}
             />
           </Avatar>

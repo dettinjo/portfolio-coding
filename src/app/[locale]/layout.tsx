@@ -53,12 +53,38 @@ export async function generateMetadata({
       ],
     },
     alternates: {
-      canonical: locale === "de" ? `${serverUrl}/de` : `${serverUrl}`,
+      canonical: locale === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${locale}`,
       languages: {
-        en: `${serverUrl}`,
-        de: `${serverUrl}/de`,
+        ...Object.fromEntries(
+          routing.locales.map((loc) => [
+            loc,
+            loc === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${loc}`,
+          ])
+        ),
         "x-default": `${serverUrl}`,
       },
+    },
+    openGraph: {
+      title: t("title", { name: firstName }),
+      description: t("description", { name: firstName }),
+      url: locale === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${locale}`,
+      siteName: t("title", { name: firstName }),
+      images: [
+        {
+          url: `${serverUrl}/og-software.png`,
+          width: 1200,
+          height: 630,
+          alt: `An overview of software projects by ${siteConfig.person.fullName}`,
+        },
+      ],
+      type: "website",
+      locale: locale,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title", { name: firstName }),
+      description: t("description", { name: firstName }),
+      images: [`${serverUrl}/og-software.png`],
     },
   };
 }

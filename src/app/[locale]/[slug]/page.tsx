@@ -23,20 +23,19 @@ import { SoftwareHeader } from "@/components/layout/SoftwareHeader";
 import { Footer } from "@/components/layout/Footer";
 
 import { fetchAllProjectSlugs } from "@/lib/data";
+import { routing } from "@/i18n/routing";
 
 // generateStaticParams implemented to enable SSG/ISR.
 // We wrap it in a try/catch to ensure the build doesn't fail if the DB is unreachable (e.g. in CI).
 export async function generateStaticParams() {
   try {
-    const [enSlugs, deSlugs] = await Promise.all([
-      fetchAllProjectSlugs("en"),
-      fetchAllProjectSlugs("de"),
-    ]);
+    const slugsPerLocale = await Promise.all(
+      routing.locales.map((locale) => fetchAllProjectSlugs(locale))
+    );
 
-    const params = [
-      ...enSlugs.map((p) => ({ slug: p.slug, locale: "en" })),
-      ...deSlugs.map((p) => ({ slug: p.slug, locale: "de" })),
-    ];
+    const params = routing.locales.flatMap((locale, index) =>
+      slugsPerLocale[index].map((p) => ({ slug: p.slug, locale }))
+    );
 
     return params;
   } catch (error) {
@@ -71,11 +70,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const languages: Record<string, string> = {};
   if (serverUrl) {
-    languages[locale] = `${serverUrl}${locale === "de" ? "/de" : ""}/${slug}`;
+    const getLocalizedSlugUrl = (loc: string, s: string) => {
+      if (loc === routing.defaultLocale) {
+        return `${serverUrl}/${s}`;
+      }
+      return `${serverUrl}/${loc}/${s}`;
+    };
+
+    languages[locale] = getLocalizedSlugUrl(locale, slug);
     localizations?.forEach((loc) => {
-      languages[loc.locale] = `${serverUrl}${
-        loc.locale === "de" ? "/de" : ""
-      }/${loc.slug}`;
+      languages[loc.locale] = getLocalizedSlugUrl(loc.locale, loc.slug);
     });
   }
 
@@ -93,7 +97,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     alternates: {
       canonical: serverUrl
-        ? `${serverUrl}${locale === "de" ? "/de" : ""}/${slug}`
+        ? `${serverUrl}${locale === routing.defaultLocale ? "" : `/${locale}`}/${slug}`
         : undefined,
       languages: languages,
     },
@@ -171,13 +175,13 @@ export default async function ProjectDetailPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: `${serverUrl}/${locale === "de" ? "de" : ""}`, // localized home
+        item: `${serverUrl}${locale === routing.defaultLocale ? "" : `/${locale}`}`, // localized home
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
-        item: `${serverUrl}/${locale === "de" ? "de/" : ""}${slug}`, // current page
+        item: `${serverUrl}${locale === routing.defaultLocale ? "" : `/${locale}`}/${slug}`, // current page
       },
     ],
   };

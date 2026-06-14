@@ -1,0 +1,22 @@
+{
+  "title": "Nexus CLI Tool",
+  "titleDe": "Nexus CLI-Tool",
+  "description": "A fast command-line tool for scaffolding project structures, managing environment configurations, and linting files, written in Rust.",
+  "descriptionDe": "Ein schnelles Kommandozeilenwerkzeug zum Erstellen von Projektstrukturen, Verwalten von Umgebungskonfigurationen und Linting von Dateien, geschrieben in Rust.",
+  "projectType": "Command-Line Utility",
+  "projectTypeDe": "Kommandozeilenwerkzeug",
+  "developedAt": "2025-05-10T00:00:00Z",
+  "weight": 1,
+  "publishLink": false,
+  "liveUrl": null,
+  "repoUrl": null,
+  "tags": [
+    "Rust",
+    "Shell",
+    "Markdown"
+  ],
+  "languages": {
+    "Rust": 95000,
+    "Shell": 5000
+  }
+}

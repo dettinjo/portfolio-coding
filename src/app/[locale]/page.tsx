@@ -13,6 +13,7 @@ import { ScrollIndicator } from "@/components/ScrollIndicator";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { fetchSoftwareProjects, fetchSkillCategories } from "@/lib/data";
 import { siteConfig } from "@/lib/config";
+import { routing } from "@/i18n/routing";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: siteTitle,
       description: t("description"),
-      url: `${serverUrl}`,
+      url: locale === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${locale}`,
       siteName: siteTitle,
       images: [
         {
@@ -52,10 +53,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale,
     },
     alternates: {
-      canonical: locale === "de" ? `${serverUrl}/de` : `${serverUrl}`,
+      canonical: locale === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${locale}`,
       languages: {
-        en: `${serverUrl}`,
-        de: `${serverUrl}/de`,
+        ...Object.fromEntries(
+          routing.locales.map((loc) => [
+            loc,
+            loc === routing.defaultLocale ? `${serverUrl}` : `${serverUrl}/${loc}`,
+          ])
+        ),
         "x-default": `${serverUrl}`,
       },
     },

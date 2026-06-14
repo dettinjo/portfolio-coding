@@ -257,7 +257,7 @@ function avatarSvg(): string {
   const gray = "#9aa1ab";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
     <circle cx="320" cy="250" r="118" fill="${gray}"/>
-    <path d="M132 612 C132 452 236 392 320 392 C404 392 508 452 508 612 Z" fill="${gray}"/>
+    <path d="M132 640 C132 452 236 392 320 392 C404 392 508 452 508 640 Z" fill="${gray}"/>
   </svg>`;
 }
 
@@ -488,6 +488,39 @@ const DEMOS: Demo[] = [
     ],
     shotLabels: ["Balance", "Budgets", "Reports"],
   },
+  {
+    slug: "nexus-cli",
+    style: "terminal",
+    accent: "#3B82F6",
+    developedAt: "2025-05-10",
+    weight: 1,
+    publishLink: false,
+    repoUrl: null,
+    liveUrl: null,
+    title: "Nexus CLI Tool",
+    titleDe: "Nexus CLI-Tool",
+    projectType: "Command-Line Utility",
+    projectTypeDe: "Kommandozeilenwerkzeug",
+    description:
+      "A fast command-line tool for scaffolding project structures, managing environment configurations, and linting files, written in Rust.",
+    descriptionDe:
+      "Ein schnelles Kommandozeilenwerkzeug zum Erstellen von Projektstrukturen, Verwalten von Umgebungskonfigurationen und Linting von Dateien, geschrieben in Rust.",
+    tags: ["Rust", "Shell", "Markdown"],
+    languages: { Rust: 95000, Shell: 5000 },
+    features: [
+      "Zero-dependency binary compiled for macOS, Linux, and Windows",
+      "Extremely fast file globbing and parallel processing",
+      "Flexible YAML-based config parsing and template rendering",
+      "Color-coded terminal output with clear error reporting",
+    ],
+    featuresDe: [
+      "Abhängigkeitsfreie Binärdatei kompiliert für macOS, Linux und Windows",
+      "Extrem schnelles File-Globbing und parallele Verarbeitung",
+      "Flexibles YAML-basiertes Konfigurations-Parsing und Template-Rendering",
+      "Farbcodierte Terminalausgabe mit klarer Fehlerberichterstattung",
+    ],
+    shotLabels: [],
+  },
 ];
 
 function aboutMd(d: Demo, lang: "en" | "de"): string {
@@ -497,9 +530,11 @@ function aboutMd(d: Demo, lang: "en" | "de"): string {
   const headings = de
     ? { ov: "Überblick", feat: "Funktionen", stack: "Tech-Stack", note: "Hinweis" }
     : { ov: "Overview", feat: "Features", stack: "Tech stack", note: "Note" };
-  const grid = d.shotLabels
-    .map((_, i) => `  <img src="/media/projects/${d.slug}/gallery/shot${i + 1}.webp" alt="${esc(d.title)} screenshot ${i + 1}" width="32%" />`)
-    .join("\n");
+  const grid = d.shotLabels.length > 0
+    ? `\n<p align="center">\n` + d.shotLabels
+        .map((_, i) => `  <img src="/media/projects/${d.slug}/gallery/shot${i + 1}.webp" alt="${esc(d.title)} screenshot ${i + 1}" width="32%" />`)
+        .join("\n") + `\n</p>\n`
+    : "";
   const note = d.publishLink
     ? ""
     : de
@@ -508,11 +543,7 @@ function aboutMd(d: Demo, lang: "en" | "de"): string {
   return `## ${headings.ov}
 
 ${desc}
-
-<p align="center">
 ${grid}
-</p>
-
 ## ${headings.feat}
 
 ${feats.map((f) => `- ${f}`).join("\n")}
@@ -539,6 +570,7 @@ const SITE_CONFIG = {
   site: {
     serverUrl: "https://portfolio-demo.example.com",
     defaultLocale: "en",
+    locales: ["en", "de", "es"],
     seo: {
       description: {
         en: "Demo portfolio of Alex Rivera — a config-driven, GitHub-powered developer portfolio template.",
@@ -644,12 +676,14 @@ async function main() {
     writeFile(path.join(base, "about.de.md"), aboutMd(d, "de"));
 
     // Cover (hero) + gallery shots.
-    await toWebp(renderShot(d.style, d.title, d.shotLabels[0], d.accent, d.slug + "cover", 0), path.join(base, "cover.webp"));
-    for (let i = 0; i < d.shotLabels.length; i++) {
-      await toWebp(
-        renderShot(d.style, d.title, d.shotLabels[i], d.accent, d.slug + i, i),
-        path.join(base, "gallery", `shot${i + 1}.webp`)
-      );
+    if (d.shotLabels && d.shotLabels.length > 0) {
+      await toWebp(renderShot(d.style, d.title, d.shotLabels[0], d.accent, d.slug + "cover", 0), path.join(base, "cover.webp"));
+      for (let i = 0; i < d.shotLabels.length; i++) {
+        await toWebp(
+          renderShot(d.style, d.title, d.shotLabels[i], d.accent, d.slug + i, i),
+          path.join(base, "gallery", `shot${i + 1}.webp`)
+        );
+      }
     }
     console.log(`  ✓ ${d.slug} (${d.shotLabels.length} shots)`);
   }
