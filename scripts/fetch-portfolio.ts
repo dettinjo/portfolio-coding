@@ -518,11 +518,9 @@ const main = async () => {
       fs.copyFileSync(demoResume, outputResumePath);
       resumeConfigFetched = true;
     }
-    const demoAvatar = path.join(demoDir, "profile.webp");
-    if (fs.existsSync(demoAvatar)) {
-      fs.mkdirSync(path.dirname(outputAvatarPath), { recursive: true });
-      fs.copyFileSync(demoAvatar, outputAvatarPath);
-    }
+    // No demo avatar copy: the generic transparent placeholder
+    // (public/images/avatar.placeholder.webp) is applied by the no-avatar
+    // fallback below — one shared avatar asset.
   }
 
   // Resolve config repo: explicit env var overrides auto-detection.

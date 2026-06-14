@@ -1,16 +1,12 @@
 name: Build & Deploy
 
 on:
+  # Project/skill/resume data is fetched from GitHub at build time, so the live
+  # site updates on a rebuild: a push to main, or a manual run from the Actions
+  # tab. (No background poller — see the removed portfolio-watcher.)
   push:
     branches: [main]
-  repository_dispatch:
-    # Triggered by project repos and the config repo when their data changes.
-    # Payload: { "repo": "owner/some-project" } (for logging)
-    types: [portfolio-data-changed]
-  schedule:
-    # Fallback safety net — the portfolio-watcher poller handles real-time triggers;
-    # this catches any edge cases (watcher down, missed events, new repos without a push).
-    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   build:

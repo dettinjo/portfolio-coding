@@ -654,9 +654,11 @@ async function main() {
     console.log(`  ✓ ${d.slug} (${d.shotLabels.length} shots)`);
   }
 
-  // Avatar (transparent contact silhouette).
-  await toWebp(avatarSvg(), path.join(demoDir, "profile.webp"));
-  console.log("  ✓ profile.webp");
+  // Avatar: the single shared transparent contact silhouette. It doubles as the
+  // committed no-avatar placeholder (public/images/avatar.placeholder.webp), which
+  // the build also falls back to in demo mode — so there's just one avatar asset.
+  await toWebp(avatarSvg(), path.join(rootDir, "public", "images", "avatar.placeholder.webp"));
+  console.log("  ✓ public/images/avatar.placeholder.webp");
 
   // Config + resume.
   writeFile(path.join(demoDir, "site.config.json"), JSON.stringify(SITE_CONFIG, null, 2) + "\n");
