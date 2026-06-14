@@ -1,23 +1,18 @@
+# Single production compose for the portfolio app.
+#
+# The image is built by GitHub Actions and pushed to ghcr.io — never built on the
+# server. Deployed via Coolify (set Coolify's "Docker Compose Location" to this
+# file). Runtime secrets are injected by Coolify, not baked into the image.
+#
+# Projects/skills/resume are fetched from GitHub at *build time* only; to update
+# the live site, rebuild (push to main, or run the "Build & Deploy" workflow).
+#
+# Analytics (Umami) is optional and expected to run as a separate service; leave
+# the UMAMI_* vars empty to disable it.
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_FULL_NAME: ${NEXT_PUBLIC_FULL_NAME}
-        NEXT_PUBLIC_EMAIL_ADDRESS: ${NEXT_PUBLIC_EMAIL_ADDRESS}
-        NEXT_PUBLIC_PHONE_NUMBER: ${NEXT_PUBLIC_PHONE_NUMBER}
-        NEXT_PUBLIC_STREET_ADDRESS: ${NEXT_PUBLIC_STREET_ADDRESS}
-        NEXT_PUBLIC_CITY_ADDRESS: ${NEXT_PUBLIC_CITY_ADDRESS}
-        NEXT_PUBLIC_GITHUB_USERNAME: ${NEXT_PUBLIC_GITHUB_USERNAME}
-        NEXT_PUBLIC_LINKEDIN_USERNAME: ${NEXT_PUBLIC_LINKEDIN_USERNAME}
-        NEXT_PUBLIC_INSTAGRAM_USERNAME: ${NEXT_PUBLIC_INSTAGRAM_USERNAME}
-        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
-    image: my-portfolio-app
-    container_name: my-portfolio-app
+    image: ghcr.io/dettinjo/portfolio-coding:latest
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/en"]
       interval: 30s
@@ -26,9 +21,20 @@ services:
       start_period: 30s
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
-    env_file:
-      - .env.local
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - UMAMI_INTERNAL_URL=${UMAMI_INTERNAL_URL}
+      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID}
+    # Lets the container reach a separately-hosted Umami at host.docker.internal.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - coolify
+
+networks:
+  coolify:
+    external: true

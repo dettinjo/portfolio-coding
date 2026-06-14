@@ -147,14 +147,12 @@ Add or override an entry (category, icon, URL) by editing
 
 ---
 
-## Automatic rebuilds (optional)
+## Updating the live site
 
-A push that should refresh the live site can trigger a rebuild via a
-`repository_dispatch`. Add a notify workflow to a project or config repo that
-calls the central reusable workflow in the portfolio repo, passing a fine-grained
-PAT with **Actions: Read and write** on the portfolio repo as a secret. The
-dispatch logic stays centralized so project repos need no updates when the
-pipeline changes.
+Project/skill/resume data is read from GitHub **only at build time** — there is
+no background poller or runtime fetching. To publish a change (a new repo, an
+edited README, updated config), trigger a rebuild: push to `portfolio-coding`'s
+`main`, or run the **Build & Deploy** workflow manually from the Actions tab.
 
 ---
 
