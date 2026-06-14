@@ -7,7 +7,6 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
-import { useResumeDownload } from "@/hooks/useResumeDownload";
 import { useUmami } from "@/hooks/useUmami";
 
 export function ResumeCTASection() {
@@ -15,7 +14,6 @@ export function ResumeCTASection() {
   const locale = useLocale();
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
-  const { downloadResume } = useResumeDownload();
   const { track } = useUmami();
 
   const { scrollYProgress } = useScroll({
@@ -109,11 +107,8 @@ export function ResumeCTASection() {
               </Link>
             </Button>
             <Button
+              asChild
               size="lg"
-              onClick={() => {
-                track("resume_downloaded", { source: "cta_section", locale });
-                downloadResume();
-              }}
               className={cn(
                 "gap-2 transition-all duration-500 border-2 border-transparent cursor-pointer",
                 // Active State (Dark Card): Transparent with White Border -> Hover: White Button
@@ -121,8 +116,20 @@ export function ResumeCTASection() {
                 "group-data-[active=true]:hover:bg-background group-data-[active=true]:hover:text-foreground"
               )}
             >
-              <Download className="h-4 w-4" />
-              {t("downloadPdf")}
+              {/* Opens the resume with auto-print (ResumeAutoPrint). Uses next-intl
+                  Link so the href is correct in every environment (locale prefix +
+                  static-export basePath), which a hand-built URL got wrong. */}
+              <Link
+                href={{ pathname: "/resume", query: { print: "true" } }}
+                locale={locale}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-umami-event="resume_downloaded"
+                onClick={() => track("resume_downloaded", { source: "cta_section", locale })}
+              >
+                <Download className="h-4 w-4" />
+                {t("downloadPdf")}
+              </Link>
             </Button>
           </motion.div>
         </div>
