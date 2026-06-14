@@ -23,6 +23,7 @@ export interface SiteConfig {
       stackoverflow?: string;
       [key: string]: string | undefined;
     };
+    hasCustomAvatar?: boolean;
   };
   site: {
     serverUrl: string;

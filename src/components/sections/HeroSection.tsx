@@ -17,6 +17,7 @@ import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
+import { siteConfig } from "@/lib/config";
 
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
@@ -24,6 +25,7 @@ export function HeroSection() {
   // Generated at build time from the config repo's profile image (or the
   // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
   const avatarSrc = withBasePath("/images/profile.webp");
+  const isPlaceholder = !siteConfig.person.hasCustomAvatar;
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
 
@@ -89,7 +91,7 @@ export function HeroSection() {
               "h-48 w-48 sm:h-56 sm:w-56 border-4 lg:size-[418px] group",
               "transition-all duration-500 ease-in-out",
               "bg-transparent border-foreground",
-              "data-[active=true]:bg-foreground"
+              isPlaceholder && "data-[active=true]:bg-foreground"
             )}
           >
             <Image
@@ -103,8 +105,7 @@ export function HeroSection() {
                 // the head keeps headroom at the top instead of being cropped.
                 "object-cover object-bottom origin-bottom transition-all duration-500 ease-in-out",
                 "group-data-[active=true]:scale-105",
-                "group-data-[active=true]:brightness-0 group-data-[active=true]:invert",
-                "dark:group-data-[active=true]:brightness-0 dark:group-data-[active=true]:invert-0"
+                isPlaceholder && "group-data-[active=true]:brightness-0 group-data-[active=true]:invert dark:group-data-[active=true]:brightness-0 dark:group-data-[active=true]:invert-0"
               )}
             />
           </Avatar>

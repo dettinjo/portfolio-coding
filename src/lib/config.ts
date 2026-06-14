@@ -44,6 +44,7 @@ const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
         stackoverflow: person.socials?.stackoverflow ?? "",
         ...person.socials,
       },
+      hasCustomAvatar: person.hasCustomAvatar ?? false,
     },
     site: {
       serverUrl: site.serverUrl ?? "http://localhost:3000",

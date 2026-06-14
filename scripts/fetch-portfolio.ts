@@ -197,6 +197,7 @@ const computeEffectiveWeight = (manualWeight: number, repo: any): number => {
 
 const main = async () => {
   console.log("Starting portfolio synchronization...");
+  let hasCustomAvatar = false;
 
   // Create media outputs path
   if (!fs.existsSync(publicMediaDir)) {
@@ -583,6 +584,7 @@ const main = async () => {
             fs.writeFileSync(outputAvatarPath, buffer);
             console.log("    ✓ Saved profile image");
           }
+          hasCustomAvatar = true;
         }
 
         const pdfFile = contents.find((c) => c.name === "resume.pdf");
@@ -629,6 +631,7 @@ const main = async () => {
         fs.writeFileSync(outputAvatarPath, buffer);
         console.log("  ✓ Copied local profile image");
       }
+      hasCustomAvatar = true;
     }
 
     const localPdf = path.join(localConfigDir, "resume.pdf");
@@ -698,6 +701,19 @@ const main = async () => {
     console.log("  ✓ Generated public/og-software.png from site config");
   } catch (e: any) {
     console.warn("  Could not generate OG image:", e.message);
+  }
+
+  // Post-process site.config.json to add hasCustomAvatar flag
+  if (fs.existsSync(outputSiteConfigPath)) {
+    try {
+      const siteConfigObj = JSON.parse(fs.readFileSync(outputSiteConfigPath, "utf8"));
+      siteConfigObj.person = siteConfigObj.person || {};
+      siteConfigObj.person.hasCustomAvatar = hasCustomAvatar;
+      fs.writeFileSync(outputSiteConfigPath, JSON.stringify(siteConfigObj, null, 2) + "\n", "utf8");
+      console.log(`  ✓ Updated site.config.json with hasCustomAvatar = ${hasCustomAvatar}`);
+    } catch (e: any) {
+      console.warn("  Could not add hasCustomAvatar to site.config.json:", e.message);
+    }
   }
 
   if (!fs.existsSync(outputResumePath)) {
