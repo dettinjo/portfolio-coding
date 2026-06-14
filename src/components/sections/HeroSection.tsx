@@ -90,8 +90,8 @@ export function HeroSection() {
             className={cn(
               "h-48 w-48 sm:h-56 sm:w-56 border-4 lg:size-[418px] group",
               "transition-all duration-500 ease-in-out",
-              "bg-transparent border-foreground",
-              isPlaceholder && "data-[active=true]:bg-foreground"
+              "border-foreground",
+              isAvatarActive ? "bg-foreground" : "bg-background"
             )}
           >
             <Image
