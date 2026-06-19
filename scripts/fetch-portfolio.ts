@@ -687,8 +687,8 @@ const main = async () => {
     const ogName = esc(cfg.person?.fullName || "Portfolio");
     const ogTagline = esc(cfg.person?.headline || "Software Developer Portfolio");
     const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#19191F"/>
-  <rect x="36" y="36" width="1128" height="558" rx="20" fill="none" stroke="#ffffff18" stroke-width="1.5"/>
+  <rect width="1200" height="630" fill="#FFFFFF"/>
+  <rect x="36" y="36" width="1128" height="558" rx="20" fill="#19191F" stroke="#ffffff18" stroke-width="1.5"/>
   <g transform="translate(490, 130) scale(9.17)">
     <polyline points="4 17 10 11 4 5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <line x1="12" y1="19" x2="20" y2="19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
