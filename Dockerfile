@@ -17,6 +17,7 @@ RUN \
 
 # ── builder: compile the Next.js app ─────────────────────────────────────────
 FROM base AS builder
+RUN apk add --no-cache fontconfig ttf-freefont
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

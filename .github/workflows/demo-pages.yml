@@ -56,7 +56,26 @@ jobs:
           cat > out/index.html <<'HTML'
           <!doctype html>
           <html lang="en"><head><meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=./en/">
+          <script>
+            (function() {
+              var locales = ["en", "de", "es"];
+              var defaultLocale = "en";
+              var userLanguages = navigator.languages || [navigator.language || navigator.userLanguage];
+              var matchedLocale = defaultLocale;
+              for (var i = 0; i < userLanguages.length; i++) {
+                if (!userLanguages[i]) continue;
+                var lang = userLanguages[i].split('-')[0].toLowerCase();
+                if (locales.indexOf(lang) !== -1) {
+                  matchedLocale = lang;
+                  break;
+                }
+              }
+              window.location.replace("./" + matchedLocale + "/");
+            })();
+          </script>
+          <noscript>
+            <meta http-equiv="refresh" content="0; url=./en/">
+          </noscript>
           <link rel="canonical" href="./en/"><title>Redirecting…</title></head>
           <body>Redirecting to <a href="./en/">the demo</a>…</body></html>
           HTML
