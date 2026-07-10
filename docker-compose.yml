@@ -12,6 +12,12 @@
 services:
   app:
     image: ghcr.io/dettinjo/portfolio-coding:latest
+    # Compose's default pull policy only pulls a tag if it's missing locally.
+    # Since GitHub Actions repushes ":latest" on every build, a plain `docker
+    # compose up -d` reuses the stale cached image and silently no-ops the
+    # redeploy. `always` forces a re-pull so Coolify's redeploy actually picks
+    # up the newly built image.
+    pull_policy: always
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/en"]
