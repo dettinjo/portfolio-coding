@@ -4,12 +4,14 @@
 
 **🌐 [English](README.md) · [Deutsch](README.de.md)**
 
-A fast, SEO-optimized, fully bilingual (EN/DE) developer-portfolio **template**.
-It contains **zero personal data** — everything (projects, skills, résumé,
-identity, legal pages) is injected at build time from your GitHub repositories
-and a single private config repo. Adapting it to your own portfolio is a matter
-of adding a topic to your repos and filling one config file; no code changes
-required.
+A fast, SEO-optimized, fully bilingual (EN/DE) developer-portfolio template
+with zero personal data in the repo — projects, skills, and identity are
+injected at build time from GitHub.
+
+Everything (projects, skills, résumé, identity, legal pages) is injected at
+build time from your GitHub repositories and a single private config repo.
+Adapting it to your own portfolio is a matter of adding a topic to your repos
+and filling one config file; no code changes required.
 
 <p align="center">
   <img src="docs/screenshots/hero-light.webp" alt="Landing / hero section" width="49%" />

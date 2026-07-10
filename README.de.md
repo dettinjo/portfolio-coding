@@ -4,9 +4,11 @@
 
 **🌐 [English](README.md) · [Deutsch](README.de.md)**
 
-Ein schnelles, SEO-optimiertes, vollständig zweisprachiges (EN/DE)
-Entwickler-Portfolio-**Template**. Es enthält **keinerlei persönliche Daten** –
-alles (Projekte, Skills, Lebenslauf, Identität, Rechtsseiten) wird zur Build-Zeit
+Ein schnelles, SEO-optimiertes, zweisprachiges (EN/DE) Entwickler-Portfolio-
+Template ganz ohne persönliche Daten im Repo — Projekte, Skills und Identität
+werden zur Build-Zeit aus GitHub geladen.
+
+Alles (Projekte, Skills, Lebenslauf, Identität, Rechtsseiten) wird zur Build-Zeit
 aus deinen GitHub-Repositories und einem einzigen privaten Config-Repo erzeugt.
 Die Anpassung an dein eigenes Portfolio bedeutet nur: ein Topic an deine Repos
 vergeben und eine Config-Datei ausfüllen – ohne Code-Änderungen.
