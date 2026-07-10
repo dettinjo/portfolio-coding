@@ -377,6 +377,70 @@ const main = async () => {
     return { title, body, coverUrl };
   };
 
+  // Extract the first prose paragraph from a processed README body (title,
+  // language-switcher line, and portfolio:date comment already stripped by
+  // processReadme) for use as the project card preview / meta description.
+  // Skips headings, HTML blocks, blockquotes, badge chains, and image-only
+  // lines to find the first paragraph of real text, then flattens markdown
+  // formatting down to plain prose.
+  const extractFirstParagraph = (body: string): string => {
+    const lines = body.replace(/\r\n/g, "\n").split("\n");
+    const switcherLinkRe = /\[[^\]]*\]\(README(\.[a-z]{2})?\.md\)/gi;
+    const isSwitcherLine = (s: string): boolean => {
+      if (!switcherLinkRe.test(s)) return false;
+      switcherLinkRe.lastIndex = 0;
+      // Line is "just" the switcher if nothing but the links plus bold
+      // markers, separators, and emoji/flag decoration remains.
+      const rest = s
+        .replace(switcherLinkRe, "")
+        .replace(/[\s*·|]/g, "")
+        .replace(/\p{Extended_Pictographic}/gu, "");
+      return rest === "";
+    };
+    const isBadgeLine = (s: string): boolean =>
+      /^(\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)\s*)+$/.test(s);
+    const isImageOnlyLine = (s: string): boolean =>
+      /^(!\[[^\]]*\]\([^)]*\)\s*)+$/.test(s);
+
+    const paraLines: string[] = [];
+    let collecting = false;
+    for (const raw of lines) {
+      const s = raw.trim();
+      if (!collecting) {
+        if (s === "") continue;
+        if (s.startsWith("#") || s.startsWith("<") || s.startsWith(">")) continue;
+        if (isSwitcherLine(s) || isBadgeLine(s) || isImageOnlyLine(s)) continue;
+        collecting = true;
+        paraLines.push(s);
+      } else {
+        if (s === "" || s.startsWith("#") || s.startsWith("<") || s.startsWith(">")) break;
+        paraLines.push(s);
+      }
+    }
+
+    let text = paraLines.join(" ");
+    text = text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links → text
+      .replace(/`([^`]+)`/g, "$1") // inline code
+      .replace(/\*\*([^*]+)\*\*/g, "$1") // bold
+      .replace(/__([^_]+)__/g, "$1") // bold (underscore)
+      .replace(/\*([^*]+)\*/g, "$1") // italic
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Safety net only — curated READMEs should already land well under this.
+    // Prevents an unusually structured README from blowing out the card /
+    // meta-description length; cuts on a word boundary.
+    const MAX_LEN = 260;
+    if (text.length > MAX_LEN) {
+      const cut = text.slice(0, MAX_LEN);
+      const lastSpace = cut.lastIndexOf(" ");
+      text = cut.slice(0, lastSpace > 0 ? lastSpace : MAX_LEN).trim() + "…";
+    }
+
+    return text;
+  };
+
   // Optional development-date override embedded in the README as an HTML comment:
   // "<!-- portfolio:date=2022-07-01 -->". Lets a repo created later than the
   // project was actually built report the real date.
@@ -828,8 +892,9 @@ const main = async () => {
   // ─── 2. SYNC PROJECTS FROM GITHUB ────────────────────────────────────────
   // A repo opts in via the "portfolio" (linked) or "portfolio-private" (no code
   // link) topic. Everything is derived from GitHub-native data — no per-repo
-  // metadata files. The localized README is the project detail (images inline);
-  // the repo description is the card overview; topics are the tags.
+  // metadata files. The localized README is the project detail (images inline)
+  // AND the source of the card overview (its first paragraph, per locale);
+  // topics are the tags.
   try {
     const portfolioRepos = DEMO_MODE
       ? []
@@ -878,14 +943,20 @@ const main = async () => {
         }
 
         const title = en.title || prettifyRepoName(repoName);
+        // Card preview / meta description: the README's own first paragraph,
+        // per locale — not the (unlocalized, English-only) GitHub "About"
+        // text. Falls back to the GitHub description only if a README has no
+        // extractable paragraph at all.
+        const descriptionEn = extractFirstParagraph(en.body) || repo.description || "";
+        const descriptionDe = extractFirstParagraph(de.body) || descriptionEn;
 
         projectsMap[slug] = {
           id: slug,
           slug,
           title,
           titleDe: de.title || undefined,
-          description: repo.description || "",
-          descriptionDe: repo.description || "",
+          description: descriptionEn,
+          descriptionDe: descriptionDe,
           longDescription: en.body,
           longDescriptionDe: de.body,
           projectType: repo.language || "Software Project",
