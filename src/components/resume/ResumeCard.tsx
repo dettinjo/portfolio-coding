@@ -66,7 +66,17 @@ export function ResumeCard({
   };
 
   const { basics, sections } = data;
-  const avatarPath = withBasePath("/images/profile.webp");
+
+  const rawPictureUrl = basics.picture?.url;
+  const isInvalidUrl =
+    !rawPictureUrl ||
+    rawPictureUrl.startsWith("http://localhost") ||
+    rawPictureUrl.startsWith("https://localhost") ||
+    rawPictureUrl.includes("localhost:9000");
+
+  const avatarPath = isInvalidUrl
+    ? withBasePath("/images/profile.webp")
+    : withBasePath(rawPictureUrl);
 
   // Apply per-section display limits defined in resume.json `display` block
   const displayLimit = data.display ?? {};
@@ -136,6 +146,7 @@ export function ResumeCard({
                     fill
                     sizes="(max-width: 1024px) 160px, 176px"
                     priority
+                    unoptimized
                     className="object-cover object-top scale-[1.2] origin-bottom translate-y-4 transition-transform duration-500 ease-in-out"
                   />
                 </Avatar>

@@ -134,6 +134,20 @@ export async function generateResumePdf(params: {
 
     await page.waitForSelector("main", { timeout: 10_000 });
 
+    // Ensure all images (including avatar) are fully decoded into memory before taking PDF snapshot
+    await page.evaluate(async () => {
+      const images = Array.from(document.querySelectorAll("img"));
+      await Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        })
+      );
+    });
+
     // 4. Post-render DOM Layout Safeguard
     // Inspect actual rendered DOM heights to ensure no overflow
     const layout = await page.evaluate(() => {

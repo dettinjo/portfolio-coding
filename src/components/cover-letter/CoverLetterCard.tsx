@@ -52,10 +52,17 @@ export function CoverLetterCard({
 }: CoverLetterCardProps) {
   const { basics, profiles, recipient, position, content } = data;
 
-  // Resolve avatar URL with fallback support
-  const avatarUrl = basics?.picture?.url
-    ? withBasePath(basics.picture.url)
-    : withBasePath("/images/profile.webp");
+  // Resolve avatar URL with fallback support to canonical profile image
+  const rawPictureUrl = basics?.picture?.url;
+  const isInvalidUrl =
+    !rawPictureUrl ||
+    rawPictureUrl.startsWith("http://localhost") ||
+    rawPictureUrl.startsWith("https://localhost") ||
+    rawPictureUrl.includes("localhost:9000");
+
+  const avatarUrl = isInvalidUrl
+    ? withBasePath("/images/profile.webp")
+    : withBasePath(rawPictureUrl);
 
   const initials = (basics?.name || "Candidate")
     .split(/\s+/)
@@ -152,6 +159,7 @@ export function CoverLetterCard({
                       fill
                       sizes="(max-width: 1024px) 160px, 176px"
                       priority
+                      unoptimized
                       className="object-cover object-top scale-[1.2] origin-bottom translate-y-4 transition-transform duration-500 ease-in-out"
                     />
                   ) : (

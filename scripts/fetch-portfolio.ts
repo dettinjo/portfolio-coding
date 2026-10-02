@@ -626,8 +626,15 @@ const main = async () => {
           console.log("  Fetching remote resume.json...");
           const resumeRaw = await githubFetch(resumeFile.url);
           const resumeString = Buffer.from(resumeRaw.content, "base64").toString("utf8");
-          JSON.parse(resumeString); // validate JSON
-          fs.writeFileSync(outputResumePath, resumeString, "utf8");
+          const resumeParsed = JSON.parse(resumeString); // validate JSON
+          if (
+            resumeParsed.basics?.picture?.url &&
+            (resumeParsed.basics.picture.url.startsWith("http://localhost") ||
+              resumeParsed.basics.picture.url.includes("localhost:9000"))
+          ) {
+            resumeParsed.basics.picture.url = "/images/profile.webp";
+          }
+          fs.writeFileSync(outputResumePath, JSON.stringify(resumeParsed, null, 2), "utf8");
           resumeConfigFetched = true;
           console.log("    ✓ Successfully synced remote resume.json");
         }

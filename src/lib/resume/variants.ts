@@ -49,16 +49,36 @@ function ensureWritableVariantsDir(): string {
  * Reads freshly from disk to ensure real-time accuracy.
  */
 export function getCanonicalResume(): ResumeData {
+  let resume: ResumeData;
   const filePath = path.join(process.cwd(), "src", "data", "resume.json");
   if (fs.existsSync(filePath)) {
     try {
       const raw = fs.readFileSync(filePath, "utf8");
-      return JSON.parse(raw) as ResumeData;
+      resume = JSON.parse(raw) as ResumeData;
     } catch {
-      // Fall through to bundled fallback
+      resume = JSON.parse(JSON.stringify(canonicalResumeData)) as ResumeData;
+    }
+  } else {
+    resume = JSON.parse(JSON.stringify(canonicalResumeData)) as ResumeData;
+  }
+
+  // Sanitize picture URL: if missing or pointing to localhost/dead DB host, use canonical profile image
+  const picUrl = resume.basics?.picture?.url;
+  if (
+    !picUrl ||
+    picUrl.startsWith("http://localhost") ||
+    picUrl.startsWith("https://localhost") ||
+    picUrl.includes("localhost:9000")
+  ) {
+    if (resume.basics) {
+      resume.basics.picture = {
+        ...resume.basics.picture,
+        url: "/images/profile.webp",
+      };
     }
   }
-  return JSON.parse(JSON.stringify(canonicalResumeData)) as ResumeData;
+
+  return resume;
 }
 
 /**

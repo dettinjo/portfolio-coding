@@ -76,8 +76,9 @@ export function getCoverLetterTemplate(
       email: resume.basics.email,
       phone: resume.basics.phone,
       location: resume.basics.location,
-      url: resume.basics.url,
-      picture: resume.basics.picture,
+      picture: {
+        url: resume.basics.picture?.url || "/images/profile.webp",
+      },
     },
     profiles,
     keyCompetencies: (resume.sections.skills?.items || [])
