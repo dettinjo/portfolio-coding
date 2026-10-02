@@ -28,9 +28,19 @@ function ensureVariantsDir(): string {
 }
 
 /**
- * Returns the untouched canonical resume used by the public website.
+ * Returns the untouched official resume used by the public website.
+ * Reads freshly from disk to ensure real-time accuracy.
  */
 export function getCanonicalResume(): ResumeData {
+  const filePath = path.join(process.cwd(), "src", "data", "resume.json");
+  if (fs.existsSync(filePath)) {
+    try {
+      const raw = fs.readFileSync(filePath, "utf8");
+      return JSON.parse(raw) as ResumeData;
+    } catch {
+      // Fall through to bundled fallback
+    }
+  }
   return JSON.parse(JSON.stringify(canonicalResumeData)) as ResumeData;
 }
 

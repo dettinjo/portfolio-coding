@@ -20,22 +20,32 @@ export function createResumeMcpServer(): McpServer {
     version: "1.0.0",
   });
 
-  // ─── TOOL 1: GET CANONICAL RESUME ──────────────────────────────────────────
+  // ─── TOOL 1: GET OFFICIAL RESUME (PRIMARY ENTRYPOINT) ─────────────────────
+  const getOfficialResumeHandler = async () => {
+    const resume = getCanonicalResume();
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(resume, null, 2),
+        },
+      ],
+    };
+  };
+
+  server.tool(
+    "get_official_resume",
+    "ALWAYS CALL THIS FIRST. Fetches the official, authoritative CV JSON currently published on the portfolio website. The AI MUST inspect this first to get a complete overview of the candidate's authentic profile, contact details, verified work history, education, and skills. All tailored resumes must be adapted from this official data as the foundation.",
+    {},
+    getOfficialResumeHandler
+  );
+
+  // Alias for backward compatibility
   server.tool(
     "get_canonical_resume",
-    "Returns the canonical resume currently displayed on the public website. Use this as the base template to adapt.",
+    "Alias for get_official_resume. Returns the official website CV JSON.",
     {},
-    async () => {
-      const resume = getCanonicalResume();
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(resume, null, 2),
-          },
-        ],
-      };
-    }
+    getOfficialResumeHandler
   );
 
   // ─── TOOL 2: GET MASTER RESUME POOL ────────────────────────────────────────
@@ -276,7 +286,7 @@ Job Description:
 ${job_description}
 
 Instructions:
-1. First, call 'get_master_resume' or 'get_canonical_resume' to retrieve my base CV.
+1. ALWAYS call 'get_official_resume' FIRST to fetch my official CV JSON and get a complete overview of my verified profile, work history, education, and skills. Use this official data as the foundation to adapt.
 2. Call 'get_layout_guidelines' to review the strict single-page A4 constraints.
 3. Select the 4 to 6 most relevant skills and order them by importance for this role.
 4. Select 3 to 4 relevant work experiences. Tailor each summary (max 180 chars per role) to highlight relevant achievements, metrics, and technologies.
