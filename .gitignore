@@ -74,6 +74,8 @@ next-env.d.ts
 /public/og-software.png
 /public/media/resume.pdf
 
-# tailored resume variants and downloads (MCP generated)
+# tailored resume and cover letter variants and downloads (MCP generated)
 /resumes/variants/
 /public/downloads/resumes/
+/cover-letters/variants/
+/public/downloads/cover-letters/

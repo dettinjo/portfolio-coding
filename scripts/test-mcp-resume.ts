@@ -134,6 +134,36 @@ async function runTests() {
   });
   console.log("Validation tool output:", valJson.result.content[0].text);
 
+  // JSON-RPC tools/call: get_cover_letter_template
+  const clTmplJson = await callMcp({
+    jsonrpc: "2.0",
+    id: 4,
+    method: "tools/call",
+    params: {
+      name: "get_cover_letter_template",
+      arguments: {
+        company: "Allianz Technology",
+        role: "AI Full Stack Developer",
+      },
+    },
+  });
+  const parsedCl = JSON.parse(clTmplJson.result.content[0].text);
+  console.log("Cover letter template tool output position:", parsedCl.position.title);
+
+  // JSON-RPC tools/call: validate_cover_letter_layout
+  const clValJson = await callMcp({
+    jsonrpc: "2.0",
+    id: 5,
+    method: "tools/call",
+    params: {
+      name: "validate_cover_letter_layout",
+      arguments: {
+        coverLetterData: parsedCl,
+      },
+    },
+  });
+  console.log("Cover letter validation tool output:", clValJson.result.content[0].text);
+
   console.log("\nALL TESTS PASSED SUCCESSFULLY! ✅");
 }
 
