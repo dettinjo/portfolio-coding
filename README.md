@@ -57,6 +57,10 @@ and filling one config file; no code changes required.
   (SMTP), and optional cookieless **Umami** analytics.
 - **Static output** — everything is generated at build time; there is no runtime
   fetching, so the live site is just static files.
+- **AI-native Model Context Protocol (MCP) server & document generator.** Built-in
+  `/api/mcp` endpoint connects AI assistants (Claude Desktop, Cursor, Antigravity)
+  directly to your verified profile to generate tailored, single-page A4 résumés and
+  matching cover letters with pixel-perfect PDF rendering (Puppeteer) and web previews.
 - **Bundled demo dataset** so a clean clone (or a public live demo) renders a
   full, realistic site with no secrets.
 
@@ -159,6 +163,54 @@ persona, résumé, and on-brand mock screenshots. Regenerate the demo assets wit
 
 ---
 
+## AI Assistant & MCP Integration (Tailored CVs & Cover Letters)
+
+The portfolio includes an integrated [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server at `/api/mcp` (Streamable HTTP / SSE transport). This turns your portfolio into an active capability for AI assistants: instead of manually copy-pasting résumé text into chats, AI agents (Claude Desktop, Cursor, Antigravity) can directly read your verified credentials and generate tailored, role-specific application documents that strictly adhere to single-page A4 layouts and your visual brand.
+
+### Connecting an AI Client
+
+Add the server to your client configuration (e.g., `claude_desktop_config.json` or Cursor MCP settings):
+
+```json
+{
+  "mcpServers": {
+    "portfolio-tailor": {
+      "url": "https://your-portfolio-domain.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_RESUME_MCP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+*(Authentication is optional; if `RESUME_MCP_API_KEY` is not set in `.env.local`, requests are permitted without authentication for local development).*
+
+### Available MCP Tools & Prompts
+
+| Tool / Prompt | Description |
+|---|---|
+| `get_official_resume` | **Always call first.** Fetches the authoritative candidate CV JSON currently published on the live site. |
+| `get_master_resume` | Returns the extended master pool of all experiences, projects, and skills. |
+| `get_layout_guidelines` | Outlines the strict single-page A4 constraints (character budgets, max items per section). |
+| `validate_resume_layout` | Verifies proposed CV data against vertical height budgets before rendering. |
+| `generate_tailored_resume` | Validates layout and renders a pixel-perfect single-page A4 PDF via headless Chromium, saving the variant and returning download & preview URLs. |
+| `get_cover_letter_template` | Pre-populates a structured cover letter template with verified personal details, links, recipient, position card, and avatar. |
+| `validate_cover_letter_layout`| Checks cover letter text length against single-page vertical budgets. |
+| `generate_tailored_cover_letter` | Renders an exact single-page A4 PDF cover letter matching the portfolio's visual styling (sidebar links, position card, signature, embedded avatar). |
+| `get_download_link` | Direct lookup tool for PDF download URLs and web preview links for any variant ID or the live website CV. |
+| `list_saved_variants` / `list_saved_cover_letters` | Lists previously generated documents with metadata and download links. |
+| `prompt: tailor_cv_for_job` | Step-by-step guided workflow for AI assistants to tailor the CV for any target job posting while guaranteeing single-page A4 constraints. |
+| `prompt: write_cover_letter_for_job` | Step-by-step guided workflow for AI assistants to draft and render a matching cover letter. |
+
+### Web Previews & Direct Downloads
+
+Every generated variant receives unique URLs:
+- **Web Preview**: `/[locale]/resume/preview/[id]` and `/[locale]/cover-letter/preview/[id]`
+- **Direct PDF Download**: `/api/resume/download/[id]` and `/api/cover-letter/download/[id]`
+
+---
+
 ## Deployment
 
 GitHub Actions builds a Docker image, pushes it to GHCR, and triggers a redeploy
@@ -171,6 +223,7 @@ is passed only as a BuildKit secret — never baked into an image layer. A publi
 ## Tech stack
 
 Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS · next-intl ·
+Model Context Protocol (@modelcontextprotocol/sdk) · Puppeteer (Chromium PDF engine) ·
 Framer Motion · sharp · nodemailer · Umami · Docker.
 
 ## License

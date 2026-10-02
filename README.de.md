@@ -60,6 +60,11 @@ vergeben und eine Config-Datei ausfüllen – ohne Code-Änderungen.
   **Kontaktformular** (SMTP) und optionale cookielose **Umami**-Analytics.
 - **Statische Ausgabe** – alles wird zur Build-Zeit erzeugt; kein Laden zur
   Laufzeit, die Live-Site besteht nur aus statischen Dateien.
+- **KI-nativer Model Context Protocol (MCP)-Server & Dokumentengenerator.**
+  Integrierter `/api/mcp`-Endpunkt, der KI-Assistenten (Claude Desktop, Cursor,
+  Antigravity) direkt mit deinem verifizierten Profil verbindet, um passgenaue,
+  einseitige A4-Lebensläufe und DIN 5008-orientierte Anschreiben mit Pixel-perfektem
+  PDF-Rendering (Puppeteer) und Web-Vorschauen zu erzeugen.
 - **Mitgelieferter Demo-Datensatz**, damit ein frischer Clone (oder eine
   öffentliche Live-Demo) eine vollständige, realistische Site ohne Secrets zeigt.
 
@@ -164,6 +169,54 @@ neu erzeugen mit `npx tsx scripts/generate-demo-assets.ts`.
 
 ---
 
+## KI-Assistent & MCP-Integration (Passgenaue Lebensläufe & Anschreiben)
+
+Das Portfolio verfügt über einen integrierten [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)-Server unter `/api/mcp` (Streamable HTTP / SSE-Transport). Damit wird dein Portfolio zur aktiven Schnittstelle für moderne KI-Assistenten: Anstatt CV-Texte manuell in Chats zu kopieren, können KI-Agenten (Claude Desktop, Cursor, Antigravity) deine verifizierten Profildaten direkt auslesen und rollenspezifische Bewerbungsunterlagen erzeugen – unter strikter Einhaltung des einseitigen A4-Layouts und deines visuellen Portfoliodesigns.
+
+### KI-Client anbinden
+
+Füge den Server zu deiner MCP-Konfiguration hinzu (z. B. in `claude_desktop_config.json` oder in den Cursor MCP-Einstellungen):
+
+```json
+{
+  "mcpServers": {
+    "portfolio-tailor": {
+      "url": "https://deine-portfolio-domain.de/api/mcp",
+      "headers": {
+        "Authorization": "Bearer DEIN_RESUME_MCP_API_KEY"
+      }
+    }
+  }
+}
+```
+
+*(Authentifizierung ist optional; wird `RESUME_MCP_API_KEY` in `.env.local` nicht gesetzt, sind Anfragen für lokale Tests ohne Token gestattet).*
+
+### Verfügbare MCP-Tools & Prompts
+
+| Tool / Prompt | Beschreibung |
+|---|---|
+| `get_official_resume` | **Immer zuerst aufrufen.** Lädt das verbindliche CV-JSON des Kandidaten direkt von der Live-Website. |
+| `get_master_resume` | Liefert den erweiterten Gesamtpool aller Erfahrungen, Projekte und Skills. |
+| `get_layout_guidelines` | Definiert strikte Grenzwerte für die einseitige A4-Darstellung (Zeichenlimits, Maximalanzahl an Einträgen). |
+| `validate_resume_layout` | Validiert ein vorgeschlagenes CV-JSON gegen vertikale Layout-Budgets vor dem Rendern. |
+| `generate_tailored_resume` | Rendert ein Pixel-perfektes einseitiges A4-PDF über headless Chromium, archiviert die Variante und liefert Download- und Vorschau-URLs. |
+| `get_cover_letter_template` | Initialisiert ein strukturiertes Anschreiben-Template mit verifizierten Kontaktdaten, Links, Empfänger, Positionskarte und Profilbild. |
+| `validate_cover_letter_layout`| Prüft Textlängen des Anschreibens gegen das einseitige Seitenbudget. |
+| `generate_tailored_cover_letter` | Rendert ein einseitiges A4-PDF-Anschreiben im Design des Portfolios (Sidebar-Links, Positionskarte, Unterschrift, eingebettetes Profilbild). |
+| `get_download_link` | Direkte Abfrage von öffentlichen Download-Links und Vorschau-URLs für jede Dokumenten-ID oder das offizielle Website-CV. |
+| `list_saved_variants` / `list_saved_cover_letters` | Listet bisher erzeugte Dokumente mit Metadaten und Download-Links auf. |
+| `prompt: tailor_cv_for_job` | Schritt-für-Schritt-Workflow für KI-Modelle zur passgenauen Anpassung des CVs an Stellenanzeigen unter Einseiten-Garantie. |
+| `prompt: write_cover_letter_for_job` | Schritt-für-Schritt-Workflow für KI-Modelle zur Erstellung und Ausgabe des passenden Anschreibens. |
+
+### Web-Vorschauen & Direktdownloads
+
+Jedes generierte Dokument erhält eigene URLs:
+- **Web-Vorschau**: `/[locale]/resume/preview/[id]` und `/[locale]/cover-letter/preview/[id]`
+- **PDF-Direktdownload**: `/api/resume/download/[id]` und `/api/cover-letter/download/[id]`
+
+---
+
 ## Deployment
 
 GitHub Actions baut ein Docker-Image, pusht es zu GHCR und stößt ein Redeploy an
@@ -177,6 +230,7 @@ greift automatisch).
 ## Tech-Stack
 
 Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS · next-intl ·
+Model Context Protocol (@modelcontextprotocol/sdk) · Puppeteer (Chromium PDF-Engine) ·
 Framer Motion · sharp · nodemailer · Umami · Docker.
 
 ## Lizenz
