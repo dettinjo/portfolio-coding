@@ -179,15 +179,10 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL ||
-          (process.env.PORT ? `http://localhost:${process.env.PORT}` : "");
+          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
 
-        const fullDownloadUrl = baseUrl
-          ? `${baseUrl}${result.downloadUrl}`
-          : result.downloadUrl;
-        const fullPreviewUrl = baseUrl
-          ? `${baseUrl}/${locale}/resume/preview/${result.variant.id}`
-          : `/${locale}/resume/preview/${result.variant.id}`;
+        const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
+        const fullPreviewUrl = `${baseUrl}/${locale}/resume/preview/${result.variant.id}`;
 
         const responsePayload = {
           success: true,
@@ -229,10 +224,16 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 6: LIST SAVED VARIANTS ──────────────────────────────────────────
   server.tool(
     "list_saved_variants",
-    "Lists all previously tailored resume variants saved on the server.",
+    "Lists all previously tailored resume variants saved on the server, including download and preview links.",
     {},
     async () => {
-      const variants = listVariants();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+      const variants = listVariants().map((v) => ({
+        ...v,
+        downloadUrl: `${baseUrl}/api/resume/download/${v.id}`,
+        previewUrl: `${baseUrl}/${v.locale}/resume/preview/${v.id}`,
+      }));
       return {
         content: [
           {
@@ -247,7 +248,7 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 7: GET VARIANT BY ID ────────────────────────────────────────────
   server.tool(
     "get_variant",
-    "Retrieves the details and ResumeData of a specific saved variant by its variant ID.",
+    "Retrieves the details, ResumeData, download link, and preview URL of a specific saved variant by its variant ID.",
     {
       variantId: z.string().describe("The variant ID"),
     },
@@ -264,11 +265,21 @@ export function createResumeMcpServer(): McpServer {
           ],
         };
       }
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(variant, null, 2),
+            text: JSON.stringify(
+              {
+                ...variant,
+                downloadUrl: `${baseUrl}/api/resume/download/${variant.id}`,
+                previewUrl: `${baseUrl}/${variant.locale}/resume/preview/${variant.id}`,
+              },
+              null,
+              2
+            ),
           },
         ],
       };
@@ -355,15 +366,10 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL ||
-          (process.env.PORT ? `http://localhost:${process.env.PORT}` : "");
+          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
 
-        const fullDownloadUrl = baseUrl
-          ? `${baseUrl}${result.downloadUrl}`
-          : result.downloadUrl;
-        const fullPreviewUrl = baseUrl
-          ? `${baseUrl}/${locale}/cover-letter/preview/${result.variant.id}`
-          : `/${locale}/cover-letter/preview/${result.variant.id}`;
+        const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
+        const fullPreviewUrl = `${baseUrl}/${locale}/cover-letter/preview/${result.variant.id}`;
 
         const responsePayload = {
           success: true,
@@ -405,10 +411,16 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 11: LIST SAVED COVER LETTERS ────────────────────────────────────
   server.tool(
     "list_saved_cover_letters",
-    "Lists all previously tailored cover letter variants saved on the server.",
+    "Lists all previously tailored cover letter variants saved on the server, including download and preview links.",
     {},
     async () => {
-      const variants = listCoverLetterVariants();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+      const variants = listCoverLetterVariants().map((v) => ({
+        ...v,
+        downloadUrl: `${baseUrl}/api/cover-letter/download/${v.id}`,
+        previewUrl: `${baseUrl}/${v.locale}/cover-letter/preview/${v.id}`,
+      }));
       return {
         content: [
           {
@@ -423,7 +435,7 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 12: GET SAVED COVER LETTER BY ID ────────────────────────────────
   server.tool(
     "get_saved_cover_letter",
-    "Retrieves the details and CoverLetterData of a saved cover letter variant by ID.",
+    "Retrieves the details, CoverLetterData, download link, and preview URL of a saved cover letter variant by ID.",
     {
       variantId: z.string().describe("The cover letter variant ID"),
     },
@@ -440,11 +452,106 @@ export function createResumeMcpServer(): McpServer {
           ],
         };
       }
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(variant, null, 2),
+            text: JSON.stringify(
+              {
+                ...variant,
+                downloadUrl: `${baseUrl}/api/cover-letter/download/${variant.id}`,
+                previewUrl: `${baseUrl}/${variant.locale}/cover-letter/preview/${variant.id}`,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL 13: GET DOWNLOAD LINK ───────────────────────────────────────────
+  server.tool(
+    "get_download_link",
+    "Returns the direct public download link and preview URL for any tailored CV or cover letter variant ID, or for the official website CV.",
+    {
+      variantId: z
+        .string()
+        .describe(
+          "Variant ID (e.g. 'cl_2026-...' for cover letter or '2026-...' for resume, or 'official' / 'canonical' for the live website CV)"
+        ),
+    },
+    async ({ variantId }) => {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+
+      if (variantId === "official" || variantId === "canonical") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  variantId: "official",
+                  documentType: "resume",
+                  title: "Official Resume (Live Website)",
+                  previewUrl: `${baseUrl}/en/resume`,
+                  downloadUrl: `${baseUrl}/en/resume?print=true`,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      const isCoverLetter = variantId.startsWith("cl_");
+      if (isCoverLetter) {
+        const cl = getCoverLetterVariant(variantId);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  variantId,
+                  documentType: "cover-letter",
+                  company: cl?.company,
+                  role: cl?.role,
+                  downloadUrl: `${baseUrl}/api/cover-letter/download/${variantId}`,
+                  previewUrl: `${baseUrl}/${cl?.locale || "en"}/cover-letter/preview/${variantId}`,
+                  exists: Boolean(cl),
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      const res = getVariant(variantId);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                variantId,
+                documentType: "resume",
+                company: res?.company,
+                role: res?.role,
+                downloadUrl: `${baseUrl}/api/resume/download/${variantId}`,
+                previewUrl: `${baseUrl}/${res?.locale || "en"}/resume/preview/${variantId}`,
+                exists: Boolean(res),
+              },
+              null,
+              2
+            ),
           },
         ],
       };
