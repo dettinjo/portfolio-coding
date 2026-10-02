@@ -22,6 +22,10 @@ export const CoverLetterContentSchema = z.object({
     .array(z.string().min(1))
     .min(2, "Cover letter must contain at least 2 paragraphs")
     .max(5, "Cover letter must contain at most 5 paragraphs to fit on 1 page"),
+  bulletPoints: z
+    .array(z.string().min(1).max(250))
+    .max(4, "Maximum 4 bullet points allowed")
+    .optional(),
   closing: z.string().min(1).max(60),
   signOffName: z.string().min(1).max(60),
 });
@@ -44,6 +48,10 @@ export const CoverLetterDataSchema = z.object({
         url: z.object({ href: z.string().url() }),
       })
     )
+    .optional(),
+  keyCompetencies: z
+    .array(z.string().min(1).max(40))
+    .max(6, "Maximum 6 key competencies allowed")
     .optional(),
   recipient: CoverLetterRecipientSchema,
   position: CoverLetterPositionSchema,
@@ -94,10 +102,12 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
   const { content } = data;
 
   // Calculate text metrics
-  const fullText = content.paragraphs.join(" ");
+  const bulletsText = (content.bulletPoints || []).join(" ");
+  const fullText = content.paragraphs.join(" ") + " " + bulletsText;
   const totalChars = fullText.length;
   const totalWords = fullText.trim().split(/\s+/).filter(Boolean).length;
   const paragraphCount = content.paragraphs.length;
+  const bulletCount = (content.bulletPoints || []).length;
 
   if (totalChars > MAX_RECOMMENDED_CHARS) {
     errors.push(
@@ -113,10 +123,11 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
   }
 
   // Vertical Height Estimation:
-  // Header: Name (40px) + Recipient Block (70px) + Position Title Banner (45px) + Date (25px) = 180px
+  // Header: Name (36px) + Application line (40px) + Meta line (24px) = ~100px
   // Salutation + Sign-off: 70px
-  // Content: ~20px per line (approx 80 chars per line at 14px font in 500px column) + paragraph gaps (16px per paragraph)
-  const headerHeight = 180;
+  // Content: ~20px per line (approx 75 chars per line at 14px font) + paragraph gaps (16px per paragraph)
+  // Bullet points: ~22px per bullet point + gap (8px per bullet)
+  const headerHeight = 110;
   const salutationSignOffHeight = 70;
   const linesCount = content.paragraphs.reduce(
     (lines, p) => lines + Math.ceil(p.length / 75),
@@ -124,8 +135,9 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
   );
   const textHeight = linesCount * 21;
   const paragraphGaps = (paragraphCount - 1) * 16;
+  const bulletsHeight = bulletCount * 28;
   const estimatedHeightPx =
-    headerHeight + salutationSignOffHeight + textHeight + paragraphGaps;
+    headerHeight + salutationSignOffHeight + textHeight + paragraphGaps + bulletsHeight;
 
   if (estimatedHeightPx > MAX_SAFE_COVER_LETTER_HEIGHT_PX) {
     errors.push(

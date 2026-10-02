@@ -63,6 +63,11 @@ export function getCoverLetterTemplate(
       picture: resume.basics.picture,
     },
     profiles,
+    keyCompetencies: (resume.sections.skills?.items || [])
+      .filter((s) => s.visible !== false)
+      .slice(0, 5)
+      .map((s) => s.name || "")
+      .filter(Boolean),
     recipient: {
       company,
       department: "Hiring Team",

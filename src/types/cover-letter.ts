@@ -16,6 +16,7 @@ export interface CoverLetterPosition {
 export interface CoverLetterContent {
   salutation: string;
   paragraphs: string[];
+  bulletPoints?: string[];
   closing: string;
   signOffName: string;
 }
@@ -35,6 +36,7 @@ export interface CoverLetterData {
     username: string;
     url: { href: string };
   }>;
+  keyCompetencies?: string[];
   recipient: CoverLetterRecipient;
   position: CoverLetterPosition;
   content: CoverLetterContent;
