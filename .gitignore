@@ -73,3 +73,7 @@ next-env.d.ts
 /public/images/profile.webp
 /public/og-software.png
 /public/media/resume.pdf
+
+# tailored resume variants and downloads (MCP generated)
+/resumes/variants/
+/public/downloads/resumes/
