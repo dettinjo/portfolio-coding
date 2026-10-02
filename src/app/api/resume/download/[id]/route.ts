@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs";
-import path from "path";
 import { getVariant } from "@/lib/resume/variants";
-import { generateResumePdf } from "@/lib/resume/pdf-generator";
+import {
+  generateResumePdf,
+  findResumePdfPath,
+} from "@/lib/resume/pdf-generator";
 
 export async function GET(
   request: NextRequest,
@@ -18,18 +20,11 @@ export async function GET(
     );
   }
 
-  const pdfPath = path.join(
-    process.cwd(),
-    "public",
-    "downloads",
-    "resumes",
-    `${variant.id}.pdf`
-  );
-
+  const existingPdfPath = findResumePdfPath(variant.id);
   let pdfBuffer: Buffer;
 
-  if (fs.existsSync(pdfPath)) {
-    pdfBuffer = fs.readFileSync(pdfPath);
+  if (existingPdfPath) {
+    pdfBuffer = fs.readFileSync(existingPdfPath);
   } else {
     try {
       const generated = await generateResumePdf({

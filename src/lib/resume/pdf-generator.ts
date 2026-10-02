@@ -37,13 +37,35 @@ export interface PdfGenerationResult {
   pageCount: number;
 }
 
-const PDF_OUTPUT_DIR = path.join(process.cwd(), "public", "downloads", "resumes");
-
-function ensurePdfOutputDir(): string {
-  if (!fs.existsSync(PDF_OUTPUT_DIR)) {
-    fs.mkdirSync(PDF_OUTPUT_DIR, { recursive: true });
+export function getResumePdfOutputDir(): string {
+  const preferred = path.join(process.cwd(), "public", "downloads", "resumes");
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    fs.accessSync(preferred, fs.constants.W_OK);
+    return preferred;
+  } catch {
+    const fallback = path.join("/tmp", "resumes", "downloads");
+    if (!fs.existsSync(fallback)) {
+      fs.mkdirSync(fallback, { recursive: true });
+    }
+    return fallback;
   }
-  return PDF_OUTPUT_DIR;
+}
+
+export function findResumePdfPath(variantId: string): string | null {
+  const safeId = path.basename(variantId).replace(/\.pdf$/, "");
+  const candidates = [
+    path.join(process.cwd(), "public", "downloads", "resumes", `${safeId}.pdf`),
+    path.join("/tmp", "resumes", "downloads", `${safeId}.pdf`),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 /**
@@ -87,7 +109,6 @@ export async function generateResumePdf(params: {
   const port = process.env.PORT || "3000";
   const baseUrl =
     process.env.INTERNAL_URL ||
-    process.env.NEXT_PUBLIC_SERVER_URL ||
     `http://127.0.0.1:${port}`;
 
   const previewUrl = `${baseUrl}/${variant.locale}/resume/preview/${variant.id}?print=true`;
@@ -181,10 +202,10 @@ export async function generateResumePdf(params: {
       );
     }
 
-    // 7. Save PDF to public downloads
-    ensurePdfOutputDir();
+    // 7. Save PDF to downloads
+    const outputDir = getResumePdfOutputDir();
     const pdfFileName = `${variant.id}.pdf`;
-    const pdfPath = path.join(PDF_OUTPUT_DIR, pdfFileName);
+    const pdfPath = path.join(outputDir, pdfFileName);
     fs.writeFileSync(pdfPath, pdfBuffer);
 
     const downloadUrl = `/api/resume/download/${variant.id}`;

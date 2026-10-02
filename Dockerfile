@@ -59,13 +59,19 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 COPY --from=builder /app/public ./public
 
 RUN mkdir -p .next \
- && chown -R nextjs:nodejs .next public
+    public/downloads/resumes \
+    public/downloads/cover-letters \
+    resumes/variants \
+    cover-letters/variants \
+ && chown -R nextjs:nodejs /app
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Puppeteer needs its own node_modules in the standalone output
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/puppeteer ./node_modules/puppeteer
+
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 

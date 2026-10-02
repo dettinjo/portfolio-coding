@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs";
-import path from "path";
 import { getCoverLetterVariant } from "@/lib/cover-letter/variants";
-import { generateCoverLetterPdf } from "@/lib/cover-letter/pdf-generator";
+import {
+  generateCoverLetterPdf,
+  findCoverLetterPdfPath,
+} from "@/lib/cover-letter/pdf-generator";
 
 export async function GET(
   request: NextRequest,
@@ -18,18 +20,11 @@ export async function GET(
     );
   }
 
-  const pdfPath = path.join(
-    process.cwd(),
-    "public",
-    "downloads",
-    "cover-letters",
-    `${variant.id}.pdf`
-  );
-
+  const existingPdfPath = findCoverLetterPdfPath(variant.id);
   let pdfBuffer: Buffer;
 
-  if (fs.existsSync(pdfPath)) {
-    pdfBuffer = fs.readFileSync(pdfPath);
+  if (existingPdfPath) {
+    pdfBuffer = fs.readFileSync(existingPdfPath);
   } else {
     try {
       const generated = await generateCoverLetterPdf({

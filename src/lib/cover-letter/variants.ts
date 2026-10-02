@@ -21,13 +21,30 @@ export interface CoverLetterVariant {
 
 export type CoverLetterVariantSummary = Omit<CoverLetterVariant, "data">;
 
-const VARIANTS_DIR = path.join(process.cwd(), "cover-letters", "variants");
-
-function ensureVariantsDir(): string {
-  if (!fs.existsSync(VARIANTS_DIR)) {
-    fs.mkdirSync(VARIANTS_DIR, { recursive: true });
+function getVariantsCandidateDirs(): string[] {
+  const dirs = [path.join(process.cwd(), "cover-letters", "variants")];
+  const tmpDir = path.join("/tmp", "cover-letters", "variants");
+  if (!dirs.includes(tmpDir)) {
+    dirs.push(tmpDir);
   }
-  return VARIANTS_DIR;
+  return dirs;
+}
+
+function ensureWritableVariantsDir(): string {
+  const preferred = path.join(process.cwd(), "cover-letters", "variants");
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    fs.accessSync(preferred, fs.constants.W_OK);
+    return preferred;
+  } catch {
+    const fallback = path.join("/tmp", "cover-letters", "variants");
+    if (!fs.existsSync(fallback)) {
+      fs.mkdirSync(fallback, { recursive: true });
+    }
+    return fallback;
+  }
 }
 
 /**
@@ -106,7 +123,7 @@ export function saveCoverLetterVariant(params: {
     );
   }
 
-  ensureVariantsDir();
+  const targetDir = ensureWritableVariantsDir();
 
   const sanitizedCompany = params.company
     .toLowerCase()
@@ -120,7 +137,7 @@ export function saveCoverLetterVariant(params: {
   const randomSuffix = crypto.randomBytes(3).toString("hex");
 
   const variantId = `cl_${dateStr}_${sanitizedCompany}_${sanitizedRole}_${randomSuffix}`;
-  const filePath = path.join(VARIANTS_DIR, `${variantId}.json`);
+  const filePath = path.join(targetDir, `${variantId}.json`);
 
   const variant: CoverLetterVariant = {
     id: variantId,
@@ -143,49 +160,55 @@ export function saveCoverLetterVariant(params: {
  */
 export function getCoverLetterVariant(variantId: string): CoverLetterVariant | null {
   const safeId = path.basename(variantId).replace(/\.json$/, "");
-  const filePath = path.join(VARIANTS_DIR, `${safeId}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    return null;
+  for (const dir of getVariantsCandidateDirs()) {
+    const filePath = path.join(dir, `${safeId}.json`);
+    if (fs.existsSync(filePath)) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf8");
+        return JSON.parse(raw) as CoverLetterVariant;
+      } catch {
+        // continue search
+      }
+    }
   }
-
-  try {
-    const raw = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(raw) as CoverLetterVariant;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**
  * Lists all saved cover letter variants (sorted newest first).
  */
 export function listCoverLetterVariants(): CoverLetterVariantSummary[] {
-  if (!fs.existsSync(VARIANTS_DIR)) {
-    return [];
-  }
+  const map = new Map<string, CoverLetterVariantSummary>();
 
-  const files = fs.readdirSync(VARIANTS_DIR).filter((f) => f.endsWith(".json"));
-  const summaries: CoverLetterVariantSummary[] = [];
+  for (const dir of getVariantsCandidateDirs()) {
+    if (!fs.existsSync(dir)) continue;
 
-  for (const file of files) {
     try {
-      const fullPath = path.join(VARIANTS_DIR, file);
-      const raw = fs.readFileSync(fullPath, "utf8");
-      const parsed = JSON.parse(raw) as CoverLetterVariant;
-      summaries.push({
-        id: parsed.id,
-        createdAt: parsed.createdAt,
-        company: parsed.company,
-        role: parsed.role,
-        locale: parsed.locale,
-        notes: parsed.notes,
-        validation: parsed.validation,
-      });
+      const files = fs.readdirSync(dir).filter((f) => f.endsWith(".json"));
+      for (const file of files) {
+        try {
+          const fullPath = path.join(dir, file);
+          const raw = fs.readFileSync(fullPath, "utf8");
+          const parsed = JSON.parse(raw) as CoverLetterVariant;
+          if (!map.has(parsed.id)) {
+            map.set(parsed.id, {
+              id: parsed.id,
+              createdAt: parsed.createdAt,
+              company: parsed.company,
+              role: parsed.role,
+              locale: parsed.locale,
+              notes: parsed.notes,
+              validation: parsed.validation,
+            });
+          }
+        } catch {
+          // Ignore corrupt files
+        }
+      }
     } catch {
-      // Ignore corrupt files
+      // Ignore unreadable dirs
     }
   }
 
-  return summaries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return Array.from(map.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

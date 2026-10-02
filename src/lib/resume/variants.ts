@@ -18,13 +18,30 @@ export interface ResumeVariant {
 
 export type ResumeVariantSummary = Omit<ResumeVariant, "data">;
 
-const VARIANTS_DIR = path.join(process.cwd(), "resumes", "variants");
-
-function ensureVariantsDir(): string {
-  if (!fs.existsSync(VARIANTS_DIR)) {
-    fs.mkdirSync(VARIANTS_DIR, { recursive: true });
+function getVariantsCandidateDirs(): string[] {
+  const dirs = [path.join(process.cwd(), "resumes", "variants")];
+  const tmpDir = path.join("/tmp", "resumes", "variants");
+  if (!dirs.includes(tmpDir)) {
+    dirs.push(tmpDir);
   }
-  return VARIANTS_DIR;
+  return dirs;
+}
+
+function ensureWritableVariantsDir(): string {
+  const preferred = path.join(process.cwd(), "resumes", "variants");
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    fs.accessSync(preferred, fs.constants.W_OK);
+    return preferred;
+  } catch {
+    const fallback = path.join("/tmp", "resumes", "variants");
+    if (!fs.existsSync(fallback)) {
+      fs.mkdirSync(fallback, { recursive: true });
+    }
+    return fallback;
+  }
 }
 
 /**
@@ -79,7 +96,7 @@ export function saveVariant(params: {
     );
   }
 
-  ensureVariantsDir();
+  const targetDir = ensureWritableVariantsDir();
 
   const sanitizedCompany = params.company
     .toLowerCase()
@@ -93,7 +110,7 @@ export function saveVariant(params: {
   const randomSuffix = crypto.randomBytes(3).toString("hex");
 
   const variantId = `${dateStr}_${sanitizedCompany}_${sanitizedRole}_${randomSuffix}`;
-  const filePath = path.join(VARIANTS_DIR, `${variantId}.json`);
+  const filePath = path.join(targetDir, `${variantId}.json`);
 
   const variant: ResumeVariant = {
     id: variantId,
@@ -116,49 +133,55 @@ export function saveVariant(params: {
  */
 export function getVariant(variantId: string): ResumeVariant | null {
   const safeId = path.basename(variantId).replace(/\.json$/, "");
-  const filePath = path.join(VARIANTS_DIR, `${safeId}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    return null;
+  for (const dir of getVariantsCandidateDirs()) {
+    const filePath = path.join(dir, `${safeId}.json`);
+    if (fs.existsSync(filePath)) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf8");
+        return JSON.parse(raw) as ResumeVariant;
+      } catch {
+        // continue search
+      }
+    }
   }
-
-  try {
-    const raw = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(raw) as ResumeVariant;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**
  * Lists all saved resume variants (sorted newest first).
  */
 export function listVariants(): ResumeVariantSummary[] {
-  if (!fs.existsSync(VARIANTS_DIR)) {
-    return [];
-  }
+  const map = new Map<string, ResumeVariantSummary>();
 
-  const files = fs.readdirSync(VARIANTS_DIR).filter((f) => f.endsWith(".json"));
-  const summaries: ResumeVariantSummary[] = [];
+  for (const dir of getVariantsCandidateDirs()) {
+    if (!fs.existsSync(dir)) continue;
 
-  for (const file of files) {
     try {
-      const fullPath = path.join(VARIANTS_DIR, file);
-      const raw = fs.readFileSync(fullPath, "utf8");
-      const parsed = JSON.parse(raw) as ResumeVariant;
-      summaries.push({
-        id: parsed.id,
-        createdAt: parsed.createdAt,
-        company: parsed.company,
-        role: parsed.role,
-        locale: parsed.locale,
-        notes: parsed.notes,
-        validation: parsed.validation,
-      });
+      const files = fs.readdirSync(dir).filter((f) => f.endsWith(".json"));
+      for (const file of files) {
+        try {
+          const fullPath = path.join(dir, file);
+          const raw = fs.readFileSync(fullPath, "utf8");
+          const parsed = JSON.parse(raw) as ResumeVariant;
+          if (!map.has(parsed.id)) {
+            map.set(parsed.id, {
+              id: parsed.id,
+              createdAt: parsed.createdAt,
+              company: parsed.company,
+              role: parsed.role,
+              locale: parsed.locale,
+              notes: parsed.notes,
+              validation: parsed.validation,
+            });
+          }
+        } catch {
+          // Ignore corrupt or unreadable files
+        }
+      }
     } catch {
-      // Ignore corrupt or unreadable files
+      // Ignore unreadable dirs
     }
   }
 
-  return summaries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return Array.from(map.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
