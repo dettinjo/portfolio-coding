@@ -38,7 +38,12 @@ export const CoverLetterDataSchema = z.object({
       email: z.string().email().optional(),
       phone: z.string().optional(),
       location: z.string().max(50).optional(),
-      url: z.object({ href: z.string().url() }).optional(),
+      url: z
+        .object({
+          label: z.string().optional(),
+          href: z.string().min(1),
+        })
+        .optional(),
       picture: z.object({ url: z.string() }).optional(),
     })
     .optional(),
@@ -46,8 +51,11 @@ export const CoverLetterDataSchema = z.object({
     .array(
       z.object({
         network: z.string(),
-        username: z.string(),
-        url: z.object({ href: z.string().url() }),
+        username: z.string().optional(),
+        url: z.object({
+          label: z.string().optional(),
+          href: z.string().min(1),
+        }),
       })
     )
     .optional(),

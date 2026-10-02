@@ -5,6 +5,7 @@ import {
   getMasterResume,
   getVariant,
   listVariants,
+  pruneExpiredResumeVariants,
 } from "@/lib/resume/variants";
 import {
   validateResumeLayout,
@@ -17,6 +18,7 @@ import {
   getCoverLetterTemplate,
   getCoverLetterVariant,
   listCoverLetterVariants,
+  pruneExpiredCoverLetterVariants,
 } from "@/lib/cover-letter/variants";
 import {
   validateCoverLetterLayout,
@@ -628,6 +630,310 @@ Instructions:
 5. Ensure basics.headline is concise (max 55 chars) matching the target role.
 6. Run 'validate_resume_layout' on your modified JSON to ensure it satisfies all height budgets and does not overflow onto a 2nd page.
 7. Finally, call 'generate_tailored_resume' to generate the pixel-perfect A4 PDF and provide me with the download link and preview URL.`,
+            },
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL 14: RECALL APPLICATION MATERIALS (INTERVIEW PREP) ───────────────
+  server.tool(
+    "recall_application_materials",
+    "Recalls submitted tailored resumes and cover letters for a specific company or role to prepare for job interviews. Retained for 60 days on the server. Returns an interview briefing with the exact tailored achievements, skills, and cover letter arguments submitted, plus direct preview and download links.",
+    {
+      company: z
+        .string()
+        .optional()
+        .describe("Target company name to search for (e.g. 'Stripe')"),
+      role: z
+        .string()
+        .optional()
+        .describe("Target position or role keyword (e.g. 'Senior Full-Stack')"),
+      variantId: z
+        .string()
+        .optional()
+        .describe("Exact variant ID to recall directly"),
+      format: z
+        .enum(["interview_briefing", "full_json"])
+        .default("interview_briefing")
+        .describe("Output format: 'interview_briefing' for conversational interview prep or 'full_json' for raw data"),
+    },
+    async ({ company, role, variantId, format }) => {
+      // 1. Run automatic 60-day retention prune
+      pruneExpiredResumeVariants();
+      pruneExpiredCoverLetterVariants();
+
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+
+      const allResumes = listVariants();
+      const allCoverLetters = listCoverLetterVariants();
+
+      // Filter matches
+      const filterItem = (item: { id: string; company: string; role: string }) => {
+        if (variantId) {
+          return item.id.toLowerCase() === variantId.toLowerCase();
+        }
+        let match = true;
+        if (company) {
+          const compTerm = company.toLowerCase().trim();
+          match = match && item.company.toLowerCase().includes(compTerm);
+        }
+        if (role) {
+          const roleTerm = role.toLowerCase().trim();
+          match = match && item.role.toLowerCase().includes(roleTerm);
+        }
+        return match;
+      };
+
+      const matchedResumeSummaries = allResumes.filter(filterItem);
+      const matchedCoverLetterSummaries = allCoverLetters.filter(filterItem);
+
+      if (matchedResumeSummaries.length === 0 && matchedCoverLetterSummaries.length === 0) {
+        const availableCompanies = Array.from(
+          new Set([...allResumes.map((r) => r.company), ...allCoverLetters.map((c) => c.company)])
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  found: false,
+                  message: `No application materials found matching query (company: "${company || ""}", role: "${role || ""}", variantId: "${variantId || ""}").`,
+                  retentionPolicy: "Materials are automatically deleted 60 days after creation.",
+                  availableCompanies: availableCompanies.length > 0 ? availableCompanies : ["None currently stored"],
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      // Fetch full variant objects
+      const matchedResumes = matchedResumeSummaries
+        .map((s) => getVariant(s.id))
+        .filter((v): v is NonNullable<typeof v> => v !== null);
+
+      const matchedCoverLetters = matchedCoverLetterSummaries
+        .map((s) => getCoverLetterVariant(s.id))
+        .filter((v): v is NonNullable<typeof v> => v !== null);
+
+      if (format === "full_json") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  found: true,
+                  resumes: matchedResumes.map((r) => ({
+                    ...r,
+                    downloadUrl: `${baseUrl}/api/resume/download/${r.id}`,
+                    previewUrl: `${baseUrl}/${r.locale}/resume/preview/${r.id}`,
+                  })),
+                  coverLetters: matchedCoverLetters.map((cl) => ({
+                    ...cl,
+                    downloadUrl: `${baseUrl}/api/cover-letter/download/${cl.id}`,
+                    previewUrl: `${baseUrl}/${cl.locale}/cover-letter/preview/${cl.id}`,
+                  })),
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      // Interview briefing format
+      const briefing = {
+        title: "Job Interview Recall Briefing",
+        query: { company, role, variantId },
+        retentionNotice: "Application materials are stored for 60 days from creation, then automatically deleted.",
+        resumes: matchedResumes.map((r) => {
+          const expItems = r.data.sections?.experience?.items || [];
+          const skillItems = r.data.sections?.skills?.items || [];
+          const eduItems = r.data.sections?.education?.items || [];
+          return {
+            variantId: r.id,
+            company: r.company,
+            role: r.role,
+            submittedAt: r.createdAt,
+            expiresAt: r.expiresAt,
+            daysRemaining: r.daysRemaining,
+            headline: r.data.basics?.headline,
+            summary: r.data.sections?.summary?.content,
+            tailoredWorkExperience: expItems.map((w) => ({
+              company: w.company || w.name,
+              position: w.position,
+              period: w.date,
+              tailoredSummary: w.summary || w.description,
+            })),
+            featuredSkills: skillItems.map((s) => ({
+              name: s.name,
+              level: s.level,
+              keywords: s.keywords,
+            })),
+            education: eduItems.map((e) => ({
+              institution: e.institution,
+              degree: e.studyType,
+              area: e.area,
+              period: e.date,
+            })),
+            links: {
+              previewUrl: `${baseUrl}/${r.locale}/resume/preview/${r.id}`,
+              downloadUrl: `${baseUrl}/api/resume/download/${r.id}`,
+            },
+          };
+        }),
+        coverLetters: matchedCoverLetters.map((cl) => ({
+          variantId: cl.id,
+          company: cl.company,
+          role: cl.role,
+          submittedAt: cl.createdAt,
+          expiresAt: cl.expiresAt,
+          daysRemaining: cl.daysRemaining,
+          salutation: cl.data.content?.salutation,
+          letterParagraphs: cl.data.content?.paragraphs || [],
+          keyCompetencies: cl.data.keyCompetencies,
+          signOff: `${cl.data.content?.closing || "Sincerely"}, ${cl.data.content?.signOffName || cl.data.basics?.name || ""}`,
+          links: {
+            previewUrl: `${baseUrl}/${cl.locale}/cover-letter/preview/${cl.id}`,
+            downloadUrl: `${baseUrl}/api/cover-letter/download/${cl.id}`,
+          },
+        })),
+      };
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(briefing, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL 15: LIST ALL APPLICATIONS ───────────────────────────────────────
+  server.tool(
+    "list_all_applications",
+    "Lists all active saved CV and Cover Letter applications stored on the server with their target company, role, creation date, 60-day expiration date, days remaining, preview URL, and download URL.",
+    {},
+    async () => {
+      pruneExpiredResumeVariants();
+      pruneExpiredCoverLetterVariants();
+
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+
+      const resumes = listVariants().map((v) => ({
+        type: "resume" as const,
+        id: v.id,
+        company: v.company,
+        role: v.role,
+        locale: v.locale,
+        createdAt: v.createdAt,
+        expiresAt: v.expiresAt,
+        daysRemaining: v.daysRemaining,
+        downloadUrl: `${baseUrl}/api/resume/download/${v.id}`,
+        previewUrl: `${baseUrl}/${v.locale}/resume/preview/${v.id}`,
+      }));
+
+      const coverLetters = listCoverLetterVariants().map((v) => ({
+        type: "cover-letter" as const,
+        id: v.id,
+        company: v.company,
+        role: v.role,
+        locale: v.locale,
+        createdAt: v.createdAt,
+        expiresAt: v.expiresAt,
+        daysRemaining: v.daysRemaining,
+        downloadUrl: `${baseUrl}/api/cover-letter/download/${v.id}`,
+        previewUrl: `${baseUrl}/${v.locale}/cover-letter/preview/${v.id}`,
+      }));
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                retentionPolicy: "Materials are automatically deleted 60 days after creation.",
+                totalApplications: resumes.length + coverLetters.length,
+                resumes,
+                coverLetters,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL 16: PRUNE EXPIRED MATERIALS ─────────────────────────────────────
+  server.tool(
+    "prune_expired_materials",
+    "Manually triggers the pruning engine to clean up any CV and cover letter variants (and their generated PDFs) older than 60 days (2 months).",
+    {},
+    async () => {
+      const deletedResumes = pruneExpiredResumeVariants();
+      const deletedCoverLetters = pruneExpiredCoverLetterVariants();
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                success: true,
+                retentionDays: 60,
+                prunedResumesCount: deletedResumes.deletedIds.length,
+                prunedResumeIds: deletedResumes.deletedIds,
+                prunedCoverLettersCount: deletedCoverLetters.deletedIds.length,
+                prunedCoverLetterIds: deletedCoverLetters.deletedIds,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── MCP PROMPT: PREP FOR INTERVIEW ───────────────────────────────────────
+  server.prompt(
+    "prep_for_interview",
+    "Prepares the candidate for an upcoming job interview by recalling the exact submitted CV achievements, tailored work history, and cover letter motivation.",
+    {
+      company: z.string().describe("Target company name to prepare for"),
+      role: z.string().optional().describe("Position title (optional)"),
+    },
+    async ({ company, role }) => {
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `I have an upcoming interview with "${company}"${role ? ` for the position of "${role}"` : ""}. Please help me prepare thoroughly based on the exact materials I submitted to them.
+
+Instructions:
+1. Call 'recall_application_materials' with company: "${company}"${role ? `, role: "${role}"` : ""} to fetch the exact tailored CV and cover letter submitted.
+2. Review the submitted headline, tailored achievements, highlighted skills, and cover letter motivation.
+3. Provide a structured Interview Preparation Guide:
+   - Executive Pitch: A 60-second opening statement aligned with the tailored CV headline.
+   - Deep Dive Stories: 3-4 STAR method talking points based on the exact bullet points and project stories submitted.
+   - Technical Highlights: How to speak to the featured skills and architectures mentioned.
+   - Anticipated Tough Questions & Tailored Answers: Questions the interviewers at "${company}" will likely ask based on the submitted application.
+   - Questions to Ask the Interviewer: Thoughtful, role-specific questions.`,
             },
           },
         ],

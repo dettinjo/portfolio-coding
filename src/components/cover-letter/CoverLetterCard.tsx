@@ -13,8 +13,37 @@ import { PrintButton } from "@/components/resume/PrintButton";
 import { CoverLetterData } from "@/types/cover-letter";
 import { withBasePath } from "@/lib/basePath";
 
+interface CoverLetterTranslations {
+  contact: string;
+  applicationFor: string;
+  recipient: string;
+  downloadPdf: string;
+}
+
+const DEFAULT_TRANSLATIONS: Record<string, CoverLetterTranslations> = {
+  en: {
+    contact: "Contact",
+    applicationFor: "Application for Position",
+    recipient: "Recipient",
+    downloadPdf: "Download PDF",
+  },
+  de: {
+    contact: "Kontakt",
+    applicationFor: "Bewerbung um die Position",
+    recipient: "Empfänger",
+    downloadPdf: "PDF herunterladen",
+  },
+  es: {
+    contact: "Contacto",
+    applicationFor: "Candidatura al puesto",
+    recipient: "Destinatario",
+    downloadPdf: "Descargar PDF",
+  },
+};
+
 interface CoverLetterCardProps {
   data: CoverLetterData;
+  locale?: string;
   showDownloadButton?: boolean;
 }
 
@@ -48,8 +77,10 @@ function parseReference(raw?: string): { prefix: string; code: string } | null {
 
 export function CoverLetterCard({
   data,
+  locale = "en",
   showDownloadButton = true,
 }: CoverLetterCardProps) {
+  const t = DEFAULT_TRANSLATIONS[locale] || DEFAULT_TRANSLATIONS.en;
   const { basics, profiles, recipient, position, content } = data;
 
   // Resolve avatar URL with fallback support to canonical profile image
@@ -172,10 +203,10 @@ export function CoverLetterCard({
                 {/* 2. Personal Information & Links (Rendered only when contact details exist) */}
                 {hasContactInfo && (
                   <section className="w-full">
-                    <h3 className="text-xs font-bold mb-2.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
-                      Contact & Profiles
+                    <h3 className="text-sm font-bold mb-2.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
+                      {t.contact}
                     </h3>
-                    <div className="space-y-2.5 text-xs w-full text-left">
+                    <div className="space-y-2 text-xs w-full text-left">
                       {basics?.location && (
                         <a
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -256,7 +287,7 @@ export function CoverLetterCard({
               {hasRecipientInfo && (
                 <section className="w-full pt-4 border-t border-zinc-800 dark:border-zinc-200">
                   <h3 className="text-xs font-bold mb-2 uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                    Recipient
+                    {t.recipient}
                   </h3>
                   <div className="text-xs space-y-1.5 text-zinc-300 dark:text-zinc-700">
                     {recipient?.company && (
@@ -299,22 +330,22 @@ export function CoverLetterCard({
                   </div>
                 )}
 
-                {/* Target Position Heading (Subtle, editorial document styling without dominant tints/dividers) */}
+                {/* Target Position Card (Provides visual differentiation from the letter content) */}
                 {hasPositionCard && (
-                  <div className="mb-6 space-y-1">
-                    {/* Micro-label + Modern Ref ID */}
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="mb-6 p-4 md:p-5 rounded-xl border border-zinc-200/90 bg-zinc-50/70 dark:border-zinc-800 dark:bg-zinc-900/40 space-y-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    {/* Micro-label + Modern Ref ID Badge */}
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                        Application for Position
+                        {t.applicationFor}
                       </span>
 
                       {refBadge && (
-                        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
-                          <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                          <span className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
-                            {refBadge.prefix}:
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-200/60 dark:bg-zinc-800 border border-zinc-300/40 dark:border-zinc-700/50 font-mono text-[10px] text-zinc-600 dark:text-zinc-300">
+                          <span className="font-semibold text-zinc-400 dark:text-zinc-500">
+                            {refBadge.prefix}
                           </span>
-                          <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                          <span className="font-bold">
                             {refBadge.code}
                           </span>
                         </span>
@@ -323,12 +354,12 @@ export function CoverLetterCard({
 
                     {/* Position Title */}
                     {position?.title && (
-                      <h2 className="text-2xl font-bold text-zinc-950 dark:text-zinc-50 tracking-tight break-words leading-tight">
+                      <h2 className="text-xl md:text-2xl font-bold text-zinc-950 dark:text-zinc-50 tracking-tight break-words leading-tight">
                         {position.title}
                       </h2>
                     )}
 
-                    {/* Company & Department / Area: Subtle, clean typographic metadata */}
+                    {/* Company & Department / Area: Clean metadata styling */}
                     {hasMetaRow && (
                       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400 font-medium pt-0.5">
                         {recipient?.company && (

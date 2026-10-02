@@ -57,7 +57,7 @@ export default async function CoverLetterVariantPreviewPage({
         </div>
       </div>
 
-      <CoverLetterCard data={variant.data} showDownloadButton={true} />
+      <CoverLetterCard data={variant.data} locale={locale} showDownloadButton={true} />
     </div>
   );
 }

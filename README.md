@@ -194,14 +194,25 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | `get_master_resume` | Returns the extended master pool of all experiences, projects, and skills. |
 | `get_layout_guidelines` | Outlines the strict single-page A4 constraints (character budgets, max items per section). |
 | `validate_resume_layout` | Verifies proposed CV data against vertical height budgets before rendering. |
-| `generate_tailored_resume` | Validates layout and renders a pixel-perfect single-page A4 PDF via headless Chromium, saving the variant and returning download & preview URLs. |
-| `get_cover_letter_template` | Pre-populates a structured cover letter template with verified personal details, links, recipient, position card, and avatar. |
+| `generate_tailored_resume` | Validates layout and renders a pixel-perfect single-page A4 PDF via headless Chromium, saving the variant with a 60-day retention period, and returning download & preview URLs. |
+| `get_cover_letter_template` | Pre-populates a structured cover letter template with verified personal details, identical contact links matching the CV, recipient, position card, and avatar. |
 | `validate_cover_letter_layout`| Checks cover letter text length against single-page vertical budgets. |
-| `generate_tailored_cover_letter` | Renders an exact single-page A4 PDF cover letter matching the portfolio's visual styling (sidebar links, position card, signature, embedded avatar). |
+| `generate_tailored_cover_letter` | Renders an exact single-page A4 PDF cover letter matching the portfolio's visual styling (sidebar links, subtle position information card, signature, embedded avatar) with 60-day retention. |
+| `recall_application_materials` | **Interview Recall:** Recalls submitted CV achievements, tailored work history, highlighted skills, and cover letter arguments for any company or role to prepare for interviews. |
+| `list_all_applications` | Lists all active saved CV and Cover Letter applications, creation dates, 60-day expiration dates, days remaining, preview URLs, and download links. |
+| `prune_expired_materials` | Manually triggers the cleanup engine to delete materials and PDFs older than 60 days. |
 | `get_download_link` | Direct lookup tool for PDF download URLs and web preview links for any variant ID or the live website CV. |
 | `list_saved_variants` / `list_saved_cover_letters` | Lists previously generated documents with metadata and download links. |
 | `prompt: tailor_cv_for_job` | Step-by-step guided workflow for AI assistants to tailor the CV for any target job posting while guaranteeing single-page A4 constraints. |
 | `prompt: write_cover_letter_for_job` | Step-by-step guided workflow for AI assistants to draft and render a matching cover letter. |
+| `prompt: prep_for_interview` | Guided workflow for AI assistants to run a tailored mock interview preparation and briefing based on the exact application materials submitted to a specific company. |
+
+### 60-Day Retention & Interview Recall Engine
+
+All generated CV and Cover Letter variants are assigned unique IDs matching the target company and role (e.g. `2026-10-02_stripe_senior-backend-engineer_a1b2c3d4` or `cl_2026-10-02_stripe_senior-backend-engineer_a1b2c3d4`).
+- **2-Month (60 Days) Lifecycle**: Variant JSON data and generated PDF artifacts are stored on the server for exactly 60 days.
+- **Automatic Pruning**: Whenever variants are listed, created, or recalled, any records older than 60 days are automatically pruned from disk to prevent bloat.
+- **Interview Recall**: Before job interviews, AI assistants can invoke `recall_application_materials` (or the `prep_for_interview` prompt) with just the company name (e.g., `"Stripe"`) to instantly recall the exact tailored summaries, technical bullet points, and pitch submitted.
 
 ### Web Previews & Direct Downloads
 

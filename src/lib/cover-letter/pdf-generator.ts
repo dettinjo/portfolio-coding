@@ -3,7 +3,11 @@ import fs from "fs";
 import puppeteer, { Browser } from "puppeteer";
 import { CoverLetterData } from "@/types/cover-letter";
 import { validateCoverLetterLayout } from "./validator";
-import { saveCoverLetterVariant, CoverLetterVariant } from "./variants";
+import {
+  saveCoverLetterVariant,
+  CoverLetterVariant,
+  normalizeCoverLetterData,
+} from "./variants";
 
 let browserInstance: Browser | null = null;
 
@@ -84,8 +88,10 @@ export async function generateCoverLetterPdf(params: {
   locale?: string;
   notes?: string;
 }): Promise<CoverLetterPdfResult> {
+  const normalizedData = normalizeCoverLetterData(params.data);
+
   // 1. Pre-render Layout Safeguard
-  const validation = validateCoverLetterLayout(params.data);
+  const validation = validateCoverLetterLayout(normalizedData);
   if (!validation.valid) {
     throw new Error(
       `Pre-render layout validation failed:\n- ${validation.errors.join("\n- ")}`
@@ -94,7 +100,7 @@ export async function generateCoverLetterPdf(params: {
 
   // 2. Persist variant so the dynamic preview route can serve it
   const { variant } = saveCoverLetterVariant({
-    data: params.data,
+    data: normalizedData,
     company: params.company,
     role: params.role,
     locale: params.locale || "en",

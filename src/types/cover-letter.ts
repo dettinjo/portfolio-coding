@@ -28,13 +28,13 @@ export interface CoverLetterData {
     email?: string;
     phone?: string;
     location?: string;
-    url?: { href: string };
+    url?: { label?: string; href: string };
     picture?: { url: string };
   };
   profiles?: Array<{
     network: string;
-    username: string;
-    url: { href: string };
+    username?: string;
+    url: { label?: string; href: string };
   }>;
   keyCompetencies?: string[];
   recipient?: CoverLetterRecipient;
