@@ -282,31 +282,31 @@ export function CoverLetterCard({
           <div className="bg-white text-zinc-900 px-6 py-6 md:px-8 md:py-8 print:px-6 print:py-6 dark:bg-zinc-950 dark:text-zinc-100 h-full flex flex-col justify-between print:h-full print:box-border">
             <div className="flex flex-col h-full justify-between">
               <div>
-                {/* Document Date: Placed top-right, applying generally to the entire letter */}
+                {/* Document Date: Top right, applying to the entire letter */}
                 {position?.date && (
-                  <div className="flex justify-end mb-2.5">
+                  <div className="flex justify-end mb-2 print:mb-2">
                     <time className="text-xs text-zinc-500 dark:text-zinc-400 font-medium tracking-tight">
                       {position.date}
                     </time>
                   </div>
                 )}
 
-                {/* Target Position Banner on Top (Rendered only if position data exists) */}
+                {/* Target Position Heading (Subtle, editorial document styling without dominant tints/dividers) */}
                 {hasPositionCard && (
-                  <div className="mb-6 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                    {/* Card Header: Application label on left, Modern Ref ID badge on right */}
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  <div className="mb-6 space-y-1">
+                    {/* Micro-label + Modern Ref ID */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                         Application for Position
                       </span>
 
-                      {/* Modern Reference ID Badge */}
                       {refBadge && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md font-mono text-[11px] font-medium bg-zinc-200/70 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border border-zinc-300/60 dark:border-zinc-700/60 shrink-0">
-                          <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+                          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                          <span className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
                             {refBadge.prefix}:
                           </span>
-                          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          <span className="font-semibold text-zinc-700 dark:text-zinc-300">
                             {refBadge.code}
                           </span>
                         </span>
@@ -315,21 +315,24 @@ export function CoverLetterCard({
 
                     {/* Position Title */}
                     {position?.title && (
-                      <h2 className="text-xl md:text-2xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight break-words leading-snug">
+                      <h2 className="text-2xl font-bold text-zinc-950 dark:text-zinc-50 tracking-tight break-words leading-tight">
                         {position.title}
                       </h2>
                     )}
 
-                    {/* Company & Department / Area: Resilient layout where any length wraps gracefully */}
+                    {/* Company & Department / Area: Subtle, clean typographic metadata */}
                     {hasMetaRow && (
-                      <div className="mt-2.5 pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs text-zinc-500 dark:text-zinc-400 font-medium pt-0.5">
                         {recipient?.company && (
-                          <span className="font-semibold text-zinc-900 dark:text-zinc-100 break-words">
+                          <span className="text-zinc-700 dark:text-zinc-300 font-semibold break-words">
                             {recipient.company}
                           </span>
                         )}
+                        {recipient?.company && recipient?.department && (
+                          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                        )}
                         {recipient?.department && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-300/40 dark:border-zinc-700/40 break-words">
+                          <span className="break-words">
                             {recipient.department}
                           </span>
                         )}
