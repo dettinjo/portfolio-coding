@@ -1,4 +1,14 @@
-import { Globe, Mail, MapPin, Phone, Linkedin, Github, Building, Calendar, CheckCircle2 } from "lucide-react";
+import {
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  Linkedin,
+  Github,
+  Building,
+  Calendar,
+  Hash,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
 import { PrintButton } from "@/components/resume/PrintButton";
@@ -14,7 +24,7 @@ export function CoverLetterCard({
   data,
   showDownloadButton = true,
 }: CoverLetterCardProps) {
-  const { basics, profiles, keyCompetencies, recipient, position, content } = data;
+  const { basics, profiles, recipient, position, content } = data;
   const avatarPath = withBasePath("/images/profile.webp");
 
   // Profile links
@@ -52,10 +62,10 @@ export function CoverLetterCard({
             </div>
           </div>
 
-          {/* LEFT COLUMN: Sidebar Container (Harmoniously filled, no void) */}
+          {/* LEFT COLUMN: Sidebar Container */}
           <aside className="p-4 pr-0 print:p-4 print:pr-0 print:h-full bg-white dark:bg-zinc-950">
             <div className="bg-zinc-900 text-zinc-100 p-6 md:p-8 flex flex-col justify-between print:!flex print:p-6 print:h-full dark:bg-white dark:text-zinc-900 h-full rounded-2xl">
-              <div className="flex flex-col items-center gap-5">
+              <div className="flex flex-col items-center gap-6">
                 {/* 1. Avatar */}
                 <Avatar className="h-40 w-40 lg:h-44 lg:w-44 group transition-all duration-500 ease-in-out bg-zinc-800 border-4 border-zinc-800 shadow-sm dark:bg-zinc-200 dark:border-zinc-200">
                   <Image
@@ -70,10 +80,10 @@ export function CoverLetterCard({
 
                 {/* 2. Personal Information & Links */}
                 <section className="w-full">
-                  <h3 className="text-xs font-bold mb-2 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
+                  <h3 className="text-xs font-bold mb-2.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
                     Contact & Profiles
                   </h3>
-                  <div className="space-y-2 text-xs w-full text-left">
+                  <div className="space-y-2.5 text-xs w-full text-left">
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                         basics.location
@@ -145,46 +155,30 @@ export function CoverLetterCard({
                     )}
                   </div>
                 </section>
-
-                {/* 3. Core Competencies / Role Match (Fills the previous void & provides instant 5-second overview) */}
-                {keyCompetencies && keyCompetencies.length > 0 && (
-                  <section className="w-full">
-                    <h3 className="text-xs font-bold mb-2 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
-                      Target Competencies
-                    </h3>
-                    <div className="flex flex-col gap-1.5">
-                      {keyCompetencies.map((comp, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 text-xs text-zinc-200 dark:text-zinc-800"
-                        >
-                          <CheckCircle2 className="h-3 w-3 shrink-0 text-zinc-400 dark:text-zinc-500" />
-                          <span className="font-medium tracking-tight truncate">{comp}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
               </div>
 
-              {/* 4. Recipient Organization Card */}
+              {/* 3. Recipient Organization (No truncation, clean word wrapping) */}
               <section className="w-full pt-4 border-t border-zinc-800 dark:border-zinc-200">
-                <h3 className="text-[11px] font-bold mb-1.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                  Target Entity
+                <h3 className="text-xs font-bold mb-2 uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  Recipient
                 </h3>
-                <div className="text-xs space-y-0.5 text-zinc-300 dark:text-zinc-700">
-                  <div className="font-bold text-zinc-100 dark:text-zinc-900 flex items-center gap-1.5">
-                    <Building className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
-                    <span className="truncate">{recipient.company}</span>
+                <div className="text-xs space-y-1.5 text-zinc-300 dark:text-zinc-700">
+                  <div className="font-semibold text-zinc-100 dark:text-zinc-900 flex items-start gap-1.5">
+                    <Building className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500 mt-0.5" />
+                    <span className="leading-snug break-words">{recipient.company}</span>
                   </div>
                   {recipient.department && (
-                    <div className="opacity-80 text-[11px] truncate">{recipient.department}</div>
+                    <div className="opacity-80 pl-5 leading-snug break-words text-[11px]">
+                      {recipient.department}
+                    </div>
                   )}
                   {recipient.contactPerson && (
-                    <div className="opacity-80 text-[11px]">{recipient.contactPerson}</div>
+                    <div className="opacity-80 pl-5 leading-snug break-words text-[11px]">
+                      {recipient.contactPerson}
+                    </div>
                   )}
                   {recipient.city && (
-                    <div className="opacity-70 text-[11px]">
+                    <div className="opacity-70 pl-5 leading-snug break-words text-[11px]">
                       {recipient.city}
                       {recipient.country ? `, ${recipient.country}` : ""}
                     </div>
@@ -194,58 +188,52 @@ export function CoverLetterCard({
             </div>
           </aside>
 
-          {/* RIGHT COLUMN: Executive Document Layout */}
+          {/* RIGHT COLUMN: Cover Letter Content */}
           <div className="bg-white text-zinc-900 px-6 py-6 md:px-8 md:py-8 print:px-6 print:py-6 dark:bg-zinc-950 dark:text-zinc-100 h-full flex flex-col justify-between print:h-full print:box-border">
             <div className="flex flex-col h-full justify-between">
               <div>
-                {/* Header Row: Candidate Name + Date aligned cleanly */}
-                <div className="mb-4 pb-3 border-b border-zinc-200 dark:border-zinc-800 hidden md:flex print:flex items-baseline justify-between">
-                  <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight mt-0 leading-none text-zinc-950 dark:text-zinc-50">
-                      {basics.name}
-                    </h1>
-                    {basics.headline && (
-                      <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-                        {basics.headline}
-                      </p>
+                {/* Target Position Banner on Top (Matches official website card design) */}
+                <div className="mb-6 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      Application for Position
+                    </span>
+                    {position.date && (
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 font-mono">
+                        <Calendar className="h-3 w-3" />
+                        {position.date}
+                      </span>
                     )}
                   </div>
-                  {position.date && (
-                    <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 font-mono">
-                      <Calendar className="h-3.5 w-3.5 text-zinc-400" />
-                      <span>{position.date}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Sleek Typographic Position Banner (Replaces heavy gray widget) */}
-                <div className="mb-5 border-l-4 border-zinc-900 dark:border-zinc-100 pl-4 py-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                      Subject · Application
+                  <h2 className="text-xl md:text-2xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">
+                    {position.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-600 dark:text-zinc-400 mt-1.5">
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-200">
+                      {recipient.company}
                     </span>
+                    {recipient.department && (
+                      <span className="opacity-80">
+                        · {recipient.department}
+                      </span>
+                    )}
                     {position.referenceNumber && (
-                      <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
+                      <span className="flex items-center gap-1 opacity-80 font-mono">
+                        <Hash className="h-3 w-3" />
                         {position.referenceNumber}
                       </span>
                     )}
                   </div>
-                  <h2 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50 leading-snug">
-                    {position.title}
-                  </h2>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-medium">
-                    {recipient.company} {recipient.department ? `· ${recipient.department}` : ""}
-                  </div>
                 </div>
 
-                {/* Letter Body Typography */}
+                {/* Cover Letter Body */}
                 <div className="space-y-3.5 text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">
                     {content.salutation}
                   </p>
 
                   {content.paragraphs.map((paragraph, index) => (
-                    <p key={index} className="leading-relaxed text-justify print:text-justify text-zinc-700 dark:text-zinc-300">
+                    <p key={index} className="leading-relaxed text-zinc-700 dark:text-zinc-300">
                       {paragraph}
                     </p>
                   ))}
@@ -264,15 +252,12 @@ export function CoverLetterCard({
                 </div>
               </div>
 
-              {/* Elegant Sign-off Area */}
-              <div className="pt-4 mt-4 border-t border-zinc-200/80 dark:border-zinc-800">
-                <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-2">
+              {/* Sign-off & Signature: Signed once cleanly */}
+              <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800/80">
+                <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                   {content.closing}
                 </p>
-                <div className="font-serif italic text-2xl text-zinc-800 dark:text-zinc-200 select-none mb-1">
-                  {basics.name}
-                </div>
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <p className="text-base font-bold text-zinc-950 dark:text-zinc-50">
                   {content.signOffName || basics.name}
                 </p>
               </div>
