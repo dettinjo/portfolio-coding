@@ -20,7 +20,7 @@ export async function generateMetadata({
     return { title: "Cover Letter Not Found" };
   }
   return {
-    title: `Cover Letter - ${variant.data.basics.name} (${variant.company} - ${variant.role})`,
+    title: `Cover Letter - ${variant.data.basics?.name || "Candidate"} (${variant.company} - ${variant.role})`,
     robots: {
       index: false,
       follow: false,

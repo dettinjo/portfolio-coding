@@ -1,5 +1,5 @@
 export interface CoverLetterRecipient {
-  company: string;
+  company?: string;
   department?: string;
   contactPerson?: string;
   address?: string;
@@ -8,26 +8,26 @@ export interface CoverLetterRecipient {
 }
 
 export interface CoverLetterPosition {
-  title: string;
+  title?: string;
   referenceNumber?: string;
   date?: string;
 }
 
 export interface CoverLetterContent {
-  salutation: string;
+  salutation?: string;
   paragraphs: string[];
   bulletPoints?: string[];
-  closing: string;
-  signOffName: string;
+  closing?: string;
+  signOffName?: string;
 }
 
 export interface CoverLetterData {
-  basics: {
-    name: string;
+  basics?: {
+    name?: string;
     headline?: string;
-    email: string;
+    email?: string;
     phone?: string;
-    location: string;
+    location?: string;
     url?: { href: string };
     picture?: { url: string };
   };
@@ -37,7 +37,7 @@ export interface CoverLetterData {
     url: { href: string };
   }>;
   keyCompetencies?: string[];
-  recipient: CoverLetterRecipient;
-  position: CoverLetterPosition;
+  recipient?: CoverLetterRecipient;
+  position?: CoverLetterPosition;
   content: CoverLetterContent;
 }

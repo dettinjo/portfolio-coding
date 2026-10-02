@@ -50,7 +50,7 @@ export async function GET(
     }
   }
 
-  const safeName = (variant.data.basics.name || "Candidate")
+  const safeName = (variant.data.basics?.name || "Candidate")
     .replace(/[^a-zA-Z0-9\s]/g, "")
     .trim()
     .replace(/\s+/g, "_");

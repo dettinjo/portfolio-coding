@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CoverLetterData } from "@/types/cover-letter";
 
 export const CoverLetterRecipientSchema = z.object({
-  company: z.string().min(1).max(80),
+  company: z.string().max(80).optional(),
   department: z.string().max(80).optional(),
   contactPerson: z.string().max(80).optional(),
   address: z.string().max(100).optional(),
@@ -11,35 +11,37 @@ export const CoverLetterRecipientSchema = z.object({
 });
 
 export const CoverLetterPositionSchema = z.object({
-  title: z.string().min(1).max(75),
+  title: z.string().max(75).optional(),
   referenceNumber: z.string().max(50).optional(),
   date: z.string().max(40).optional(),
 });
 
 export const CoverLetterContentSchema = z.object({
-  salutation: z.string().min(1).max(80),
+  salutation: z.string().max(80).optional(),
   paragraphs: z
     .array(z.string().min(1))
-    .min(2, "Cover letter must contain at least 2 paragraphs")
+    .min(1, "Cover letter must contain at least 1 paragraph")
     .max(5, "Cover letter must contain at most 5 paragraphs to fit on 1 page"),
   bulletPoints: z
     .array(z.string().min(1).max(250))
     .max(4, "Maximum 4 bullet points allowed")
     .optional(),
-  closing: z.string().min(1).max(60),
-  signOffName: z.string().min(1).max(60),
+  closing: z.string().max(60).optional(),
+  signOffName: z.string().max(60).optional(),
 });
 
 export const CoverLetterDataSchema = z.object({
-  basics: z.object({
-    name: z.string().min(1).max(50),
-    headline: z.string().max(65).optional(),
-    email: z.string().email(),
-    phone: z.string().optional(),
-    location: z.string().min(1).max(50),
-    url: z.object({ href: z.string().url() }).optional(),
-    picture: z.object({ url: z.string() }).optional(),
-  }),
+  basics: z
+    .object({
+      name: z.string().max(50).optional(),
+      headline: z.string().max(65).optional(),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      location: z.string().max(50).optional(),
+      url: z.object({ href: z.string().url() }).optional(),
+      picture: z.object({ url: z.string() }).optional(),
+    })
+    .optional(),
   profiles: z
     .array(
       z.object({
@@ -53,8 +55,8 @@ export const CoverLetterDataSchema = z.object({
     .array(z.string().min(1).max(40))
     .max(6, "Maximum 6 key competencies allowed")
     .optional(),
-  recipient: CoverLetterRecipientSchema,
-  position: CoverLetterPositionSchema,
+  recipient: CoverLetterRecipientSchema.optional(),
+  position: CoverLetterPositionSchema.optional(),
   content: CoverLetterContentSchema,
 });
 
@@ -72,8 +74,9 @@ export interface CoverLetterValidationResult {
   sanitizedData?: CoverLetterData;
 }
 
+// Single-page A4 vertical height budget (approx 1,123px total at 96 DPI)
 export const MAX_SAFE_COVER_LETTER_HEIGHT_PX = 950;
-export const MAX_RECOMMENDED_CHARS = 2400; // ~350-380 words
+export const MAX_RECOMMENDED_CHARS = 2400;
 
 export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationResult {
   const errors: string[] = [];
@@ -103,10 +106,10 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
 
   // Calculate text metrics
   const bulletsText = (content.bulletPoints || []).join(" ");
-  const fullText = content.paragraphs.join(" ") + " " + bulletsText;
+  const fullText = (content.paragraphs || []).join(" ") + " " + bulletsText;
   const totalChars = fullText.length;
   const totalWords = fullText.trim().split(/\s+/).filter(Boolean).length;
-  const paragraphCount = content.paragraphs.length;
+  const paragraphCount = (content.paragraphs || []).length;
   const bulletCount = (content.bulletPoints || []).length;
 
   if (totalChars > MAX_RECOMMENDED_CHARS) {
@@ -118,23 +121,23 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
     warnings.push(
       `Cover letter text is relatively long (${totalChars} characters). Recommended length is 1,400–1,900 characters for ideal white space.`
     );
-  } else if (totalChars < 500) {
-    warnings.push("Cover letter is very brief (under 500 characters).");
+  } else if (totalChars < 300) {
+    warnings.push("Cover letter is very brief (under 300 characters).");
   }
 
   // Vertical Height Estimation:
-  // Header: Name (36px) + Application line (40px) + Meta line (24px) = ~100px
+  // Header: Application card = ~110px
   // Salutation + Sign-off: 70px
-  // Content: ~20px per line (approx 75 chars per line at 14px font) + paragraph gaps (16px per paragraph)
-  // Bullet points: ~22px per bullet point + gap (8px per bullet)
+  // Content: ~21px per line (approx 75 chars per line) + paragraph gaps (16px per paragraph)
+  // Bullet points: ~28px per bullet
   const headerHeight = 110;
   const salutationSignOffHeight = 70;
-  const linesCount = content.paragraphs.reduce(
+  const linesCount = (content.paragraphs || []).reduce(
     (lines, p) => lines + Math.ceil(p.length / 75),
     0
   );
   const textHeight = linesCount * 21;
-  const paragraphGaps = (paragraphCount - 1) * 16;
+  const paragraphGaps = Math.max(0, paragraphCount - 1) * 16;
   const bulletsHeight = bulletCount * 28;
   const estimatedHeightPx =
     headerHeight + salutationSignOffHeight + textHeight + paragraphGaps + bulletsHeight;
