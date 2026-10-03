@@ -3,7 +3,8 @@
     "made_with": "Hecho con",
     "by_me": "por mí",
     "imprint": "Aviso Legal",
-    "privacy": "Política de Privacidad"
+    "privacy": "Política de Privacidad",
+    "banner": "Banner de LinkedIn"
   },
   "HomePageSEO": {
     "title": "Código por {name}",
@@ -65,5 +66,17 @@
     "skills": "Habilidades",
     "languages": "Idiomas",
     "contact": "Contacto"
+  },
+  "BannerPage": {
+    "title": "Generador de Banner de LinkedIn",
+    "subtitle": "Cree un banner de fondo de LinkedIn profesional alineado con el estilo de su portafolio. Con superposición de zona segura y opciones de exportación.",
+    "researchTitle": "Especificaciones e Investigación de Banners de LinkedIn",
+    "researchIntro": "Dimensiones oficiales y recomendaciones de zona segura basadas en pruebas de LinkedIn.",
+    "specDimensionsTitle": "Dimensiones recomendadas",
+    "specDimensionsDesc": "1584 × 396 píxeles (relación de aspecto exacta 4:1). Formatos admitidos: PNG y JPG de menos de 8 MB. Se recomienda PNG para tipografía nítida.",
+    "specDesktopSafeTitle": "Superposición de foto de perfil en escritorio",
+    "specDesktopSafeDesc": "En escritorio, LinkedIn superpone una foto de perfil circular en la esquina inferior izquierda. Todas las plantillas reservan los 340px izquierdos.",
+    "specMobileSafeTitle": "Recorte responsivo en móviles",
+    "specMobileSafeDesc": "Las aplicaciones móviles recortan hasta un 15% en los bordes. Mantenga el contenido crítico dentro de la zona segura central de 1260 × 316 px."
   }
 }

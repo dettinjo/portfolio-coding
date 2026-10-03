@@ -203,9 +203,28 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | `prune_expired_materials` | Manually triggers the cleanup engine to delete materials and PDFs older than 60 days. |
 | `get_download_link` | Direct lookup tool for PDF download URLs and web preview links for any variant ID or the live website CV. |
 | `list_saved_variants` / `list_saved_cover_letters` | Lists previously generated documents with metadata and download links. |
+| `generate_linkedin_banner` | Generates a 1584×396px LinkedIn background banner tailored with a custom Job Title, name, tagline, and skills pills matching the portfolio theme. Supports Light & Dark modes and 4 layout templates (terminal, split, glow, framed). |
+| `get_linkedin_banner_guidelines` | Returns official LinkedIn banner dimensions (1584×396, 4:1), avatar safe zones, mobile cropping margins, and design rules. |
 | `prompt: tailor_cv_for_job` | Step-by-step guided workflow for AI assistants to tailor the CV for any target job posting while guaranteeing single-page A4 constraints. |
 | `prompt: write_cover_letter_for_job` | Step-by-step guided workflow for AI assistants to draft and render a matching cover letter. |
 | `prompt: prep_for_interview` | Guided workflow for AI assistants to run a tailored mock interview preparation and briefing based on the exact application materials submitted to a specific company. |
+
+### LinkedIn Banner Generator & Design Studio
+
+The portfolio includes a dedicated LinkedIn Banner Generator studio accessible at `/[locale]/banner` (and via API `/api/banner/generate` & MCP tool `generate_linkedin_banner`):
+
+- **Official Resolution**: Exactly 1584 × 396 pixels (4:1 aspect ratio), under 8 MB.
+- **Safe Area Collision Guarantees**:
+  - **Desktop Profile Picture Zone**: Reserves the left ~340px to ensure the circular profile photo (overlapping at bottom-left) never covers names, job titles, or tech tags.
+  - **Mobile Cropping Boundary**: Guarantees all critical branding elements stay within the central 1260 × 316 px viewport area.
+- **Settable Elements**: Customizable Job Title / Headline, candidate name, tagline / value proposition, interactive core skills pill tokens (up to 8 technologies), contact / portfolio URL, and active status indicator badge.
+- **Themes**: Full **Light Mode** (portfolio zinc-50 / #fafafa) and **Dark Mode** (portfolio zinc-950 / #18181b) support.
+- **4 Distinct Layout Templates**:
+  1. **Terminal Minimalist** (Signature): CLI prompt `> alex.rivera@portfolio:~$`, bold monospace Job Title with blinking cursor `_`, code token badges, and subtle dot-matrix engineering grid.
+  2. **Architectural Split** (Modernist): Clean asymmetric divider with dedicated avatar framing, status badge, bold sans-serif Job Title, and specialty pills.
+  3. **Ambient Tech Glow** (Neo-Tech): Ambient radial light aura, high-contrast typography, and glowing tech chips.
+  4. **Framed Card** (Showcase): Inset floating card mirroring the portfolio's ResumeCard and CoverLetterCard styling.
+- **Export Options**: 1x PNG (1584 × 396 px), Retina 2x PNG (3168 × 792 px), Vector SVG, Direct Clipboard Copy, and headless REST API (`/api/banner/generate`).
 
 ### 60-Day Retention & Interview Recall Engine
 

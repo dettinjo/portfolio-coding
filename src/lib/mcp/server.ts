@@ -27,6 +27,16 @@ import {
 } from "@/lib/cover-letter/validator";
 import { generateCoverLetterPdf } from "@/lib/cover-letter/pdf-generator";
 import { CoverLetterData } from "@/types/cover-letter";
+import { generateBannerPng } from "@/lib/banner/png-generator";
+import {
+  BANNER_TEMPLATES,
+  DEFAULT_BANNER_DATA,
+  LINKEDIN_BANNER_WIDTH,
+  LINKEDIN_BANNER_HEIGHT,
+  LINKEDIN_SAFE_AREAS,
+} from "@/lib/banner/constants";
+import { BannerData } from "@/types/banner";
+import { siteConfig } from "@/lib/config";
 
 export function createResumeMcpServer(): McpServer {
   const server = new McpServer({
@@ -898,6 +908,143 @@ Instructions:
                 prunedResumeIds: deletedResumes.deletedIds,
                 prunedCoverLettersCount: deletedCoverLetters.deletedIds.length,
                 prunedCoverLetterIds: deletedCoverLetters.deletedIds,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL: GENERATE LINKEDIN BANNER ─────────────────────────────────────
+  server.tool(
+    "generate_linkedin_banner",
+    "Generates an official 1584x396 LinkedIn background banner tailored with a customizable Job Title, name, tagline, tech stack pills, and matching the developer portfolio styling. Supports Light Mode and Dark Mode, and 4 layout templates (terminal, split, glow, framed).",
+    {
+      jobTitle: z
+        .string()
+        .min(1)
+        .describe("The Job Title / Headline to highlight (e.g. 'Senior Full-Stack Engineer', 'Lead Cloud Architect')"),
+      name: z
+        .string()
+        .optional()
+        .describe("Candidate full name (defaults to portfolio config name)"),
+      tagline: z
+        .string()
+        .optional()
+        .describe("Value proposition / engineering tagline"),
+      skills: z
+        .array(z.string())
+        .optional()
+        .describe("List of core skills / technologies to showcase as badge pills (max 7-8)"),
+      theme: z
+        .enum(["dark", "light"])
+        .default("dark")
+        .describe("Color theme: 'dark' (portfolio zinc-950) or 'light' (portfolio zinc-50)"),
+      template: z
+        .enum(["terminal", "split", "glow", "framed"])
+        .default("terminal")
+        .describe("Layout design idea: 'terminal' (signature CLI), 'split' (architectural modern), 'glow' (ambient neo-tech), or 'framed' (portfolio showcase)"),
+      contactUrl: z
+        .string()
+        .optional()
+        .describe("Portfolio or GitHub link to display"),
+      statusText: z
+        .string()
+        .optional()
+        .describe("Optional status badge text, e.g. 'Available for select roles'"),
+      scale: z
+        .enum(["1", "2"])
+        .default("1")
+        .describe("Scale factor: '1' for standard 1584x396px, '2' for crisp Retina 3168x792px"),
+    },
+    async ({
+      jobTitle,
+      name,
+      tagline,
+      skills,
+      theme,
+      template,
+      contactUrl,
+      statusText,
+      scale,
+    }) => {
+      const bannerData: BannerData = {
+        jobTitle,
+        name: name || siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
+        tagline: tagline || DEFAULT_BANNER_DATA.tagline,
+        skills: skills && skills.length > 0 ? skills : DEFAULT_BANNER_DATA.skills,
+        theme,
+        template,
+        contactUrl:
+          contactUrl ||
+          siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
+          DEFAULT_BANNER_DATA.contactUrl,
+        statusText: statusText || DEFAULT_BANNER_DATA.statusText,
+        showStatus: Boolean(statusText || DEFAULT_BANNER_DATA.showStatus),
+      };
+
+      const scaleNum = scale === "2" ? 2 : 1;
+      const result = await generateBannerPng(bannerData, {
+        scale: scaleNum,
+        saveToFile: true,
+      });
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `LinkedIn banner generated successfully (${result.width}x${result.height}px).`,
+                jobTitle: bannerData.jobTitle,
+                theme: bannerData.theme,
+                template: bannerData.template,
+                downloadUrl: result.downloadUrl,
+                localFilePath: result.outputPath,
+                dimensions: `${result.width}x${result.height}px`,
+                aspectRatio: "4:1",
+                safeZoneGuaranteed: true,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL: GET LINKEDIN BANNER GUIDELINES ────────────────────────────────
+  server.tool(
+    "get_linkedin_banner_guidelines",
+    "Returns official LinkedIn background banner dimensions, safe area specifications, avatar collision rules, and available design templates matching the portfolio brand.",
+    {},
+    async () => {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                dimensions: {
+                  width: LINKEDIN_BANNER_WIDTH,
+                  height: LINKEDIN_BANNER_HEIGHT,
+                  aspectRatio: "4:1",
+                  maxFileSizeMB: 8,
+                  recommendedFormats: ["PNG", "JPG"],
+                },
+                safeAreas: LINKEDIN_SAFE_AREAS,
+                rules: [
+                  "Desktop profile picture collision: Circular avatar occupies the bottom-left corner (~160px visible height). Keep text and primary branding beyond x: 340px.",
+                  "Mobile responsive cropping: Screen viewports crop up to 15% from left and right edges. Keep critical messaging centered within the 1260x316px boundary.",
+                  "Typography: Monospace accents for technical credibility paired with bold modern sans-serif headlines.",
+                  "Color palettes: Strictly match portfolio HSL zinc scales (Dark: #18181b / Light: #fafafa).",
+                ],
+                availableTemplates: BANNER_TEMPLATES,
               },
               null,
               2

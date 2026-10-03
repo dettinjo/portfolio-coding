@@ -3,7 +3,8 @@
     "made_with": "Made with",
     "by_me": "by me",
     "imprint": "Imprint",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "banner": "LinkedIn Banner"
   },
   "HomePageSEO": {
     "title": "Code by {name}",
@@ -65,5 +66,17 @@
     "skills": "Skills",
     "languages": "Languages",
     "contact": "Contact"
+  },
+  "BannerPage": {
+    "title": "LinkedIn Banner Generator",
+    "subtitle": "Create an ATS-friendly, brand-aligned LinkedIn background banner matching your portfolio theme. Features live safe-area overlays and export options.",
+    "researchTitle": "LinkedIn Banner Specifications & Safe Area Research",
+    "researchIntro": "Official background dimensions and safe area recommendations based on 2025/2026 LinkedIn viewport tests.",
+    "specDimensionsTitle": "Recommended Dimensions",
+    "specDimensionsDesc": "1584 × 396 pixels (exact 4:1 aspect ratio). Supported formats: PNG and JPG under 8 MB. PNG is recommended for razor-sharp typography and code badges.",
+    "specDesktopSafeTitle": "Desktop Profile Picture Collision",
+    "specDesktopSafeDesc": "On desktop, LinkedIn renders a 160px circular profile photo over the bottom-left corner. All templates reserve the left 340px to ensure zero text or badge collision.",
+    "specMobileSafeTitle": "Mobile Responsive Cropping",
+    "specMobileSafeDesc": "Mobile apps crop up to 15% from left and right edges. Keep critical messaging centered within the central 1260 × 316 px safe zone."
   }
 }
