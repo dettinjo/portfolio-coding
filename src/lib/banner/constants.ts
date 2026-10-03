@@ -60,31 +60,33 @@ export const BANNER_TEMPLATES: BannerTemplateMeta[] = [
 ];
 
 export const PRESET_JOB_TITLES: string[] = [
+  "AI Engineer",
   "Full-Stack Engineer",
   "Senior Full-Stack Engineer",
   "Lead Software Architect",
   "Staff Software Engineer",
   "Cloud & DevOps Engineer",
-  "Frontend Architect & Design Technologist",
   "Backend & Distributed Systems Engineer",
-  "AI & Systems Engineer",
+  "Frontend Architect & Design Technologist",
 ];
 
 export const SUGGESTED_SKILLS: string[] = [
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Node.js",
   "Python",
+  "PyTorch",
+  "LLMs & RAG",
+  "LangChain",
+  "Vector DBs",
+  "FastAPI",
+  "TypeScript",
+  "Next.js",
+  "React",
+  "Node.js",
   "Docker",
   "PostgreSQL",
   "Kubernetes",
   "AWS",
-  "Tailwind CSS",
-  "GraphQL",
   "Go",
   "Redis",
-  "CI/CD",
 ];
 
 export const DEFAULT_BANNER_DATA: BannerData = {
