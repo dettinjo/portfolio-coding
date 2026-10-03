@@ -3,7 +3,8 @@
     "made_with": "Mit",
     "by_me": "von mir entwickelt",
     "imprint": "Impressum",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "banner": "LinkedIn-Banner"
   },
   "HomePageSEO": {
     "title": "Code von {name}",
@@ -65,5 +66,17 @@
     "skills": "Fähigkeiten",
     "languages": "Sprachen",
     "contact": "Kontakt"
+  },
+  "BannerPage": {
+    "title": "LinkedIn-Banner-Generator",
+    "subtitle": "Erstellen Sie ein professionelles LinkedIn-Hintergrundbanner im Design Ihres Entwickler-Portfolios. Mit Live-Safe-Zone-Vorschau und Exportoptionen.",
+    "researchTitle": "LinkedIn-Banner-Spezifikationen & Safe-Zone-Forschung",
+    "researchIntro": "Offizielle Abmessungen und Safe-Zone-Empfehlungen basierend auf aktuellen LinkedIn-Viewport-Tests.",
+    "specDimensionsTitle": "Empfohlene Abmessungen",
+    "specDimensionsDesc": "1584 × 396 Pixel (exakt 4:1 Seitenverhältnis). Unterstützte Formate: PNG und JPG unter 8 MB. PNG wird für gestochen scharfe Typografie empfohlen.",
+    "specDesktopSafeTitle": "Desktop-Profilbild-Überlagerung",
+    "specDesktopSafeDesc": "Auf dem Desktop überlagert LinkedIn ein rundes Profilbild in der unteren linken Ecke. Alle Vorlagen halten die linken 340px frei von Text.",
+    "specMobileSafeTitle": "Mobile responsive Beschneidung",
+    "specMobileSafeDesc": "Mobile Apps beschneiden bis zu 15% an den Seiten. Wichtige Inhalte bleiben in der zentralen 1260 × 316 px Safe-Zone sichtbar."
   }
 }

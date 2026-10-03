@@ -202,6 +202,7 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | `list_all_applications` | Lists all active saved CV and Cover Letter applications, creation dates, 60-day expiration dates, days remaining, preview URLs, and download links. |
 | `prune_expired_materials` | Manually triggers the cleanup engine to delete materials and PDFs older than 60 days. |
 | `get_download_link` | Direct lookup tool for PDF download URLs and web preview links for any variant ID or the live website CV. |
+| `list_saved_variants` / `list_saved_cover_letters` | Lists previously generated documents with metadata and download links. |
 | `generate_linkedin_banner` | Generates a 1584×396px LinkedIn background banner tailored with a custom Job Title, name, tagline, and skills pills matching the portfolio theme. Supports Light & Dark modes and 4 layout templates (terminal, split, glow, framed). |
 | `get_linkedin_banner_guidelines` | Returns official LinkedIn banner dimensions (1584×396, 4:1), avatar safe zones, mobile cropping margins, and design rules. |
 | `prompt: tailor_cv_for_job` | Step-by-step guided workflow for AI assistants to tailor the CV for any target job posting while guaranteeing single-page A4 constraints. |
