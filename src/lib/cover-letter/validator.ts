@@ -68,10 +68,83 @@ export const CoverLetterDataSchema = z.object({
   content: CoverLetterContentSchema,
 });
 
+// Single-page A4 vertical height budget (approx 1,123px total at 96 DPI)
+export const MAX_SAFE_COVER_LETTER_HEIGHT_PX = 950;
+export const MAX_RECOMMENDED_CHARS = 2400;
+
+export interface CoverLetterLayoutRestrictions {
+  pageFormat: string;
+  categoryLimits: {
+    positionCard: {
+      titleMaxChars: number;
+      titleRecommendedChars: string;
+      referenceNumberMaxChars: number;
+      companyMaxChars: number;
+      departmentMaxChars: number;
+      rationale: string;
+    };
+    contentBody: {
+      totalMaxChars: number;
+      totalRecommendedChars: string;
+      paragraphCountMin: number;
+      paragraphCountMax: number;
+      paragraphMaxChars: number;
+      paragraphRecommendedChars: string;
+      bulletPointMaxCount: number;
+      bulletPointMaxChars: number;
+      keyCompetencyMaxCount: number;
+      keyCompetencyMaxChars: number;
+      salutationMaxChars: number;
+      closingMaxChars: number;
+      signOffNameMaxChars: number;
+      rationale: string;
+    };
+  };
+  budgets: {
+    maxSafeHeightPx: number;
+  };
+}
+
+export const COVER_LETTER_LAYOUT_RESTRICTIONS: CoverLetterLayoutRestrictions = {
+  pageFormat: "Exact Single-Page A4 (210mm x 297mm)",
+  categoryLimits: {
+    positionCard: {
+      titleMaxChars: 55,
+      titleRecommendedChars: "25-45",
+      referenceNumberMaxChars: 30,
+      companyMaxChars: 50,
+      departmentMaxChars: 60,
+      rationale:
+        "Rendered in a prominent card banner on top of the letter. Titles > 55 chars wrap onto 3 lines and displace the letter body downward.",
+    },
+    contentBody: {
+      totalMaxChars: 2400,
+      totalRecommendedChars: "1400-1900",
+      paragraphCountMin: 3,
+      paragraphCountMax: 4,
+      paragraphMaxChars: 550,
+      paragraphRecommendedChars: "300-450",
+      bulletPointMaxCount: 4,
+      bulletPointMaxChars: 160,
+      keyCompetencyMaxCount: 6,
+      keyCompetencyMaxChars: 30,
+      salutationMaxChars: 60,
+      closingMaxChars: 40,
+      signOffNameMaxChars: 40,
+      rationale:
+        "The letter body must fit on a single A4 page alongside the position card and signatures. Total text above 2,400 chars or individual paragraphs above 550 chars (~8 lines) violate the vertical budget and spill onto page 2.",
+    },
+  },
+  budgets: {
+    maxSafeHeightPx: MAX_SAFE_COVER_LETTER_HEIGHT_PX,
+  },
+};
+
 export interface CoverLetterValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
+  restrictions: CoverLetterLayoutRestrictions;
   budget: {
     totalChars: number;
     totalWords: number;
@@ -81,10 +154,6 @@ export interface CoverLetterValidationResult {
   };
   sanitizedData?: CoverLetterData;
 }
-
-// Single-page A4 vertical height budget (approx 1,123px total at 96 DPI)
-export const MAX_SAFE_COVER_LETTER_HEIGHT_PX = 950;
-export const MAX_RECOMMENDED_CHARS = 2400;
 
 export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationResult {
   const errors: string[] = [];
@@ -99,6 +168,7 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
         JSON.stringify(parseResult.error.format(), null, 2),
       ],
       warnings: [],
+      restrictions: COVER_LETTER_LAYOUT_RESTRICTIONS,
       budget: {
         totalChars: 0,
         totalWords: 0,
@@ -112,7 +182,7 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
   const data = parseResult.data as CoverLetterData;
   const { content } = data;
 
-  // Calculate text metrics
+  // 1. Calculate text metrics
   const bulletsText = (content.bulletPoints || []).join(" ");
   const fullText = (content.paragraphs || []).join(" ") + " " + bulletsText;
   const totalChars = fullText.length;
@@ -125,15 +195,49 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
       `Cover letter text is too long (${totalChars} characters / ~${totalWords} words). ` +
       `Maximum allowed is ${MAX_RECOMMENDED_CHARS} characters to ensure it fits strictly on a single A4 page.`
     );
-  } else if (totalChars > 2100) {
+  } else if (totalChars > 2000) {
     warnings.push(
       `Cover letter text is relatively long (${totalChars} characters). Recommended length is 1,400–1,900 characters for ideal white space.`
     );
-  } else if (totalChars < 300) {
-    warnings.push("Cover letter is very brief (under 300 characters).");
+  } else if (totalChars < 500) {
+    warnings.push("Cover letter is brief (under 500 characters). Ensure compelling motivation and technical achievements are articulated.");
   }
 
-  // Vertical Height Estimation:
+  // 2. Individual Paragraph Character Restrictions
+  (content.paragraphs || []).forEach((p, idx) => {
+    if (p.length > 550) {
+      errors.push(
+        `Paragraph #${idx + 1} is too long (${p.length} chars, maximum 550 chars allowed). Break into smaller paragraphs or trim text to fit single-page A4.`
+      );
+    } else if (p.length > 450) {
+      warnings.push(
+        `Paragraph #${idx + 1} is ${p.length} chars (recommended 300–450 chars for balanced whitespace).`
+      );
+    }
+  });
+
+  // 3. Position Card Restrictions
+  if (data.position?.title && data.position.title.length > 55) {
+    errors.push(
+      `Position title '${data.position.title}' is too long (${data.position.title.length} chars, maximum 55 chars).`
+    );
+  }
+  if (data.position?.referenceNumber && data.position.referenceNumber.length > 30) {
+    errors.push(
+      `Reference number '${data.position.referenceNumber}' is too long (${data.position.referenceNumber.length} chars, maximum 30 chars).`
+    );
+  }
+
+  // 4. Key Competencies Restrictions
+  (data.keyCompetencies || []).forEach((comp, idx) => {
+    if (comp.length > 30) {
+      errors.push(
+        `Key competency #${idx + 1} '${comp}' is too long (${comp.length} chars, maximum 30 chars).`
+      );
+    }
+  });
+
+  // 5. Vertical Height Estimation:
   // Header: Application card = ~110px
   // Salutation + Sign-off: 70px
   // Content: ~21px per line (approx 75 chars per line) + paragraph gaps (16px per paragraph)
@@ -161,6 +265,7 @@ export function validateCoverLetterLayout(raw: unknown): CoverLetterValidationRe
     valid: errors.length === 0,
     errors,
     warnings,
+    restrictions: COVER_LETTER_LAYOUT_RESTRICTIONS,
     budget: {
       totalChars,
       totalWords,

@@ -68,10 +68,129 @@ export const ResumeDataSchema = z.object({
 
 // ─── LAYOUT SAFEGUARDS & BUDGET CALCULATION ───────────────────────────────────
 
+// Total A4 page height at 96 DPI is 1123px.
+// Safe content budget allowing padding, margins and print headers/footers:
+export const MAX_SAFE_MAIN_HEIGHT_PX = 980;
+export const MAX_SAFE_SIDEBAR_HEIGHT_PX = 950;
+
+export interface ResumeLayoutRestrictions {
+  pageFormat: string;
+  categoryLimits: {
+    experience: {
+      maxItems: number;
+      minItems: number;
+      summaryMaxChars: number;
+      summaryRecommendedChars: string;
+      summaryMaxLines: number;
+      positionMaxChars: number;
+      companyMaxChars: number;
+      dateMaxChars: number;
+      rationale: string;
+    };
+    education: {
+      maxItems: number;
+      minItems: number;
+      areaMaxChars: number;
+      areaRecommendedChars: string;
+      areaMaxLines: number;
+      institutionMaxChars: number;
+      studyTypeMaxChars: number;
+      scoreMaxChars: number;
+      dateMaxChars: number;
+      rationale: string;
+    };
+    basics: {
+      headlineMaxChars: number;
+      headlineRecommendedChars: string;
+      nameMaxChars: number;
+      locationMaxChars: number;
+      emailMaxChars: number;
+      rationale: string;
+    };
+    skills: {
+      maxItems: number;
+      minItems: number;
+      nameMaxChars: number;
+      nameRecommendedChars: string;
+      rationale: string;
+    };
+    languages: {
+      maxItems: number;
+      minItems: number;
+      nameMaxChars: number;
+      rationale: string;
+    };
+  };
+  budgets: {
+    maxSafeMainHeightPx: number;
+    maxSafeSidebarHeightPx: number;
+  };
+}
+
+export const RESUME_LAYOUT_RESTRICTIONS: ResumeLayoutRestrictions = {
+  pageFormat: "Exact Single-Page A4 (210mm x 297mm)",
+  categoryLimits: {
+    experience: {
+      maxItems: 4,
+      minItems: 1,
+      summaryMaxChars: 200,
+      summaryRecommendedChars: "120-160",
+      summaryMaxLines: 2,
+      positionMaxChars: 50,
+      companyMaxChars: 50,
+      dateMaxChars: 30,
+      rationale:
+        "The right column content width is ~500px. Experience summaries are styled with CSS line-clamp-2 (~2 lines @ 14px font, ~68 chars/line). Any description exceeding 200 characters is automatically truncated with an ellipsis (...) in print and web views, losing content.",
+    },
+    education: {
+      maxItems: 2,
+      minItems: 1,
+      areaMaxChars: 90,
+      areaRecommendedChars: "30-65",
+      areaMaxLines: 2,
+      institutionMaxChars: 55,
+      studyTypeMaxChars: 50,
+      scoreMaxChars: 20,
+      dateMaxChars: 30,
+      rationale:
+        "Specialization/area descriptions are styled with line-clamp-2. Max 90 characters fits within 1-2 lines without eating vertical space needed for experience entries.",
+    },
+    basics: {
+      headlineMaxChars: 55,
+      headlineRecommendedChars: "30-48",
+      nameMaxChars: 40,
+      locationMaxChars: 35,
+      emailMaxChars: 32,
+      rationale:
+        "Basics headline is rendered with whitespace-nowrap in 20px font. Exceeding 55 characters clips the title or overflows past the right page margin.",
+    },
+    skills: {
+      maxItems: 6,
+      minItems: 3,
+      nameMaxChars: 24,
+      nameRecommendedChars: "10-20",
+      rationale:
+        "Rendered in the 182px net-width sidebar beside a 48px horizontal proficiency bar. Names > 24 characters squeeze or wrap the bar.",
+    },
+    languages: {
+      maxItems: 3,
+      minItems: 1,
+      nameMaxChars: 20,
+      rationale:
+        "Rendered in the sidebar beside a proficiency bar; names > 20 characters wrap awkwardly.",
+    },
+  },
+  budgets: {
+    maxSafeMainHeightPx: MAX_SAFE_MAIN_HEIGHT_PX,
+    maxSafeSidebarHeightPx: MAX_SAFE_SIDEBAR_HEIGHT_PX,
+  },
+};
+
 export interface LayoutValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
+  restrictions: ResumeLayoutRestrictions;
   budget: {
     estimatedMainHeightPx: number;
     estimatedSidebarHeightPx: number;
@@ -83,11 +202,6 @@ export interface LayoutValidationResult {
   };
   sanitizedData?: ResumeData;
 }
-
-// Total A4 page height at 96 DPI is 1123px.
-// Safe content budget allowing padding, margins and print headers/footers:
-export const MAX_SAFE_MAIN_HEIGHT_PX = 980;
-export const MAX_SAFE_SIDEBAR_HEIGHT_PX = 950;
 
 /**
  * Validates that the customized resume adheres strictly to the single-page A4
@@ -107,6 +221,7 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
         JSON.stringify(formatted, null, 2),
       ],
       warnings: [],
+      restrictions: RESUME_LAYOUT_RESTRICTIONS,
       budget: {
         estimatedMainHeightPx: 0,
         estimatedSidebarHeightPx: 0,
@@ -121,10 +236,20 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
 
   const data = parseResult.data as ResumeData;
 
-  // 1. Check Basics
+  // 1. Check Basics description & header limits
   if (data.basics.headline.length > 55) {
+    errors.push(
+      `Headline is ${data.basics.headline.length} chars (maximum 55 chars allowed). Headline is rendered with whitespace-nowrap and will clip or overflow the page.`
+    );
+  } else if (data.basics.headline.length > 48) {
     warnings.push(
-      `Headline is ${data.basics.headline.length} chars (recommended ≤ 55) — long headlines may wrap and shift content downward.`
+      `Headline is ${data.basics.headline.length} chars (recommended ≤ 48) — long headlines may press against the page margin.`
+    );
+  }
+
+  if (data.basics.location.length > 35) {
+    errors.push(
+      `Location '${data.basics.location}' is ${data.basics.location.length} chars (maximum 35 chars allowed). Must fit on a single line in the sidebar.`
     );
   }
 
@@ -170,30 +295,75 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
     );
   }
 
-  // 4. Character Length & Line-Clamp Guards on Experience
+  // 4. Character Length & Line-Clamp Guards on Experience descriptions & titles
   renderedExperiences.forEach((exp, idx) => {
     if (!exp.position) {
       errors.push(`Experience item #${idx + 1} (${exp.company || "unknown"}) is missing position.`);
+    } else if (exp.position.length > 50) {
+      errors.push(`Experience item #${idx + 1} position '${exp.position}' is too long (${exp.position.length} chars, maximum 50 chars).`);
     }
+
     if (!exp.company) {
       errors.push(`Experience item #${idx + 1} is missing company.`);
+    } else if (exp.company.length > 50) {
+      errors.push(`Experience item #${idx + 1} company '${exp.company}' is too long (${exp.company.length} chars, maximum 50 chars).`);
     }
+
     if (exp.summary) {
-      // Strip HTML tags to estimate actual text length
+      // Strip HTML tags to estimate actual rendered text length
       const cleanSummary = exp.summary.replace(/<[^>]*>/g, "").trim();
-      if (cleanSummary.length > 210) {
+      if (cleanSummary.length > 200) {
         errors.push(
-          `Experience #${idx + 1} (${exp.company}): summary is ${cleanSummary.length} chars (maximum 200 chars). Longer summaries will be truncated by CSS line-clamp or spill onto page 2.`
+          `Experience #${idx + 1} (${exp.company}): summary is ${cleanSummary.length} chars (maximum 200 chars allowed, max 2 lines). Longer summaries will be truncated by CSS line-clamp-2 with '...' or cause page overflow.`
         );
-      } else if (cleanSummary.length > 175) {
+      } else if (cleanSummary.length > 160) {
         warnings.push(
-          `Experience #${idx + 1} (${exp.company}): summary is ${cleanSummary.length} chars — keep concise (around 120-160 chars) for optimal single-page layout.`
+          `Experience #${idx + 1} (${exp.company}): summary is ${cleanSummary.length} chars (recommended 120-160 chars for optimal 2-line presentation).`
         );
       }
     }
   });
 
-  // 5. Height Budget Calculation
+  // 5. Character Length & Line-Clamp Guards on Education descriptions & titles
+  renderedEducations.forEach((edu, idx) => {
+    if (edu.institution && edu.institution.length > 55) {
+      errors.push(`Education #${idx + 1} institution '${edu.institution}' is too long (${edu.institution.length} chars, maximum 55 chars).`);
+    }
+    if (edu.studyType && edu.studyType.length > 50) {
+      errors.push(`Education #${idx + 1} degree/studyType '${edu.studyType}' is too long (${edu.studyType.length} chars, maximum 50 chars).`);
+    }
+    if (edu.area) {
+      const cleanArea = edu.area.replace(/<[^>]*>/g, "").trim();
+      if (cleanArea.length > 90) {
+        errors.push(
+          `Education #${idx + 1} (${edu.institution || "item"}): area/specialization is ${cleanArea.length} chars (maximum 90 chars allowed). Longer descriptions will be truncated by CSS line-clamp-2.`
+        );
+      } else if (cleanArea.length > 65) {
+        warnings.push(
+          `Education #${idx + 1} (${edu.institution || "item"}): area is ${cleanArea.length} chars (recommended 30-65 chars).`
+        );
+      }
+    }
+  });
+
+  // 6. Guards on Skills & Languages (Sidebar width is 182px net)
+  renderedSkills.forEach((skill) => {
+    if (skill.name && skill.name.length > 24) {
+      errors.push(
+        `Skill '${skill.name}' is too long (${skill.name.length} chars, maximum 24 chars allowed). Skill names must fit beside the 48px proficiency bar in the 182px sidebar.`
+      );
+    } else if (skill.name && skill.name.length > 20) {
+      warnings.push(`Skill '${skill.name}' is ${skill.name.length} chars (recommended ≤ 20 chars).`);
+    }
+  });
+
+  renderedLanguages.forEach((lang) => {
+    if (lang.name && lang.name.length > 20) {
+      errors.push(`Language '${lang.name}' is too long (${lang.name.length} chars, maximum 20 chars allowed).`);
+    }
+  });
+
+  // 7. Height Budget Calculation
   // Right Column (Main content):
   // Header: Name (48px) + Headline (28px) + margins (24px) = ~100px
   // Section Headers: 2 * 36px = 72px
@@ -239,6 +409,7 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
     valid: errors.length === 0,
     errors,
     warnings,
+    restrictions: RESUME_LAYOUT_RESTRICTIONS,
     budget: {
       estimatedMainHeightPx,
       estimatedSidebarHeightPx,

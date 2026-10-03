@@ -11,6 +11,7 @@ import {
   validateResumeLayout,
   MAX_SAFE_MAIN_HEIGHT_PX,
   MAX_SAFE_SIDEBAR_HEIGHT_PX,
+  RESUME_LAYOUT_RESTRICTIONS,
 } from "@/lib/resume/validator";
 import { generateResumePdf } from "@/lib/resume/pdf-generator";
 import { ResumeData } from "@/types/resume";
@@ -24,9 +25,20 @@ import {
   validateCoverLetterLayout,
   MAX_SAFE_COVER_LETTER_HEIGHT_PX,
   MAX_RECOMMENDED_CHARS,
+  COVER_LETTER_LAYOUT_RESTRICTIONS,
 } from "@/lib/cover-letter/validator";
 import { generateCoverLetterPdf } from "@/lib/cover-letter/pdf-generator";
 import { CoverLetterData } from "@/types/cover-letter";
+import { generateBannerPng } from "@/lib/banner/png-generator";
+import {
+  BANNER_TEMPLATES,
+  DEFAULT_BANNER_DATA,
+  LINKEDIN_BANNER_WIDTH,
+  LINKEDIN_BANNER_HEIGHT,
+  LINKEDIN_SAFE_AREAS,
+} from "@/lib/banner/constants";
+import { BannerData } from "@/types/banner";
+import { siteConfig } from "@/lib/config";
 
 export function createResumeMcpServer(): McpServer {
   const server = new McpServer({
@@ -83,24 +95,55 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 3: GET LAYOUT GUIDELINES & SAFEGUARDS ───────────────────────────
   server.tool(
     "get_layout_guidelines",
-    "Returns the formatting rules, character limits, and section budgets required to fit strictly on a single A4 page without breaking spacings.",
+    "Returns the formatting rules, maximum character limits, line budgets, and section restrictions required to fit strictly on a single A4 page without breaking spacings.",
     {},
     async () => {
       const guidelines = {
         pageFormat: "Exact Single-Page A4 (210mm x 297mm)",
-        strictRules: [
-          "The CV MUST NEVER exceed 1 page. Spacings and margins must remain intact.",
-          "Work experience: Exactly 3 to 4 items. If 4 items, keep summaries very brief.",
-          "Work experience summary: Maximum 180-200 characters per item (approx. 2 lines). Longer summaries will be truncated by CSS line-clamp or cause page overflow.",
-          "Education: Maximum 2 items (or max 3 if experience has only 2-3 items).",
-          "Skills: Exactly 4 to 6 skills (level 1-5). More than 6 skills will overflow the left sidebar.",
-          "Languages: 2 to 3 languages (level 1-5).",
-          "Basics headline: Maximum 55 characters to avoid wrapping to multiple lines.",
-        ],
+        overview:
+          "Strict layout bounds are enforced to prevent content from spilling onto page 2 and to avoid CSS line-clamp truncation or margin clipping.",
+        quickReferenceDescriptionLimits: {
+          resume: {
+            "Work Experience Summary":
+              "Max 200 chars (recommended 120-160 chars, max 2 lines). Longer text is truncated by CSS line-clamp-2 with '...'.",
+            "Education Area / Specialization":
+              "Max 90 chars (recommended 30-65 chars, max 2 lines). Longer text is truncated by line-clamp-2.",
+            "Basics Headline":
+              "Max 55 chars (recommended 30-48 chars). Rendered with whitespace-nowrap; exceeds right page border if longer.",
+            "Job Title (Position)": "Max 50 chars.",
+            "Company / Institution Name": "Max 50-55 chars.",
+            "Skill Name":
+              "Max 24 chars (recommended 10-20 chars). Rendered beside 48px proficiency bar in 182px sidebar.",
+            "Language Name": "Max 20 chars.",
+            "Location": "Max 35 chars (single line in sidebar).",
+            "Item Counts":
+              "Work experience: 3-4 items; Education: 1-2 items; Skills: 4-6 items; Languages: 2-3 items.",
+          },
+          coverLetter: {
+            "Total Body Characters":
+              "Max 2,400 chars (recommended 1,400-1,900 chars, ~220-300 words).",
+            "Per-Paragraph Limit":
+              "Max 550 chars per paragraph (recommended 300-450 chars, ~4-6 lines). Max 4 paragraphs.",
+            "Position Title":
+              "Max 55 chars (recommended 25-45 chars). Rendered in 24px bold card banner.",
+            "Reference Number": "Max 30 chars.",
+            "Bullet Points": "Max 4 bullets, each max 160 chars (~2 lines).",
+            "Key Competencies": "Max 6 badges, each max 30 chars.",
+          },
+        },
+        resumeRestrictions: RESUME_LAYOUT_RESTRICTIONS,
+        coverLetterRestrictions: COVER_LETTER_LAYOUT_RESTRICTIONS,
         budgets: {
           maxSafeMainHeightPx: MAX_SAFE_MAIN_HEIGHT_PX,
           maxSafeSidebarHeightPx: MAX_SAFE_SIDEBAR_HEIGHT_PX,
+          maxSafeCoverLetterHeightPx: MAX_SAFE_COVER_LETTER_HEIGHT_PX,
         },
+        enforcementMechanisms: [
+          "CSS line-clamp-2: Experience summaries and education areas exceeding 2 lines (~200 chars) are cut off with an ellipsis in PDF and web views.",
+          "CSS whitespace-nowrap: Headlines exceeding 55 characters clip past the right content boundary.",
+          "Sidebar width budget (182px net): Skill names exceeding 24 characters squeeze or wrap the 48px horizontal proficiency bar.",
+          "Height budget validation: Total page vertical height is monitored against 980px (main column) and 950px (sidebar) to guarantee an exact 1-page PDF.",
+        ],
       };
 
       return {
@@ -117,7 +160,7 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 4: VALIDATE RESUME LAYOUT (SAFEGUARD) ───────────────────────────
   server.tool(
     "validate_resume_layout",
-    "Validates a proposed tailored ResumeData object against structural schemas and single-page A4 vertical height budgets before generating a PDF.",
+    "Validates a proposed tailored ResumeData object against structural schemas, character limits (e.g. max 200 chars for work summaries, max 55 chars headline), and single-page A4 vertical height budgets before generating a PDF.",
     {
       resumeData: z
         .record(z.string(), z.any())
@@ -135,6 +178,7 @@ export function createResumeMcpServer(): McpServer {
                 errors: validation.errors,
                 warnings: validation.warnings,
                 budgetMetrics: validation.budget,
+                layoutRestrictions: validation.restrictions,
               },
               null,
               2
@@ -312,7 +356,7 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 9: VALIDATE COVER LETTER LAYOUT ─────────────────────────────────
   server.tool(
     "validate_cover_letter_layout",
-    "Validates a proposed CoverLetterData JSON object against structural schema and single-page A4 vertical height budgets before PDF rendering.",
+    "Validates a proposed CoverLetterData JSON object against structural schema, per-paragraph character limits (max 550 chars/p), and single-page A4 vertical height budgets before PDF rendering.",
     {
       coverLetterData: z
         .record(z.string(), z.any())
@@ -330,6 +374,7 @@ export function createResumeMcpServer(): McpServer {
                 errors: validation.errors,
                 warnings: validation.warnings,
                 budgetMetrics: validation.budget,
+                layoutRestrictions: validation.restrictions,
                 guidelines: {
                   maxRecommendedChars: MAX_RECOMMENDED_CHARS,
                   maxSafeHeightPx: MAX_SAFE_COVER_LETTER_HEIGHT_PX,
@@ -590,8 +635,12 @@ Instructions:
    - Paragraph 2: Core technical achievements and engineering experiences that directly solve the company's stated requirements.
    - Paragraph 3: Alignment with the company's culture, platform mission, and international agile environment.
    - Paragraph 4: Confident closing, availability for discussion, and appreciation.
-4. Keep the total letter text between 1,400 and 1,900 characters (max 2,400 characters) so it fits elegantly on an exact single A4 page.
-5. Run 'validate_cover_letter_layout' to ensure word/character counts satisfy the single-page budget.
+4. Enforce strict single-page description limits:
+   - Total letter text: 1,400 to 1,900 characters (strict maximum 2,400 characters / ~380 words).
+   - Per-paragraph length: Maximum 550 characters per paragraph (recommended 300–450 characters / ~4–6 lines).
+   - Position title: Maximum 55 characters (recommended 25–45 characters).
+   - Bullet points (if any): Maximum 4 bullets, each max 160 characters.
+5. Run 'validate_cover_letter_layout' to ensure word/character counts and paragraph lengths satisfy the single-page budget.
 6. Call 'generate_tailored_cover_letter' to render the pixel-perfect A4 PDF matching my portfolio CV styling and provide the download link.`,
             },
           },
@@ -624,12 +673,13 @@ ${job_description}
 
 Instructions:
 1. ALWAYS call 'get_official_resume' FIRST to fetch my official CV JSON and get a complete overview of my verified profile, work history, education, and skills. Use this official data as the foundation to adapt.
-2. Call 'get_layout_guidelines' to review the strict single-page A4 constraints.
-3. Select the 4 to 6 most relevant skills and order them by importance for this role.
-4. Select 3 to 4 relevant work experiences. Tailor each summary (max 180 chars per role) to highlight relevant achievements, metrics, and technologies.
-5. Ensure basics.headline is concise (max 55 chars) matching the target role.
-6. Run 'validate_resume_layout' on your modified JSON to ensure it satisfies all height budgets and does not overflow onto a 2nd page.
-7. Finally, call 'generate_tailored_resume' to generate the pixel-perfect A4 PDF and provide me with the download link and preview URL.`,
+2. Call 'get_layout_guidelines' to review the strict single-page A4 constraints and description size restrictions.
+3. Select the 4 to 6 most relevant skills and order them by importance for this role. Each skill name must be ≤ 24 characters to fit beside the proficiency bar in the 182px sidebar.
+4. Select 3 to 4 relevant work experiences. Tailor each summary to strictly ≤ 200 characters (recommended 120–160 chars / 2 lines). NOTE: CSS line-clamp-2 strictly truncates any text beyond 200 characters with an ellipsis (...).
+5. For education (max 2 items), ensure degree/area descriptions are ≤ 90 characters (recommended 30–65 chars).
+6. Ensure basics.headline is concise (maximum 55 characters, recommended 30–48 chars) matching the target role; rendered with whitespace-nowrap.
+7. Run 'validate_resume_layout' on your modified JSON to ensure it satisfies all description bounds and height budgets without spilling onto page 2.
+8. Finally, call 'generate_tailored_resume' to generate the pixel-perfect A4 PDF and provide me with the download link and preview URL.`,
             },
           },
         ],
@@ -898,6 +948,143 @@ Instructions:
                 prunedResumeIds: deletedResumes.deletedIds,
                 prunedCoverLettersCount: deletedCoverLetters.deletedIds.length,
                 prunedCoverLetterIds: deletedCoverLetters.deletedIds,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL: GENERATE LINKEDIN BANNER ─────────────────────────────────────
+  server.tool(
+    "generate_linkedin_banner",
+    "Generates an official 1584x396 LinkedIn background banner tailored with a customizable Job Title, name, tagline, tech stack pills, and matching the developer portfolio styling. Supports Light Mode and Dark Mode, and 4 layout templates (terminal, split, glow, framed).",
+    {
+      jobTitle: z
+        .string()
+        .min(1)
+        .describe("The Job Title / Headline to highlight (e.g. 'Senior Full-Stack Engineer', 'Lead Cloud Architect')"),
+      name: z
+        .string()
+        .optional()
+        .describe("Candidate full name (defaults to portfolio config name)"),
+      tagline: z
+        .string()
+        .optional()
+        .describe("Value proposition / engineering tagline"),
+      skills: z
+        .array(z.string())
+        .optional()
+        .describe("List of core skills / technologies to showcase as badge pills (max 7-8)"),
+      theme: z
+        .enum(["dark", "light"])
+        .default("dark")
+        .describe("Color theme: 'dark' (portfolio zinc-950) or 'light' (portfolio zinc-50)"),
+      template: z
+        .enum(["terminal", "split", "glow", "framed"])
+        .default("terminal")
+        .describe("Layout design idea: 'terminal' (signature CLI), 'split' (architectural modern), 'glow' (ambient neo-tech), or 'framed' (portfolio showcase)"),
+      contactUrl: z
+        .string()
+        .optional()
+        .describe("Portfolio or GitHub link to display"),
+      statusText: z
+        .string()
+        .optional()
+        .describe("Optional status badge text, e.g. 'Available for select roles'"),
+      scale: z
+        .enum(["1", "2"])
+        .default("1")
+        .describe("Scale factor: '1' for standard 1584x396px, '2' for crisp Retina 3168x792px"),
+    },
+    async ({
+      jobTitle,
+      name,
+      tagline,
+      skills,
+      theme,
+      template,
+      contactUrl,
+      statusText,
+      scale,
+    }) => {
+      const bannerData: BannerData = {
+        jobTitle,
+        name: name || siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
+        tagline: tagline || DEFAULT_BANNER_DATA.tagline,
+        skills: skills && skills.length > 0 ? skills : DEFAULT_BANNER_DATA.skills,
+        theme,
+        template,
+        contactUrl:
+          contactUrl ||
+          siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
+          DEFAULT_BANNER_DATA.contactUrl,
+        statusText: statusText || DEFAULT_BANNER_DATA.statusText,
+        showStatus: Boolean(statusText || DEFAULT_BANNER_DATA.showStatus),
+      };
+
+      const scaleNum = scale === "2" ? 2 : 1;
+      const result = await generateBannerPng(bannerData, {
+        scale: scaleNum,
+        saveToFile: true,
+      });
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                success: true,
+                message: `LinkedIn banner generated successfully (${result.width}x${result.height}px).`,
+                jobTitle: bannerData.jobTitle,
+                theme: bannerData.theme,
+                template: bannerData.template,
+                downloadUrl: result.downloadUrl,
+                localFilePath: result.outputPath,
+                dimensions: `${result.width}x${result.height}px`,
+                aspectRatio: "4:1",
+                safeZoneGuaranteed: true,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── TOOL: GET LINKEDIN BANNER GUIDELINES ────────────────────────────────
+  server.tool(
+    "get_linkedin_banner_guidelines",
+    "Returns official LinkedIn background banner dimensions, safe area specifications, avatar collision rules, and available design templates matching the portfolio brand.",
+    {},
+    async () => {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                dimensions: {
+                  width: LINKEDIN_BANNER_WIDTH,
+                  height: LINKEDIN_BANNER_HEIGHT,
+                  aspectRatio: "4:1",
+                  maxFileSizeMB: 8,
+                  recommendedFormats: ["PNG", "JPG"],
+                },
+                safeAreas: LINKEDIN_SAFE_AREAS,
+                rules: [
+                  "Desktop profile picture collision: Circular avatar occupies the bottom-left corner (~160px visible height). Keep text and primary branding beyond x: 340px.",
+                  "Mobile responsive cropping: Screen viewports crop up to 15% from left and right edges. Keep critical messaging centered within the 1260x316px boundary.",
+                  "Typography: Monospace accents for technical credibility paired with bold modern sans-serif headlines.",
+                  "Color palettes: Strictly match portfolio HSL zinc scales (Dark: #18181b / Light: #fafafa).",
+                ],
+                availableTemplates: BANNER_TEMPLATES,
               },
               null,
               2
