@@ -10,6 +10,7 @@ import {
   useScroll,
   useTransform,
   useMotionValueEvent,
+  type Transition,
 } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { AnimatedGreeting } from "@/components/AnimatedGreeting";
@@ -18,6 +19,11 @@ import { cn } from "@/lib/utils";
 import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
 import { siteConfig } from "@/lib/config";
+
+const entranceTransition: Transition = {
+  duration: 0.5,
+  ease: "easeOut",
+};
 
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
@@ -45,13 +51,13 @@ export function HeroSection() {
     <section
       ref={heroRef}
       id="hero"
-      className="relative flex min-h-screen items-center justify-center py-20 lg:py-0"
+      className="relative flex min-h-screen items-center justify-center py-20 lg:py-0 overflow-x-clip"
     >
       <div className="max-w-6xl mx-auto px-6 flex flex-col-reverse items-center gap-8 lg:gap-12 text-center lg:grid lg:grid-cols-2 lg:text-left w-full">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={entranceTransition}
           className="flex flex-col items-center lg:items-start w-full"
         >
           <AnimatedGreeting />
@@ -75,17 +81,22 @@ export function HeroSection() {
         </motion.div>
 
         <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={entranceTransition}
           className="flex justify-center lg:justify-end"
-          initial={false}
-          animate={{
-            scale: isAvatarActive ? 1.05 : 1,
-          }}
-          transition={{
-            duration: 0.5,
-            ease: "easeInOut",
-          }}
         >
-          <Avatar
+          <motion.div
+            initial={false}
+            animate={{
+              scale: isAvatarActive ? 1.05 : 1,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: "easeInOut",
+            }}
+          >
+            <Avatar
             data-active={isAvatarActive}
             className={cn(
               "h-48 w-48 sm:h-56 sm:w-56 border-4 lg:size-[418px] group",
@@ -114,6 +125,7 @@ export function HeroSection() {
               )}
             />
           </Avatar>
+          </motion.div>
         </motion.div>
       </div>
 
