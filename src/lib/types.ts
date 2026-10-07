@@ -24,6 +24,7 @@ export interface SiteConfig {
       [key: string]: string | undefined;
     };
     hasCustomAvatar?: boolean;
+    avatarBlurDataUrl?: string;
   };
   site: {
     serverUrl: string;
@@ -45,6 +46,7 @@ export interface MediaImage {
   width: number;
   height: number;
   size: number | null;
+  blurDataUrl?: string;
 }
 
 export interface Skill {

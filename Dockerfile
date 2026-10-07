@@ -58,7 +58,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 COPY --from=builder /app/public ./public
 
-RUN mkdir -p .next \
+RUN mkdir -p .next/cache \
     public/downloads/resumes \
     public/downloads/cover-letters \
     resumes/variants \

@@ -691,11 +691,29 @@ async function main() {
   // Avatar: the single shared transparent contact silhouette. It doubles as the
   // committed no-avatar placeholder (public/images/avatar.placeholder.webp), which
   // the build also falls back to in demo mode — so there's just one avatar asset.
-  await toWebp(avatarSvg(), path.join(rootDir, "public", "images", "avatar.placeholder.webp"));
+  const placeholderPath = path.join(rootDir, "public", "images", "avatar.placeholder.webp");
+  await toWebp(avatarSvg(), placeholderPath);
   console.log("  ✓ public/images/avatar.placeholder.webp");
 
+  let avatarBlurDataUrl = "";
+  try {
+    const blurBuf = await sharp(placeholderPath)
+      .resize(20, 20, { fit: "cover" })
+      .webp({ quality: 20 })
+      .toBuffer();
+    avatarBlurDataUrl = `data:image/webp;base64,${blurBuf.toString("base64")}`;
+  } catch {}
+
+  const demoConfig = {
+    ...SITE_CONFIG,
+    person: {
+      ...SITE_CONFIG.person,
+      avatarBlurDataUrl,
+    },
+  };
+
   // Config + resume.
-  writeFile(path.join(demoDir, "site.config.json"), JSON.stringify(SITE_CONFIG, null, 2) + "\n");
+  writeFile(path.join(demoDir, "site.config.json"), JSON.stringify(demoConfig, null, 2) + "\n");
   writeFile(path.join(demoDir, "resume.json"), JSON.stringify(RESUME, null, 2) + "\n");
   console.log("  ✓ site.config.json + resume.json");
 
