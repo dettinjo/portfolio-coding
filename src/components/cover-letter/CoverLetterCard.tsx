@@ -12,6 +12,7 @@ import Image from "next/image";
 import { PrintButton } from "@/components/resume/PrintButton";
 import { CoverLetterData } from "@/types/cover-letter";
 import { withBasePath } from "@/lib/basePath";
+import { siteConfig } from "@/lib/config";
 
 interface CoverLetterTranslations {
   contact: string;
@@ -191,6 +192,8 @@ export function CoverLetterCard({
                       sizes="(max-width: 1024px) 160px, 176px"
                       priority
                       unoptimized
+                      placeholder={siteConfig.person.avatarBlurDataUrl ? "blur" : "empty"}
+                      blurDataURL={siteConfig.person.avatarBlurDataUrl || undefined}
                       className="object-cover object-top scale-[1.2] origin-bottom translate-y-4 transition-transform duration-500 ease-in-out"
                     />
                   ) : (

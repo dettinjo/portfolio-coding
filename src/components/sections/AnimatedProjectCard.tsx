@@ -119,6 +119,7 @@ export function AnimatedProjectCard({
                   fill
                   sizes="(max-width: 768px) 50vw, 25vw"
                   priority={index < 2}
+                  unoptimized
                   className="object-contain"
                 />
               </div>
@@ -130,6 +131,8 @@ export function AnimatedProjectCard({
                 height={coverImage?.height || 900}
                 sizes="(max-width: 768px) 80vw, 40vw"
                 priority={index < 2}
+                placeholder={coverImage?.blurDataUrl ? "blur" : "empty"}
+                blurDataURL={coverImage?.blurDataUrl}
                 className="max-h-[320px] w-auto h-auto rounded-2xl object-contain shadow-lg"
               />
             )

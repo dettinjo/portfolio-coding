@@ -102,6 +102,9 @@ export function HeroSection() {
               fill
               sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 418px"
               priority
+              unoptimized
+              placeholder={siteConfig.person.avatarBlurDataUrl ? "blur" : "empty"}
+              blurDataURL={siteConfig.person.avatarBlurDataUrl || undefined}
               className={cn(
                 // Anchor the bottom of the photo to the bottom of the circle so
                 // the head keeps headroom at the top instead of being cropped.

@@ -14,7 +14,8 @@
       "github": "octocat",
       "linkedin": "",
       "instagram": ""
-    }
+    },
+    "avatarBlurDataUrl": ""
   },
   "site": {
     "serverUrl": "https://portfolio-demo.example.com",

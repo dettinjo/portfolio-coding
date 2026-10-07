@@ -53,6 +53,7 @@ const ImgComponent = ({
       src={withBasePath(props.src as string | undefined)}
       alt={props.alt || ""}
       loading="lazy"
+      decoding="async"
       className={
         isIcon
           ? "m-0 mx-auto h-auto max-h-40 w-auto object-contain"

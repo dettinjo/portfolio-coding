@@ -130,10 +130,13 @@ const saveAndCompressImage = async (buffer: Buffer, destPath: string): Promise<s
   const dir = path.dirname(destPath);
   const name = path.basename(destPath, ext);
 
-  if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+  if (ext === ".png" || ext === ".jpg" || ext === ".jpeg" || ext === ".webp") {
     const webpPath = path.join(dir, `${name}.webp`);
-    const img = sharp(buffer);
+    let img = sharp(buffer);
     const meta = await img.metadata();
+    if (meta.width && meta.width > 1920) {
+      img = img.resize({ width: 1920, withoutEnlargement: true });
+    }
     await img
       .webp({
         quality: 85,
@@ -648,8 +651,11 @@ const main = async () => {
             fs.mkdirSync(imagesDir, { recursive: true });
           }
           const ext = path.extname(profileFile.name).toLowerCase();
-          if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
-            await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
+          if (ext === ".png" || ext === ".jpg" || ext === ".jpeg" || ext === ".webp") {
+            await sharp(buffer)
+              .resize(896, 896, { fit: "cover", withoutEnlargement: true })
+              .webp({ quality: 85 })
+              .toFile(outputAvatarPath);
             console.log("    ✓ Converted and saved profile image as profile.webp");
           } else {
             fs.writeFileSync(outputAvatarPath, buffer);
@@ -695,8 +701,11 @@ const main = async () => {
         fs.mkdirSync(imagesDir, { recursive: true });
       }
       const ext = path.extname(localProfileFile).toLowerCase();
-      if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
-        await sharp(buffer).webp({ quality: 90 }).toFile(outputAvatarPath);
+      if (ext === ".png" || ext === ".jpg" || ext === ".jpeg" || ext === ".webp") {
+        await sharp(buffer)
+          .resize(896, 896, { fit: "cover", withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toFile(outputAvatarPath);
         console.log("  ✓ Converted and saved local profile image as profile.webp");
       } else {
         fs.writeFileSync(outputAvatarPath, buffer);
@@ -774,12 +783,23 @@ const main = async () => {
     console.warn("  Could not generate OG image:", e.message);
   }
 
-  // Post-process site.config.json to add hasCustomAvatar flag
+  // Post-process site.config.json to add hasCustomAvatar flag and avatar blur placeholder
   if (fs.existsSync(outputSiteConfigPath)) {
     try {
       const siteConfigObj = JSON.parse(fs.readFileSync(outputSiteConfigPath, "utf8"));
       siteConfigObj.person = siteConfigObj.person || {};
       siteConfigObj.person.hasCustomAvatar = hasCustomAvatar;
+      if (fs.existsSync(outputAvatarPath)) {
+        try {
+          const blurBuf = await sharp(outputAvatarPath)
+            .resize(20, 20, { fit: "cover" })
+            .webp({ quality: 20 })
+            .toBuffer();
+          siteConfigObj.person.avatarBlurDataUrl = `data:image/webp;base64,${blurBuf.toString("base64")}`;
+        } catch (err: any) {
+          console.warn("  Could not generate avatar blur preview:", err.message);
+        }
+      }
       fs.writeFileSync(outputSiteConfigPath, JSON.stringify(siteConfigObj, null, 2) + "\n", "utf8");
       console.log(`  ✓ Updated site.config.json with hasCustomAvatar = ${hasCustomAvatar}`);
     } catch (e: any) {
@@ -1020,6 +1040,7 @@ const main = async () => {
       let width = 1200;
       let height = 900;
       let sizeKb: number | null = null;
+      let blurDataUrl: string | undefined = undefined;
       if (fs.existsSync(coverFsPath)) {
         sizeKb = Math.round(fs.statSync(coverFsPath).size / 1024);
         try {
@@ -1027,6 +1048,13 @@ const main = async () => {
           if (meta.width && meta.height) {
             width = meta.width;
             height = meta.height;
+          }
+          if (!coverUrl.toLowerCase().endsWith(".svg") && meta.width && meta.height) {
+            const blurBuf = await sharp(coverFsPath)
+              .resize(24, Math.max(12, Math.round(24 * (meta.height / meta.width))), { fit: "inside" })
+              .webp({ quality: 20 })
+              .toBuffer();
+            blurDataUrl = `data:image/webp;base64,${blurBuf.toString("base64")}`;
           }
         } catch {
           /* svg without intrinsic size — keep defaults */
@@ -1039,6 +1067,7 @@ const main = async () => {
         width,
         height,
         size: sizeKb,
+        ...(blurDataUrl ? { blurDataUrl } : {}),
       };
     } else if (fs.existsSync(actualMediaDir)) {
       const files = fs.readdirSync(actualMediaDir);
@@ -1046,13 +1075,31 @@ const main = async () => {
       if (coverFile) {
         const coverPath = path.join(actualMediaDir, coverFile);
         const stats = fs.statSync(coverPath);
+        let cWidth = 1200;
+        let cHeight = 900;
+        let coverBlur: string | undefined = undefined;
+        try {
+          const meta = await sharp(coverPath).metadata();
+          if (meta.width && meta.height) {
+            cWidth = meta.width;
+            cHeight = meta.height;
+          }
+          if (!coverFile.toLowerCase().endsWith(".svg") && meta.width && meta.height) {
+            const bBuf = await sharp(coverPath)
+              .resize(24, Math.max(12, Math.round(24 * (meta.height / meta.width))), { fit: "inside" })
+              .webp({ quality: 20 })
+              .toBuffer();
+            coverBlur = `data:image/webp;base64,${bBuf.toString("base64")}`;
+          }
+        } catch {}
         project.coverImage = {
           id: "cover",
           url: `/media/projects/${repoName}/${coverFile}`,
           alternativeText: `${project.title} Cover`,
-          width: 1200,
-          height: 900,
+          width: cWidth,
+          height: cHeight,
           size: Math.round(stats.size / 1024),
+          ...(coverBlur ? { blurDataUrl: coverBlur } : {}),
         };
       }
     }

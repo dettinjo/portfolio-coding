@@ -5,6 +5,7 @@ import { ResumeEntry } from "@/components/resume/ResumeItem";
 import { PrintButton } from "@/components/resume/PrintButton";
 import { ResumeData } from "@/types/resume";
 import { withBasePath } from "@/lib/basePath";
+import { siteConfig } from "@/lib/config";
 
 export interface ResumeTranslations {
   downloadPdf?: string;
@@ -146,6 +147,8 @@ export function ResumeCard({
                     sizes="(max-width: 1024px) 160px, 176px"
                     priority
                     unoptimized
+                    placeholder={siteConfig.person.avatarBlurDataUrl ? "blur" : "empty"}
+                    blurDataURL={siteConfig.person.avatarBlurDataUrl || undefined}
                     className="object-cover object-top scale-[1.2] origin-bottom translate-y-4 transition-transform duration-500 ease-in-out"
                   />
                 </Avatar>
