@@ -167,17 +167,17 @@ export const RESUME_LAYOUT_RESTRICTIONS: ResumeLayoutRestrictions = {
     skills: {
       maxItems: 6,
       minItems: 3,
-      nameMaxChars: 24,
-      nameRecommendedChars: "10-20",
+      nameMaxChars: 28,
+      nameRecommendedChars: "10-24",
       rationale:
-        "Rendered in the 182px net-width sidebar beside a 48px horizontal proficiency bar. Names > 24 characters squeeze or wrap the bar.",
+        "Rendered in the 182px net-width sidebar without proficiency bars. Max 28 characters fits cleanly on 1-2 lines without overflow.",
     },
     languages: {
       maxItems: 3,
       minItems: 1,
-      nameMaxChars: 20,
+      nameMaxChars: 24,
       rationale:
-        "Rendered in the sidebar beside a proficiency bar; names > 20 characters wrap awkwardly.",
+        "Rendered in the sidebar with CEFR proficiency level in parentheses (e.g. 'German (C2)', 'English (C1)', 'Spanish (A2)').",
     },
   },
   budgets: {
@@ -348,18 +348,18 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
 
   // 6. Guards on Skills & Languages (Sidebar width is 182px net)
   renderedSkills.forEach((skill) => {
-    if (skill.name && skill.name.length > 24) {
+    if (skill.name && skill.name.length > 28) {
       errors.push(
-        `Skill '${skill.name}' is too long (${skill.name.length} chars, maximum 24 chars allowed). Skill names must fit beside the 48px proficiency bar in the 182px sidebar.`
+        `Skill '${skill.name}' is too long (${skill.name.length} chars, maximum 28 chars allowed). Must fit in the 182px sidebar.`
       );
-    } else if (skill.name && skill.name.length > 20) {
-      warnings.push(`Skill '${skill.name}' is ${skill.name.length} chars (recommended ≤ 20 chars).`);
+    } else if (skill.name && skill.name.length > 24) {
+      warnings.push(`Skill '${skill.name}' is ${skill.name.length} chars (recommended ≤ 24 chars).`);
     }
   });
 
   renderedLanguages.forEach((lang) => {
-    if (lang.name && lang.name.length > 20) {
-      errors.push(`Language '${lang.name}' is too long (${lang.name.length} chars, maximum 20 chars allowed).`);
+    if (lang.name && lang.name.length > 24) {
+      errors.push(`Language '${lang.name}' is too long (${lang.name.length} chars, maximum 24 chars allowed).`);
     }
   });
 
@@ -385,12 +385,12 @@ export function validateResumeLayout(raw: unknown): LayoutValidationResult {
   // Left Column (Sidebar):
   // Avatar: 176px + margins (24px) = 200px
   // Contact: Heading (30px) + 5 lines * 22px = 140px
-  // Skills: Heading (30px) + N * 28px
-  // Languages: Heading (30px) + M * 28px
+  // Skills: Heading (30px) + N * 24px
+  // Languages: Heading (30px) + M * 24px
   // Card padding: 48px
   const sidebarBase = 200 + 140 + 48;
-  const skillsHeight = 30 + renderedSkills.length * 28;
-  const languagesHeight = 30 + renderedLanguages.length * 28;
+  const skillsHeight = 30 + renderedSkills.length * 24;
+  const languagesHeight = 30 + renderedLanguages.length * 24;
   const estimatedSidebarHeightPx = sidebarBase + skillsHeight + languagesHeight;
 
   if (estimatedMainHeightPx > MAX_SAFE_MAIN_HEIGHT_PX) {

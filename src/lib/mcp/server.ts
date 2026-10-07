@@ -113,8 +113,9 @@ export function createResumeMcpServer(): McpServer {
             "Job Title (Position)": "Max 50 chars.",
             "Company / Institution Name": "Max 50-55 chars.",
             "Skill Name":
-              "Max 24 chars (recommended 10-20 chars). Rendered beside 48px proficiency bar in 182px sidebar.",
-            "Language Name": "Max 20 chars.",
+              "Max 28 chars (recommended 10-24 chars). Rendered in the sidebar without proficiency bars.",
+            "Language Name":
+              "Max 24 chars. Specified with CEFR level in parentheses, e.g. 'German (C2)', 'English (C1)', 'Spanish (A2)'.",
             "Location": "Max 35 chars (single line in sidebar).",
             "Item Counts":
               "Work experience: 3-4 items; Education: 1-2 items; Skills: 4-6 items; Languages: 2-3 items.",
@@ -141,7 +142,7 @@ export function createResumeMcpServer(): McpServer {
         enforcementMechanisms: [
           "CSS line-clamp-2: Experience summaries and education areas exceeding 2 lines (~200 chars) are cut off with an ellipsis in PDF and web views.",
           "CSS whitespace-nowrap: Headlines exceeding 55 characters clip past the right content boundary.",
-          "Sidebar width budget (182px net): Skill names exceeding 24 characters squeeze or wrap the 48px horizontal proficiency bar.",
+          "Sidebar width budget (182px net): Skill and language names fit within the single-column sidebar without proficiency bars.",
           "Height budget validation: Total page vertical height is monitored against 980px (main column) and 950px (sidebar) to guarantee an exact 1-page PDF.",
         ],
       };

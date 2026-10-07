@@ -83,32 +83,27 @@
         {
           "id": "s1",
           "visible": true,
-          "name": "Vue.js / Nuxt",
-          "level": 5
+          "name": "Vue.js / Nuxt"
         },
         {
           "id": "s2",
           "visible": true,
-          "name": "Go / APIs",
-          "level": 5
+          "name": "Go / APIs"
         },
         {
           "id": "s3",
           "visible": true,
-          "name": "Python / ML",
-          "level": 4
+          "name": "Python / ML"
         },
         {
           "id": "s4",
           "visible": true,
-          "name": "AWS / Ansible",
-          "level": 4
+          "name": "AWS / Ansible"
         },
         {
           "id": "s5",
           "visible": true,
-          "name": "Flutter / Dart",
-          "level": 3
+          "name": "Flutter / Dart"
         }
       ]
     },
@@ -119,20 +114,17 @@
         {
           "id": "l1",
           "visible": true,
-          "name": "English",
-          "level": 5
+          "name": "German (C2)"
         },
         {
           "id": "l2",
           "visible": true,
-          "name": "German",
-          "level": 5
+          "name": "English (C1)"
         },
         {
           "id": "l3",
           "visible": true,
-          "name": "Spanish",
-          "level": 3
+          "name": "Spanish (A2)"
         }
       ]
     },
