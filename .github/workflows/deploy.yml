@@ -63,7 +63,7 @@ jobs:
             # Pull the new image (built by GitHub Actions, never built on server)
             docker pull ghcr.io/${{ github.repository }}:latest
             # Trigger Coolify to redeploy (Coolify will pull latest compose, see the new image, and recreate container)
-            curl -s -X GET \
+            curl -s -X POST \
               "http://localhost:18000/api/v1/deploy?uuid=ikws0k0oc440k0cs08csws08&force=false" \
               -H "Authorization: Bearer $COOLIFY_TOKEN"
         env:
