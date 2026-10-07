@@ -3,7 +3,6 @@ import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
 import { ResumeEntry } from "@/components/resume/ResumeItem";
 import { PrintButton } from "@/components/resume/PrintButton";
-import { ProficiencyBar } from "@/components/ProficiencyBar";
 import { ResumeData } from "@/types/resume";
 import { withBasePath } from "@/lib/basePath";
 
@@ -234,20 +233,12 @@ export function ResumeCard({
                 <h3 className="text-sm font-bold mb-2.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
                   {t.skills}
                 </h3>
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2">
                   {skillItems.map((skill) => (
                     <div key={skill.id}>
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-xs text-zinc-200 dark:text-zinc-800">
-                          {skill.name}
-                        </h4>
-                        {skill.level !== undefined && (
-                          <ProficiencyBar
-                            level={skill.level}
-                            className="bg-zinc-800 [&>div]:bg-zinc-200 dark:bg-zinc-200 dark:[&>div]:bg-zinc-800"
-                          />
-                        )}
-                      </div>
+                      <h4 className="font-semibold text-xs text-zinc-200 dark:text-zinc-800">
+                        {skill.name}
+                      </h4>
                     </div>
                   ))}
                 </div>
@@ -258,19 +249,11 @@ export function ResumeCard({
                 <h3 className="text-sm font-bold mb-2.5 uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b pb-1 border-zinc-800 dark:border-zinc-200">
                   {t.languages}
                 </h3>
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2">
                   {languageItems.map((lang) => (
                     <div key={lang.id}>
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold text-xs text-zinc-200 dark:text-zinc-800">
-                          {lang.name}
-                        </div>
-                        {lang.level !== undefined && (
-                          <ProficiencyBar
-                            level={lang.level}
-                            className="bg-zinc-800 [&>div]:bg-zinc-200 dark:bg-zinc-200 dark:[&>div]:bg-zinc-800"
-                          />
-                        )}
+                      <div className="font-semibold text-xs text-zinc-200 dark:text-zinc-800">
+                        {lang.name}
                       </div>
                     </div>
                   ))}

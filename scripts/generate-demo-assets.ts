@@ -623,20 +623,20 @@ const RESUME = {
       name: "Skills",
       visible: true,
       items: [
-        { id: "s1", visible: true, name: "Vue.js / Nuxt", level: 5 },
-        { id: "s2", visible: true, name: "Go / APIs", level: 5 },
-        { id: "s3", visible: true, name: "Python / ML", level: 4 },
-        { id: "s4", visible: true, name: "AWS / Ansible", level: 4 },
-        { id: "s5", visible: true, name: "Flutter / Dart", level: 3 },
+        { id: "s1", visible: true, name: "Vue.js / Nuxt" },
+        { id: "s2", visible: true, name: "Go / APIs" },
+        { id: "s3", visible: true, name: "Python / ML" },
+        { id: "s4", visible: true, name: "AWS / Ansible" },
+        { id: "s5", visible: true, name: "Flutter / Dart" },
       ],
     },
     languages: {
       name: "Languages",
       visible: true,
       items: [
-        { id: "l1", visible: true, name: "English", level: 5 },
-        { id: "l2", visible: true, name: "German", level: 5 },
-        { id: "l3", visible: true, name: "Spanish", level: 3 },
+        { id: "l1", visible: true, name: "German (C2)" },
+        { id: "l2", visible: true, name: "English (C1)" },
+        { id: "l3", visible: true, name: "Spanish (A2)" },
       ],
     },
     profiles: {
