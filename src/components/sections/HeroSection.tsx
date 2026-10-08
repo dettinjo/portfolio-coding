@@ -1,7 +1,7 @@
 // src/components/sections/software/HeroSection.tsx
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
 import { siteConfig } from "@/lib/config";
+import { RotatingHeroBio } from "./RotatingHeroBio";
 
 const entranceTransition: Transition = {
   duration: 0.5,
@@ -28,12 +29,25 @@ const entranceTransition: Transition = {
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
   const locale = useLocale();
+  const bioRotations =
+    siteConfig.person.bioRotations?.[locale] ||
+    siteConfig.person.bioRotations?.["en"] ||
+    [];
   // Generated at build time from the config repo's profile image (or the
   // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
   const avatarSrc = withBasePath("/images/profile.webp");
   const isPlaceholder = !siteConfig.person.hasCustomAvatar;
   const heroRef = useRef<HTMLElement>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(true);
+
+  // Coordinate pointer lifecycle: starts at greeting, stops at name, then moves to bio
+  const [pointerAtGreeting, setPointerAtGreeting] = useState(true);
+  const [startBio, setStartBio] = useState(false);
+
+  const handleGreetingComplete = useCallback(() => {
+    setPointerAtGreeting(false);
+    setStartBio(true);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -60,10 +74,20 @@ export function HeroSection() {
           transition={entranceTransition}
           className="flex flex-col items-center lg:items-start w-full"
         >
-          <AnimatedGreeting />
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-muted-foreground">
-            {t("intro")}
-          </p>
+          <AnimatedGreeting
+            onComplete={handleGreetingComplete}
+            showPointer={pointerAtGreeting}
+          />
+          <div className="mt-4 sm:mt-6 w-full">
+            <RotatingHeroBio
+              items={bioRotations}
+              interval={siteConfig.person.bioRotationInterval ?? 4000}
+              fallbackText={t("intro")}
+              locale={locale}
+              isActive={startBio}
+              hasPointer={!pointerAtGreeting}
+            />
+          </div>
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto lg:mx-0">
             <Button asChild className="w-full sm:w-auto">
               <Link href="#projekte">{t("button_projects")}</Link>

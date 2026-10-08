@@ -6,10 +6,79 @@
 // components — it contains only public information.
 
 import rawConfig from "@/data/site.config.json";
-import type { SiteConfig } from "./types";
+import type { SiteConfig, BioRotationItem } from "./types";
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+const DEFAULT_BIO_ROTATIONS: Record<string, BioRotationItem[]> = {
+  en: [
+    {
+      role: "AI Engineer",
+      adjectives: ["intelligent", "context-aware", "autonomous"],
+      artifacts: "agentic workflows & AI implementations",
+    },
+    {
+      role: "Full-Stack Developer",
+      adjectives: ["robust", "scalable", "user-friendly"],
+      artifacts: "web applications & cloud platforms",
+    },
+    {
+      role: "Backend Architect",
+      adjectives: ["high-throughput", "resilient", "fault-tolerant"],
+      artifacts: "distributed microservices & APIs",
+    },
+    {
+      role: "App Developer",
+      adjectives: ["fluid", "native", "responsive"],
+      artifacts: "cross-platform mobile applications",
+    },
+  ],
+  de: [
+    {
+      role: "KI-Engineer",
+      adjectives: ["intelligente", "kontextsensitive", "autonome"],
+      artifacts: "Agentic Workflows & KI-Lösungen",
+    },
+    {
+      role: "Full-Stack Entwickler",
+      adjectives: ["robuste", "skalierbare", "benutzerfreundliche"],
+      artifacts: "Webanwendungen & Cloud-Plattformen",
+    },
+    {
+      role: "Backend Architekt",
+      adjectives: ["hochperformante", "resiliente", "fehlertolerante"],
+      artifacts: "verteilte Microservices & APIs",
+    },
+    {
+      role: "App Entwickler",
+      adjectives: ["flüssige", "native", "reaktive"],
+      artifacts: "Cross-Platform Mobile Apps",
+    },
+  ],
+  es: [
+    {
+      role: "Ingeniero de IA",
+      adjectives: ["inteligentes", "sensibles al contexto", "autónomos"],
+      artifacts: "flujos agénticos y soluciones de IA",
+    },
+    {
+      role: "Desarrollador Full-Stack",
+      adjectives: ["robustas", "escalables", "fáciles de usar"],
+      artifacts: "aplicaciones web y plataformas cloud",
+    },
+    {
+      role: "Arquitecto Backend",
+      adjectives: ["de alto rendimiento", "resilientes", "tolerantes a fallos"],
+      artifacts: "microservicios distribuidos y APIs",
+    },
+    {
+      role: "Desarrollador de Apps",
+      adjectives: ["fluidas", "nativas", "reactivas"],
+      artifacts: "aplicaciones móviles multiplataforma",
+    },
+  ],
 };
 
 const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
@@ -46,6 +115,9 @@ const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
       },
       hasCustomAvatar: person.hasCustomAvatar ?? false,
       avatarBlurDataUrl: person.avatarBlurDataUrl ?? "",
+      bioRotations: (person.bioRotations as Record<string, BioRotationItem[]>) ?? DEFAULT_BIO_ROTATIONS,
+      bioRotationInterval: person.bioRotationInterval ?? 4500,
+      bioDesignVariant: person.bioDesignVariant ?? "terminal",
     },
     site: {
       serverUrl: site.serverUrl ?? "http://localhost:3000",
