@@ -11,6 +11,7 @@ import { renderBannerSvg } from "@/lib/banner/svg-renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/i18n/navigation";
 import {
   Download,
   Copy,
@@ -26,6 +27,7 @@ import {
   Terminal,
   Type,
   FileCode,
+  ArrowLeft,
 } from "lucide-react";
 
 interface LinkedInBannerGeneratorProps {
@@ -35,6 +37,7 @@ interface LinkedInBannerGeneratorProps {
 
 export function LinkedInBannerGenerator({
   initialData,
+  locale,
 }: LinkedInBannerGeneratorProps) {
   const [data, setData] = useState<BannerData>(() => ({
     ...DEFAULT_BANNER_DATA,
@@ -102,7 +105,7 @@ export function LinkedInBannerGenerator({
     const filename = `LinkedIn_Banner_${safeRole}_${data.theme}${scale === 2 ? "@2x" : ""}.png`;
 
     try {
-      // 1. Try server-side sharp generation for razor-sharp rendering
+      // 1. Server-side sharp generation for razor-sharp antialiased typography
       const params = new URLSearchParams({
         jobTitle: data.jobTitle,
         skills: data.skills.join(","),
@@ -153,7 +156,6 @@ export function LinkedInBannerGenerator({
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.download = filename;
-        a.href = blobUrl;
         a.click();
         URL.revokeObjectURL(blobUrl);
       }, "image/png");
@@ -189,285 +191,321 @@ export function LinkedInBannerGenerator({
 
   // Filter suggestion skills to only those not yet added
   const remainingSuggestions = useMemo(() => {
-    return SUGGESTED_SKILLS.filter((s) => !data.skills.includes(s)).slice(0, 8);
+    return SUGGESTED_SKILLS.filter((s) => !data.skills.includes(s)).slice(0, 6);
   }, [data.skills]);
 
   return (
-    <div className="w-full space-y-6">
-      {/* ─── MAIN STUDIO WORKSPACE (TWO-COLUMN DESKTOP, STACKED MOBILE) ──── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ─── LEFT: LIVE CANVAS STAGE (7 COLS) ─────────────────────────── */}
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
-          {/* Canvas Toolbar */}
-          <div className="flex items-center justify-between gap-3 px-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-medium text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-md border border-border/50">
-                1584 × 396 px · 4:1
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowSafeAreas((v) => !v)}
-                className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border transition-colors ${
-                  showSafeAreas
-                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
-                    : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
-                }`}
-                title="Toggle LinkedIn avatar collision circle and mobile crop zone"
-              >
-                {showSafeAreas ? (
-                  <Eye className="h-3.5 w-3.5" />
-                ) : (
-                  <EyeOff className="h-3.5 w-3.5" />
-                )}
-                <span>Safe Zones {showSafeAreas ? "On" : "Off"}</span>
-              </button>
-            </div>
+    <div className="h-screen max-h-screen w-screen overflow-hidden flex flex-col bg-background text-foreground select-none">
+      {/* ─── COMPACT STUDIO TOPBAR (48px) ─────────────────────────────────── */}
+      <header className="h-12 shrink-0 border-b border-border/80 px-3 sm:px-4 flex items-center justify-between bg-card/60 backdrop-blur-md z-30">
+        {/* Left: Home link, title & canvas info */}
+        <div className="flex items-center gap-2 min-w-0">
+          <Link
+            href="/"
+            locale={locale}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors group p-1 -ml-1 rounded-md"
+            title="Return to Portfolio"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <Terminal className="h-4 w-4 text-primary" />
+          </Link>
+          <span className="text-muted-foreground/30 text-sm hidden xs:inline">/</span>
+          <span className="font-semibold text-xs sm:text-sm tracking-tight text-foreground truncate">
+            Banner Studio
+          </span>
+          <span className="hidden md:inline-flex text-[11px] font-mono text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border border-border/50">
+            1584 × 396 px (4:1)
+          </span>
+        </div>
 
-            <div className="flex items-center gap-1.5">
-              {/* Theme Toggle */}
-              <button
-                type="button"
-                onClick={() =>
-                  handleUpdate(
-                    "theme",
-                    data.theme === "dark" ? "light" : "dark"
-                  )
-                }
-                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border border-border bg-card hover:bg-muted/60 transition-colors"
-                title="Toggle Light / Dark mode"
-              >
-                {data.theme === "dark" ? (
-                  <>
-                    <Moon className="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Dark</span>
-                  </>
-                ) : (
-                  <>
-                    <Sun className="h-3.5 w-3.5 text-amber-500" />
-                    <span>Light</span>
-                  </>
-                )}
-              </button>
+        {/* Right: Studio actions & primary export */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          {/* Safe Zones Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowSafeAreas((v) => !v)}
+            className={`inline-flex items-center gap-1 text-xs font-medium p-1.5 sm:px-2.5 sm:py-1 rounded-md border transition-colors ${
+              showSafeAreas
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+            }`}
+            title="Toggle LinkedIn safe zones (avatar collision & mobile crop)"
+          >
+            {showSafeAreas ? (
+              <Eye className="h-3.5 w-3.5" />
+            ) : (
+              <EyeOff className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">
+              Safe Zones {showSafeAreas ? "On" : "Off"}
+            </span>
+          </button>
 
-              {/* Reset Button */}
-              <button
-                type="button"
-                onClick={handleReset}
-                className="p-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                title="Reset to defaults"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
+          {/* Banner Theme Toggle */}
+          <button
+            type="button"
+            onClick={() =>
+              handleUpdate("theme", data.theme === "dark" ? "light" : "dark")
+            }
+            className="inline-flex items-center gap-1 text-xs font-medium p-1.5 sm:px-2.5 sm:py-1 rounded-md border border-border bg-card hover:bg-muted/60 transition-colors"
+            title="Toggle Light / Dark mode for banner"
+          >
+            {data.theme === "dark" ? (
+              <>
+                <Moon className="h-3.5 w-3.5 text-zinc-400" />
+                <span className="hidden sm:inline">Dark</span>
+              </>
+            ) : (
+              <>
+                <Sun className="h-3.5 w-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Light</span>
+              </>
+            )}
+          </button>
 
-          {/* Canvas Box */}
-          <div className="relative w-full aspect-[4/1] rounded-xl overflow-hidden border border-border shadow-lg bg-zinc-950/80 flex items-center justify-center ring-1 ring-border/20">
+          {/* Reset button */}
+          <button
+            type="button"
+            onClick={handleReset}
+            className="p-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            title="Reset to defaults"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+
+          <div className="h-4 w-[1px] bg-border mx-0.5 sm:mx-1" />
+
+          {/* Primary Export Button */}
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 px-2.5 sm:px-3 text-xs font-semibold shadow-xs"
+            onClick={() => downloadPng(1)}
+            disabled={downloading !== null}
+          >
+            <Download className="h-3.5 w-3.5 sm:mr-1.5" />
+            <span className="hidden xs:inline">
+              {downloading === "png" ? "Rendering..." : "Export"}
+            </span>
+          </Button>
+        </div>
+      </header>
+
+      {/* ─── WORKSPACE (MOBILE: FLUID SCROLL WITH STICKY PREVIEW; DESKTOP: 2-COLUMN ZERO-SCROLL) ──── */}
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+        {/* ─── ARTBOARD / CANVAS STAGE ───────────────────────────────────── */}
+        <section className="sticky top-0 lg:static z-20 bg-background/95 lg:bg-zinc-950/20 backdrop-blur-md lg:backdrop-blur-none border-b lg:border-b-0 border-border/80 lg:flex-1 lg:min-h-0 lg:h-full flex flex-col items-center justify-center p-3 sm:p-4 lg:p-6 shadow-xs lg:shadow-none">
+          {/* Banner Box */}
+          <div className="w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md lg:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
             <div
               className="w-full h-full flex items-center justify-center select-none"
               dangerouslySetInnerHTML={{ __html: previewSvg }}
             />
           </div>
 
-          {/* Quick Role Presets Bar */}
-          <div className="flex items-center gap-2 pt-1 flex-wrap">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
+          {/* Presets Row: Smooth horizontal swipe row on mobile, centered on desktop */}
+          <div className="w-full max-w-4xl flex items-center gap-1.5 pt-2 sm:pt-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden justify-start sm:justify-center">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground flex items-center gap-1 shrink-0 mr-0.5">
+              <Sparkles className="h-3 w-3 text-primary" />
               Presets:
             </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {QUICK_ROLE_PRESETS.map((preset) => {
-                const isActive = data.jobTitle === preset.title;
-                return (
-                  <button
-                    key={preset.title}
-                    type="button"
-                    onClick={() => handleApplyPreset(preset)}
-                    className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary font-semibold shadow-xs"
-                        : "bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground"
-                    }`}
-                  >
-                    {preset.title}
-                  </button>
-                );
-              })}
-            </div>
+            {QUICK_ROLE_PRESETS.map((preset) => {
+              const isActive = data.jobTitle === preset.title;
+              return (
+                <button
+                  key={preset.title}
+                  type="button"
+                  onClick={() => handleApplyPreset(preset)}
+                  className={`text-xs px-2.5 py-0.5 rounded-md border shrink-0 transition-all ${
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary font-semibold shadow-xs"
+                      : "bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground"
+                  }`}
+                >
+                  {preset.title}
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </section>
 
-        {/* ─── RIGHT: CONTROLS & INSPECTOR (5 COLS) ───────────────────────── */}
-        <div className="lg:col-span-5 xl:col-span-4 bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5 space-y-5 shadow-xs">
-          {/* Section 1: Headline Role */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="banner-job-title" className="text-xs font-semibold">
-                Job Title / Headline
-              </Label>
-              <span className="text-[11px] font-mono text-muted-foreground">
-                {data.jobTitle.length} chars
-              </span>
+        {/* ─── INSPECTOR SIDEBAR / CONTROLS ──────────────────────────────── */}
+        <aside className="w-full lg:w-80 xl:w-[350px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-5 lg:space-y-0">
+          {/* Controls Group */}
+          <div className="space-y-4">
+            {/* Section 1: Headline Role */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="banner-job-title" className="text-xs font-semibold">
+                  Job Title / Headline
+                </Label>
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  {data.jobTitle.length} chars
+                </span>
+              </div>
+              <div className="relative">
+                <Input
+                  id="banner-job-title"
+                  value={data.jobTitle}
+                  onChange={(e) => handleUpdate("jobTitle", e.target.value)}
+                  placeholder="e.g. AI Engineer"
+                  className="font-mono text-xs pr-7 bg-background/80 h-9 sm:h-8"
+                />
+                {data.jobTitle && (
+                  <button
+                    type="button"
+                    onClick={() => handleUpdate("jobTitle", "")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="relative">
-              <Input
-                id="banner-job-title"
-                value={data.jobTitle}
-                onChange={(e) => handleUpdate("jobTitle", e.target.value)}
-                placeholder="e.g. AI Engineer"
-                className="font-mono text-sm pr-8 bg-background/80"
-              />
-              {data.jobTitle && (
+
+            {/* Section 2: Terminal Style Selector */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Terminal Style</Label>
+              <div className="grid grid-cols-3 gap-1 p-1 bg-muted/40 border border-border/60 rounded-lg">
                 <button
                   type="button"
-                  onClick={() => handleUpdate("jobTitle", "")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => handleUpdate("template", "terminal")}
+                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                    data.template === "terminal"
+                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Terminal Prompt (> Title█)"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <Terminal className="h-3 w-3" />
+                  <span>Prompt</span>
                 </button>
-              )}
-            </div>
-          </div>
 
-          {/* Section 2: Skills Pills */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">Skills & Tags</Label>
-              <span className="text-[11px] font-mono text-muted-foreground">
-                {data.skills.length}/8
-              </span>
-            </div>
-
-            {/* Current Active Skills */}
-            <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg bg-background/60 border border-border/80">
-              {data.skills.length === 0 ? (
-                <span className="text-xs text-muted-foreground/60 italic py-0.5">
-                  No skill tags (Title-only view)
-                </span>
-              ) : (
-                data.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono bg-secondary text-secondary-foreground border border-border/60"
-                  >
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="hover:text-destructive transition-colors ml-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))
-              )}
-            </div>
-
-            {/* Add Skill Input */}
-            <div className="flex gap-1.5">
-              <Input
-                value={newSkillInput}
-                onChange={(e) => setNewSkillInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddSkill(newSkillInput);
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleUpdate("template", "terminal-clean" as BannerTemplateId)
                   }
-                }}
-                placeholder="Add skill (e.g. PyTorch)..."
-                className="text-xs font-mono bg-background/80 h-8"
-              />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="h-8 px-2.5 text-xs"
-                onClick={() => handleAddSkill(newSkillInput)}
-                disabled={!newSkillInput.trim() || data.skills.length >= 8}
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                Add
-              </Button>
+                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                    data.template === "terminal-clean"
+                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Clean Title (Title█)"
+                >
+                  <Type className="h-3 w-3" />
+                  <span>Clean</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleUpdate("template", "title-only" as BannerTemplateId)
+                  }
+                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                    data.template === "title-only"
+                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Centered Title Only"
+                >
+                  <span>Title Only</span>
+                </button>
+              </div>
             </div>
 
-            {/* Quick Suggestions Chips */}
-            {remainingSuggestions.length > 0 && data.skills.length < 8 && (
-              <div className="pt-1">
-                <span className="text-[11px] text-muted-foreground block mb-1.5">
-                  Suggestions:
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {remainingSuggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => handleAddSkill(suggestion)}
-                      className="text-[11px] font-mono px-2 py-0.5 rounded border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                    >
-                      + {suggestion}
-                    </button>
-                  ))}
+            {/* Section 3: Skills & Tags (only if not title-only) */}
+            {data.template !== "title-only" && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold">Skills & Tags</Label>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {data.skills.length}/8
+                  </span>
                 </div>
+
+                {/* Active Skill Pills */}
+                <div className="flex flex-wrap gap-1.5 p-2 rounded-lg bg-background/60 border border-border/80 min-h-[36px]">
+                  {data.skills.length === 0 ? (
+                    <span className="text-[11px] text-muted-foreground/60 italic py-0.5 px-1">
+                      No tags added
+                    </span>
+                  ) : (
+                    data.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono bg-secondary text-secondary-foreground border border-border/60"
+                      >
+                        <span>{skill}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSkill(skill)}
+                          className="hover:text-destructive transition-colors ml-0.5 p-0.5 -mr-1"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Add Skill Input */}
+                <div className="flex gap-1.5">
+                  <Input
+                    value={newSkillInput}
+                    onChange={(e) => setNewSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddSkill(newSkillInput);
+                      }
+                    }}
+                    placeholder="Add skill (e.g. PyTorch)..."
+                    className="text-xs font-mono bg-background/80 h-8"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-2.5 text-xs"
+                    onClick={() => handleAddSkill(newSkillInput)}
+                    disabled={!newSkillInput.trim() || data.skills.length >= 8}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-0.5" />
+                    Add
+                  </Button>
+                </div>
+
+                {/* Quick Suggestions Chips */}
+                {remainingSuggestions.length > 0 && data.skills.length < 8 && (
+                  <div className="pt-0.5">
+                    <span className="text-[10px] text-muted-foreground block mb-1">
+                      Suggestions:
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {remainingSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => handleAddSkill(suggestion)}
+                          className="text-[11px] font-mono px-2 py-0.5 rounded border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        >
+                          + {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Section 3: Style Variant */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold">Terminal Style</Label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-muted/40 border border-border/60 rounded-lg">
-              <button
-                type="button"
-                onClick={() => handleUpdate("template", "terminal")}
-                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
-                  data.template === "terminal"
-                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                title="Signature prompt (> Title█)"
-              >
-                <Terminal className="h-3 w-3" />
-                <span>Prompt</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  handleUpdate("template", "terminal-clean" as BannerTemplateId)
-                }
-                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
-                  data.template === "terminal-clean"
-                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                title="Minimal title (Title█)"
-              >
-                <Type className="h-3 w-3" />
-                <span>Clean</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  handleUpdate("template", "title-only" as BannerTemplateId)
-                }
-                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
-                  data.template === "title-only"
-                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                title="Centered title only, no skill pills"
-              >
-                <span>Title Only</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Section 4: Export Buttons */}
-          <div className="space-y-2 pt-2 border-t border-border">
+          {/* Bottom Actions & Secondary Formats */}
+          <div className="pt-3 border-t border-border/60 space-y-2">
+            {/* Prominent Export Button on Mobile */}
             <Button
               type="button"
-              className="w-full font-semibold shadow-xs h-9"
+              className="w-full lg:hidden h-10 font-semibold text-xs shadow-xs"
               onClick={() => downloadPng(1)}
               disabled={downloading !== null}
             >
@@ -477,23 +515,23 @@ export function LinkedInBannerGenerator({
                 : "Download Banner PNG (1584×396)"}
             </Button>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-mono"
+                className="h-8 lg:h-7 text-xs lg:text-[11px] font-mono px-2"
                 onClick={() => downloadPng(2)}
                 disabled={downloading !== null}
               >
-                {downloading === "retina" ? "Rendering..." : "Retina 2x (3168×792)"}
+                {downloading === "retina" ? "Rendering..." : "Retina 2x"}
               </Button>
 
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-mono"
+                className="h-8 lg:h-7 text-xs lg:text-[11px] font-mono px-2"
                 onClick={downloadSvg}
               >
                 <FileCode className="h-3.5 w-3.5 mr-1" />
@@ -504,22 +542,22 @@ export function LinkedInBannerGenerator({
             <button
               type="button"
               onClick={copySvg}
-              className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 inline-flex items-center justify-center gap-1.5"
+              className="w-full text-center text-xs lg:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1 inline-flex items-center justify-center gap-1.5"
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 text-emerald-500" />
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
                   <span className="text-emerald-500 font-medium">SVG Copied to Clipboard</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-3 w-3" />
-                  <span>Copy SVG code</span>
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy raw SVG</span>
                 </>
               )}
             </button>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
