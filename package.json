@@ -8,7 +8,8 @@
     "build": "tsx scripts/fetch-portfolio.ts && next build",
     "start": "next start",
     "lint": "eslint",
-    "mcp": "tsx scripts/mcp-server.ts"
+    "mcp": "tsx scripts/mcp-server.ts",
+    "banner": "tsx scripts/generate-banner.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.31.0",

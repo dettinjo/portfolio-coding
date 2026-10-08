@@ -1,10 +1,12 @@
 export type BannerTheme = "dark" | "light";
 
 export type BannerTemplateId =
-  | "terminal"      // Terminal Minimalist (Portfolio Signature)
-  | "split"         // Architectural Split (Executive Modern)
-  | "glow"          // Ambient Tech Glow (Modern Neo-Tech)
-  | "framed";       // Framed Card (Portfolio Showcase)
+  | "terminal"        // Terminal Minimalist with prompt (> Title █)
+  | "terminal-clean"  // Terminal Minimalist without prompt (Title █)
+  | "title-only"      // Title only (vertically centered)
+  | "split"           // Architectural Split
+  | "glow"            // Ambient Tech Glow
+  | "framed";         // Framed Card
 
 export interface BannerData {
   jobTitle: string;

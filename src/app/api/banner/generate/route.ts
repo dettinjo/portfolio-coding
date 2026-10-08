@@ -62,10 +62,12 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
 
   const templateParam = body?.template || searchParams.get("template");
   const template: BannerTemplateId =
+    templateParam === "terminal-clean" ||
+    templateParam === "title-only" ||
     templateParam === "split" ||
     templateParam === "glow" ||
     templateParam === "framed"
-      ? templateParam
+      ? (templateParam as BannerTemplateId)
       : "terminal";
 
   return {

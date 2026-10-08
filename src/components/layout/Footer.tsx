@@ -24,14 +24,6 @@ export function Footer() {
           {/* --- THIS IS THE FIX (PART 2) --- */}
           {/* Changed <a> to <Link> */}
           <Link
-            href="/banner"
-            className="transition-colors hover:text-foreground"
-            data-umami-event="footer_link_clicked"
-            data-umami-event-page="banner"
-          >
-            {t("banner")}
-          </Link>
-          <Link
             href="/imprint"
             className="transition-colors hover:text-foreground"
             data-umami-event="footer_link_clicked"

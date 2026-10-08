@@ -1,22 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { BannerData, BannerTemplateId } from "@/types/banner";
 import {
-  BANNER_TEMPLATES,
   DEFAULT_BANNER_DATA,
-  LINKEDIN_BANNER_HEIGHT,
-  LINKEDIN_BANNER_WIDTH,
-  PRESET_JOB_TITLES,
+  QUICK_ROLE_PRESETS,
   SUGGESTED_SKILLS,
 } from "@/lib/banner/constants";
 import { renderBannerSvg } from "@/lib/banner/svg-renderer";
-import { LinkedInBannerPreview } from "./LinkedInBannerPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import {
   Download,
   Copy,
@@ -25,16 +19,14 @@ import {
   EyeOff,
   Sun,
   Moon,
-  Sparkles,
-  Terminal,
-  Columns,
-  Layers,
-  SquareDashed,
   Plus,
   X,
   RotateCcw,
+  Sparkles,
+  Terminal,
+  Type,
+  FileCode,
 } from "lucide-react";
-import { siteConfig } from "@/lib/config";
 
 interface LinkedInBannerGeneratorProps {
   initialData?: Partial<BannerData>;
@@ -46,11 +38,6 @@ export function LinkedInBannerGenerator({
 }: LinkedInBannerGeneratorProps) {
   const [data, setData] = useState<BannerData>(() => ({
     ...DEFAULT_BANNER_DATA,
-    name: siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
-    jobTitle: siteConfig.person.headline || DEFAULT_BANNER_DATA.jobTitle,
-    contactUrl:
-      siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
-      DEFAULT_BANNER_DATA.contactUrl,
     ...(initialData || {}),
   }));
 
@@ -70,7 +57,6 @@ export function LinkedInBannerGenerator({
     const trimmed = skill.trim();
     if (trimmed && !data.skills.includes(trimmed)) {
       if (data.skills.length >= 8) {
-        alert("Maximum 8 skills recommended to maintain clean banner layout.");
         return;
       }
       handleUpdate("skills", [...data.skills, trimmed]);
@@ -85,23 +71,61 @@ export function LinkedInBannerGenerator({
     );
   };
 
+  const handleApplyPreset = (preset: { title: string; skills: string[] }) => {
+    setData((prev) => ({
+      ...prev,
+      jobTitle: preset.title,
+      skills: [...preset.skills],
+    }));
+  };
+
   const handleReset = () => {
     setData({
       ...DEFAULT_BANNER_DATA,
-      name: siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
-      jobTitle: siteConfig.person.headline || DEFAULT_BANNER_DATA.jobTitle,
-      contactUrl:
-        siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
-        DEFAULT_BANNER_DATA.contactUrl,
     });
   };
 
-  // Canvas-based client-side export
-  const exportToPng = async (scale: 1 | 2 = 1) => {
-    setDownloading(scale === 2 ? "png-2x" : "png-1x");
+  // Live SVG string
+  const previewSvg = useMemo(() => {
+    return renderBannerSvg(data, { showSafeAreas });
+  }, [data, showSafeAreas]);
+
+  const cleanSvgForExport = useMemo(() => {
+    return renderBannerSvg(data, { showSafeAreas: false });
+  }, [data]);
+
+  // Export handlers
+  const downloadPng = async (scale: 1 | 2 = 1) => {
+    const key = scale === 2 ? "retina" : "png";
+    setDownloading(key);
+    const safeRole = (data.jobTitle || "AI_Engineer").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filename = `LinkedIn_Banner_${safeRole}_${data.theme}${scale === 2 ? "@2x" : ""}.png`;
+
     try {
-      const svgString = renderBannerSvg(data, { showSafeAreas: false });
-      const svgBlob = new Blob([svgString], {
+      // 1. Try server-side sharp generation for razor-sharp rendering
+      const params = new URLSearchParams({
+        jobTitle: data.jobTitle,
+        skills: data.skills.join(","),
+        theme: data.theme,
+        template: data.template,
+        scale: String(scale),
+        format: "png",
+      });
+
+      const response = await fetch(`/api/banner/generate?${params}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // 2. Fallback: Client-side canvas export
+      const svgBlob = new Blob([cleanSvgForExport], {
         type: "image/svg+xml;charset=utf-8",
       });
       const url = URL.createObjectURL(svgBlob);
@@ -114,10 +138,10 @@ export function LinkedInBannerGenerator({
       });
 
       const canvas = document.createElement("canvas");
-      canvas.width = LINKEDIN_BANNER_WIDTH * scale;
-      canvas.height = LINKEDIN_BANNER_HEIGHT * scale;
+      canvas.width = 1584 * scale;
+      canvas.height = 396 * scale;
       const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Could not create canvas 2D context");
+      if (!ctx) throw new Error("Canvas context unavailable");
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
@@ -128,439 +152,219 @@ export function LinkedInBannerGenerator({
         if (!blob) return;
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        const safeRole = data.jobTitle.replace(/[^a-zA-Z0-9_-]/g, "_");
-        a.download = `LinkedIn_Banner_${safeRole}_${data.theme}_${data.template}${
-          scale === 2 ? "@2x" : ""
-        }.png`;
+        a.download = filename;
         a.href = blobUrl;
         a.click();
         URL.revokeObjectURL(blobUrl);
       }, "image/png");
     } catch (err) {
       console.error("Export PNG failed:", err);
-      alert("Failed to export image. Please try again.");
     } finally {
       setDownloading(null);
     }
   };
 
-  const exportToSvg = () => {
+  const downloadSvg = () => {
+    const safeRole = (data.jobTitle || "AI_Engineer").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const blob = new Blob([cleanSvgForExport], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `LinkedIn_Banner_${safeRole}_${data.theme}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copySvg = async () => {
     try {
-      const svgString = renderBannerSvg(data, { showSafeAreas: false });
-      const blob = new Blob([svgString], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const safeRole = data.jobTitle.replace(/[^a-zA-Z0-9_-]/g, "_");
-      a.download = `LinkedIn_Banner_${safeRole}_${data.theme}_${data.template}.svg`;
-      a.href = url;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export SVG failed:", err);
+      await navigator.clipboard.writeText(cleanSvgForExport);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
     }
   };
 
-  const copyImageToClipboard = async () => {
-    try {
-      const svgString = renderBannerSvg(data, { showSafeAreas: false });
-      const svgBlob = new Blob([svgString], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = reject;
-        img.src = url;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = LINKEDIN_BANNER_WIDTH;
-      canvas.height = LINKEDIN_BANNER_HEIGHT;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Could not create canvas 2D context");
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        try {
-          const item = new ClipboardItem({ "image/png": blob });
-          await navigator.clipboard.write([item]);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2500);
-        } catch {
-          alert("Direct clipboard image copying is not supported by your browser. Please use Download PNG.");
-        }
-      }, "image/png");
-    } catch (err) {
-      console.error("Copy to clipboard failed:", err);
-    }
-  };
-
-  const templateIcons: Record<BannerTemplateId, React.ReactNode> = {
-    terminal: <Terminal className="h-4 w-4" />,
-    split: <Columns className="h-4 w-4" />,
-    glow: <Sparkles className="h-4 w-4" />,
-    framed: <SquareDashed className="h-4 w-4" />,
-  };
+  // Filter suggestion skills to only those not yet added
+  const remainingSuggestions = useMemo(() => {
+    return SUGGESTED_SKILLS.filter((s) => !data.skills.includes(s)).slice(0, 8);
+  }, [data.skills]);
 
   return (
-    <div className="w-full space-y-8">
-      {/* ─── LIVE PREVIEW CANVAS ────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight">Banner Live Preview</h2>
-            <Badge variant="outline" className="text-xs font-mono">
-              1584 × 396 px (4:1)
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowSafeAreas(!showSafeAreas)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-card hover:bg-muted/50 transition-colors"
-            >
-              {showSafeAreas ? (
-                <>
-                  <EyeOff className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Hide Safe Area Overlay</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>Show Safe Area Overlay</span>
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-card hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Reset</span>
-            </button>
-          </div>
-        </div>
-
-        {/* The Live Banner Preview */}
-        <LinkedInBannerPreview
-          data={data}
-          showSafeAreas={showSafeAreas}
-          className="ring-1 ring-border shadow-md"
-        />
-
-        {/* Overlay Explainer Guide Note */}
-        {showSafeAreas && (
-          <div className="flex flex-wrap items-center justify-between text-xs text-muted-foreground bg-muted/40 p-3 rounded-lg border gap-2">
+    <div className="w-full space-y-6">
+      {/* ─── MAIN STUDIO WORKSPACE (TWO-COLUMN DESKTOP, STACKED MOBILE) ──── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* ─── LEFT: LIVE CANVAS STAGE (7 COLS) ─────────────────────────── */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
+          {/* Canvas Toolbar */}
+          <div className="flex items-center justify-between gap-3 px-1">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-full bg-red-500/30 border border-red-500" />
-              <span>
-                <strong>Desktop Avatar Zone:</strong> Profile photo covers the bottom-left corner. Content is positioned safely outside this zone.
+              <span className="text-xs font-mono font-medium text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-md border border-border/50">
+                1584 × 396 px · 4:1
               </span>
+              <button
+                type="button"
+                onClick={() => setShowSafeAreas((v) => !v)}
+                className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border transition-colors ${
+                  showSafeAreas
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                    : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+                }`}
+                title="Toggle LinkedIn avatar collision circle and mobile crop zone"
+              >
+                {showSafeAreas ? (
+                  <Eye className="h-3.5 w-3.5" />
+                ) : (
+                  <EyeOff className="h-3.5 w-3.5" />
+                )}
+                <span>Safe Zones {showSafeAreas ? "On" : "Off"}</span>
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 border border-dashed border-amber-500 bg-amber-500/10" />
-              <span>
-                <strong>Mobile Safe Zone (1260 × 316):</strong> Inner rectangle visible on narrow mobile screens.
-              </span>
+
+            <div className="flex items-center gap-1.5">
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdate(
+                    "theme",
+                    data.theme === "dark" ? "light" : "dark"
+                  )
+                }
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border border-border bg-card hover:bg-muted/60 transition-colors"
+                title="Toggle Light / Dark mode"
+              >
+                {data.theme === "dark" ? (
+                  <>
+                    <Moon className="h-3.5 w-3.5 text-zinc-400" />
+                    <span>Dark</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Light</span>
+                  </>
+                )}
+              </button>
+
+              {/* Reset Button */}
+              <button
+                type="button"
+                onClick={handleReset}
+                className="p-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                title="Reset to defaults"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* ─── EXPORT ACTION TOOLBAR ──────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border bg-card/60 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Layers className="h-5 w-5 text-primary" />
-          <div>
-            <h3 className="text-sm font-semibold">Ready to upload?</h3>
-            <p className="text-xs text-muted-foreground">
-              Official 1584×396px resolution, optimized for LinkedIn profiles.
-            </p>
+          {/* Canvas Box */}
+          <div className="relative w-full aspect-[4/1] rounded-xl overflow-hidden border border-border shadow-lg bg-zinc-950/80 flex items-center justify-center ring-1 ring-border/20">
+            <div
+              className="w-full h-full flex items-center justify-center select-none"
+              dangerouslySetInnerHTML={{ __html: previewSvg }}
+            />
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => exportToPng(1)}
-            disabled={downloading !== null}
-            className="gap-1.5"
-          >
-            <Download className="h-4 w-4" />
-            {downloading === "png-1x" ? "Exporting..." : "Download PNG"}
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => exportToPng(2)}
-            disabled={downloading !== null}
-            className="gap-1.5"
-            title="Double-resolution 3168×792px for ultra-sharp Retina screens"
-          >
-            <Download className="h-4 w-4" />
-            {downloading === "png-2x" ? "Exporting..." : "Retina 2x PNG"}
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={exportToSvg}
-            className="gap-1.5"
-          >
-            <Download className="h-4 w-4" />
-            SVG
-          </Button>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={copyImageToClipboard}
-            className="gap-1.5"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4 text-emerald-500" />
-                <span className="text-emerald-500 font-medium">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" />
-                <span>Copy Image</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* ─── CONTROLS & CUSTOMIZATION GRID ──────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Design & Layout Choice */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Template Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold">Design Layout Template</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {BANNER_TEMPLATES.map((tmpl) => {
-                const isSelected = data.template === tmpl.id;
+          {/* Quick Role Presets Bar */}
+          <div className="flex items-center gap-2 pt-1 flex-wrap">
+            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Presets:
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {QUICK_ROLE_PRESETS.map((preset) => {
+                const isActive = data.jobTitle === preset.title;
                 return (
                   <button
-                    key={tmpl.id}
+                    key={preset.title}
                     type="button"
-                    onClick={() => handleUpdate("template", tmpl.id)}
-                    className={`flex flex-col text-left p-3.5 rounded-xl border transition-all ${
-                      isSelected
-                        ? "border-foreground bg-primary/5 ring-1 ring-foreground"
-                        : "border-border bg-card hover:border-foreground/50"
+                    onClick={() => handleApplyPreset(preset)}
+                    className={`text-xs px-2.5 py-1 rounded-md border transition-all ${
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary font-semibold shadow-xs"
+                        : "bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground"
                     }`}
                   >
-                    <div className="flex items-center justify-between w-full mb-1">
-                      <div className="flex items-center gap-2 font-semibold text-sm">
-                        {templateIcons[tmpl.id]}
-                        <span>{tmpl.name}</span>
-                      </div>
-                      <Badge variant={isSelected ? "default" : "outline"} className="text-[10px] px-1.5 py-0">
-                        {tmpl.tag}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                      {tmpl.description}
-                    </p>
+                    {preset.title}
                   </button>
                 );
               })}
             </div>
           </div>
-
-          {/* Theme Mode Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold">Color Mode</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleUpdate("theme", "dark")}
-                className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
-                  data.theme === "dark"
-                    ? "border-foreground bg-zinc-900 text-zinc-100 ring-1 ring-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Moon className="h-4 w-4" />
-                <span>Dark Mode</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleUpdate("theme", "light")}
-                className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
-                  data.theme === "light"
-                    ? "border-foreground bg-zinc-100 text-zinc-900 ring-1 ring-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Sun className="h-4 w-4" />
-                <span>Light Mode</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Status Badge Toggle */}
-          <div className="p-4 rounded-xl border bg-card space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-semibold">Status Indicator Badge</Label>
-                <p className="text-xs text-muted-foreground">
-                  Displays a green indicator dot with your current status.
-                </p>
-              </div>
-              <Switch
-                checked={data.showStatus}
-                onCheckedChange={(checked) => handleUpdate("showStatus", checked)}
-              />
-            </div>
-
-            {data.showStatus && (
-              <Input
-                value={data.statusText || ""}
-                onChange={(e) => handleUpdate("statusText", e.target.value)}
-                placeholder="e.g. Available for select roles"
-                className="text-xs"
-              />
-            )}
-          </div>
         </div>
 
-        {/* Right Column: Content & Typography Customization */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Job Title Setting */}
-          <div className="space-y-2.5">
+        {/* ─── RIGHT: CONTROLS & INSPECTOR (5 COLS) ───────────────────────── */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5 space-y-5 shadow-xs">
+          {/* Section 1: Headline Role */}
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="jobTitle" className="text-sm font-semibold">
-                Job Title / Primary Role <span className="text-red-500">*</span>
+              <Label htmlFor="banner-job-title" className="text-xs font-semibold">
+                Job Title / Headline
               </Label>
-              <span className="text-xs text-muted-foreground">
-                Headline centered safely
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {data.jobTitle.length} chars
               </span>
             </div>
-
-            <Input
-              id="jobTitle"
-              value={data.jobTitle}
-              onChange={(e) => handleUpdate("jobTitle", e.target.value)}
-              placeholder="e.g. Senior Full-Stack Engineer"
-              className="text-base font-semibold"
-            />
-
-            {/* Quick Job Title Presets */}
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="text-xs text-muted-foreground self-center mr-1">Presets:</span>
-              {PRESET_JOB_TITLES.slice(0, 5).map((preset) => (
+            <div className="relative">
+              <Input
+                id="banner-job-title"
+                value={data.jobTitle}
+                onChange={(e) => handleUpdate("jobTitle", e.target.value)}
+                placeholder="e.g. AI Engineer"
+                className="font-mono text-sm pr-8 bg-background/80"
+              />
+              {data.jobTitle && (
                 <button
-                  key={preset}
                   type="button"
-                  onClick={() => handleUpdate("jobTitle", preset)}
-                  className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
-                    data.jobTitle === preset
-                      ? "bg-foreground text-background border-foreground font-medium"
-                      : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
-                  }`}
+                  onClick={() => handleUpdate("jobTitle", "")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {preset}
+                  <X className="h-3.5 w-3.5" />
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Full Name & Tagline */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="fullName" className="text-sm font-semibold">
-                Full Name
-              </Label>
-              <Input
-                id="fullName"
-                value={data.name}
-                onChange={(e) => handleUpdate("name", e.target.value)}
-                placeholder="e.g. Alex Rivera"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="contactUrl" className="text-sm font-semibold">
-                Portfolio / GitHub Link
-              </Label>
-              <Input
-                id="contactUrl"
-                value={data.contactUrl || ""}
-                onChange={(e) => handleUpdate("contactUrl", e.target.value)}
-                placeholder="e.g. alexrivera.dev"
-              />
-            </div>
-          </div>
-
-          {/* Tagline */}
-          <div className="space-y-1.5">
-            <Label htmlFor="tagline" className="text-sm font-semibold">
-              Tagline / Value Proposition
-            </Label>
-            <Input
-              id="tagline"
-              value={data.tagline}
-              onChange={(e) => handleUpdate("tagline", e.target.value)}
-              placeholder="e.g. Building resilient distributed systems & modern web architectures."
-            />
-          </div>
-
-          {/* Tech Stack & Skills */}
+          {/* Section 2: Skills Pills */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">
-                Core Technologies & Skills ({data.skills.length}/8)
-              </Label>
-              <span className="text-xs text-muted-foreground">
-                Displayed as technical badge pills
+              <Label className="text-xs font-semibold">Skills & Tags</Label>
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {data.skills.length}/8
               </span>
             </div>
 
-            {/* Current Active Skills Chips */}
-            <div className="flex flex-wrap gap-1.5 min-h-10 p-2.5 rounded-lg border bg-muted/20">
-              {data.skills.map((skill) => (
-                <Badge
-                  key={skill}
-                  variant="secondary"
-                  className="gap-1 pl-2.5 pr-1.5 py-1 font-mono text-xs"
-                >
-                  <span>{skill}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill)}
-                    className="hover:bg-muted rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                    title={`Remove ${skill}`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-
-              {data.skills.length === 0 && (
-                <span className="text-xs text-muted-foreground self-center italic">
-                  No skills selected. Add some below.
+            {/* Current Active Skills */}
+            <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg bg-background/60 border border-border/80">
+              {data.skills.length === 0 ? (
+                <span className="text-xs text-muted-foreground/60 italic py-0.5">
+                  No skill tags (Title-only view)
                 </span>
+              ) : (
+                data.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono bg-secondary text-secondary-foreground border border-border/60"
+                  >
+                    <span>{skill}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="hover:text-destructive transition-colors ml-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))
               )}
             </div>
 
-            {/* Add Custom Skill */}
-            <div className="flex gap-2">
+            {/* Add Skill Input */}
+            <div className="flex gap-1.5">
               <Input
                 value={newSkillInput}
                 onChange={(e) => setNewSkillInput(e.target.value)}
@@ -570,45 +374,150 @@ export function LinkedInBannerGenerator({
                     handleAddSkill(newSkillInput);
                   }
                 }}
-                placeholder="Add custom skill (e.g. Rust, GraphQL)..."
-                className="text-xs"
+                placeholder="Add skill (e.g. PyTorch)..."
+                className="text-xs font-mono bg-background/80 h-8"
               />
               <Button
                 type="button"
-                variant="outline"
                 size="sm"
+                variant="outline"
+                className="h-8 px-2.5 text-xs"
                 onClick={() => handleAddSkill(newSkillInput)}
-                disabled={!newSkillInput.trim()}
+                disabled={!newSkillInput.trim() || data.skills.length >= 8}
               >
                 <Plus className="h-3.5 w-3.5 mr-1" />
                 Add
               </Button>
             </div>
 
-            {/* Suggested Skills Quick-Add */}
-            <div className="space-y-1 pt-1">
-              <span className="text-xs text-muted-foreground">Quick-add suggestions:</span>
-              <div className="flex flex-wrap gap-1">
-                {SUGGESTED_SKILLS.map((skill) => {
-                  const isAdded = data.skills.includes(skill);
-                  return (
+            {/* Quick Suggestions Chips */}
+            {remainingSuggestions.length > 0 && data.skills.length < 8 && (
+              <div className="pt-1">
+                <span className="text-[11px] text-muted-foreground block mb-1.5">
+                  Suggestions:
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {remainingSuggestions.map((suggestion) => (
                     <button
-                      key={skill}
+                      key={suggestion}
                       type="button"
-                      disabled={isAdded}
-                      onClick={() => handleAddSkill(skill)}
-                      className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
-                        isAdded
-                          ? "opacity-40 cursor-default bg-muted/20 text-muted-foreground border-transparent"
-                          : "bg-background hover:bg-muted border-border text-foreground"
-                      }`}
+                      onClick={() => handleAddSkill(suggestion)}
+                      className="text-[11px] font-mono px-2 py-0.5 rounded border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                     >
-                      {isAdded ? `✓ ${skill}` : `+ ${skill}`}
+                      + {suggestion}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
+            )}
+          </div>
+
+          {/* Section 3: Style Variant */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold">Terminal Style</Label>
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-muted/40 border border-border/60 rounded-lg">
+              <button
+                type="button"
+                onClick={() => handleUpdate("template", "terminal")}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
+                  data.template === "terminal"
+                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Signature prompt (> Title█)"
+              >
+                <Terminal className="h-3 w-3" />
+                <span>Prompt</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdate("template", "terminal-clean" as BannerTemplateId)
+                }
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
+                  data.template === "terminal-clean"
+                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Minimal title (Title█)"
+              >
+                <Type className="h-3 w-3" />
+                <span>Clean</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdate("template", "title-only" as BannerTemplateId)
+                }
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-mono transition-all ${
+                  data.template === "title-only"
+                    ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Centered title only, no skill pills"
+              >
+                <span>Title Only</span>
+              </button>
             </div>
+          </div>
+
+          {/* Section 4: Export Buttons */}
+          <div className="space-y-2 pt-2 border-t border-border">
+            <Button
+              type="button"
+              className="w-full font-semibold shadow-xs h-9"
+              onClick={() => downloadPng(1)}
+              disabled={downloading !== null}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {downloading === "png"
+                ? "Rendering PNG..."
+                : "Download Banner PNG (1584×396)"}
+            </Button>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs font-mono"
+                onClick={() => downloadPng(2)}
+                disabled={downloading !== null}
+              >
+                {downloading === "retina" ? "Rendering..." : "Retina 2x (3168×792)"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs font-mono"
+                onClick={downloadSvg}
+              >
+                <FileCode className="h-3.5 w-3.5 mr-1" />
+                Vector SVG
+              </Button>
+            </div>
+
+            <button
+              type="button"
+              onClick={copySvg}
+              className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 inline-flex items-center justify-center gap-1.5"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 text-emerald-500" />
+                  <span className="text-emerald-500 font-medium">SVG Copied to Clipboard</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3" />
+                  <span>Copy SVG code</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

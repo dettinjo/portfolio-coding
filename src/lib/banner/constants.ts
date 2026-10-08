@@ -35,40 +35,76 @@ export const LINKEDIN_SAFE_AREAS = {
 export const BANNER_TEMPLATES: BannerTemplateMeta[] = [
   {
     id: "terminal",
-    name: "Terminal Minimalist",
-    description: "Signature portfolio command-line aesthetic with monospace prompt, cursor, and code pill tokens.",
+    name: "Terminal Prompt",
+    description: "Signature CLI prompt (> Title█) with skill pills",
     tag: "Signature",
   },
   {
-    id: "split",
-    name: "Architectural Split",
-    description: "Executive modern dual-zone layout honoring the avatar safe zone with a sleek vertical rule.",
-    tag: "Modernist",
+    id: "terminal-clean",
+    name: "Clean Minimal",
+    description: "Title with terminal block cursor (Title█) without prompt symbol",
+    tag: "Clean",
   },
   {
-    id: "glow",
-    name: "Ambient Tech Glow",
-    description: "Contemporary neo-tech aesthetic with subtle ambient radial illumination and high-contrast typography.",
-    tag: "Neo-Tech",
-  },
-  {
-    id: "framed",
-    name: "Framed Card",
-    description: "Framed showcase container matching the portfolio's ResumeCard and CoverLetterCard styling.",
-    tag: "Showcase",
+    id: "title-only",
+    name: "Title Only",
+    description: "Centered headline with cursor, focusing purely on your role",
+    tag: "Focused",
   },
 ];
 
-export const PRESET_JOB_TITLES: string[] = [
-  "AI Engineer",
-  "Full-Stack Engineer",
-  "Senior Full-Stack Engineer",
-  "Lead Software Architect",
-  "Staff Software Engineer",
-  "Cloud & DevOps Engineer",
-  "Backend & Distributed Systems Engineer",
-  "Frontend Architect & Design Technologist",
+export interface RolePreset {
+  title: string;
+  skills: string[];
+}
+
+export const QUICK_ROLE_PRESETS: RolePreset[] = [
+  {
+    title: "AI Engineer",
+    skills: [
+      "Python",
+      "PyTorch",
+      "LLMs & RAG",
+      "LangChain",
+      "Vector DBs",
+      "Docker",
+      "FastAPI",
+    ],
+  },
+  {
+    title: "Full-Stack Engineer",
+    skills: ["TypeScript", "Next.js", "React", "Node.js", "Docker", "PostgreSQL"],
+  },
+  {
+    title: "Cloud & DevOps Engineer",
+    skills: ["Kubernetes", "Docker", "AWS", "Terraform", "CI/CD", "Go", "Python"],
+  },
+  {
+    title: "Software Architect",
+    skills: [
+      "TypeScript",
+      "Go",
+      "Kubernetes",
+      "AWS",
+      "PostgreSQL",
+      "Kafka",
+      "Distributed Systems",
+    ],
+  },
+  {
+    title: "Frontend Architect",
+    skills: [
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Tailwind CSS",
+      "Design Systems",
+      "Web Performance",
+    ],
+  },
 ];
+
+export const PRESET_JOB_TITLES: string[] = QUICK_ROLE_PRESETS.map((p) => p.title);
 
 export const SUGGESTED_SKILLS: string[] = [
   "Python",
@@ -76,12 +112,12 @@ export const SUGGESTED_SKILLS: string[] = [
   "LLMs & RAG",
   "LangChain",
   "Vector DBs",
+  "Docker",
   "FastAPI",
   "TypeScript",
   "Next.js",
   "React",
   "Node.js",
-  "Docker",
   "PostgreSQL",
   "Kubernetes",
   "AWS",
@@ -90,13 +126,18 @@ export const SUGGESTED_SKILLS: string[] = [
 ];
 
 export const DEFAULT_BANNER_DATA: BannerData = {
-  jobTitle: "Senior Full-Stack Engineer",
-  name: "Alex Rivera",
-  tagline: "Building resilient distributed systems, modern web architectures & high-performance APIs.",
-  skills: ["TypeScript", "Next.js", "React", "Node.js", "Docker", "PostgreSQL"],
-  contactUrl: "alexrivera.dev",
-  statusText: "Available for select roles",
-  showStatus: true,
+  jobTitle: "AI Engineer",
+  name: "",
+  tagline: "",
+  skills: [
+    "Python",
+    "PyTorch",
+    "LLMs & RAG",
+    "LangChain",
+    "Vector DBs",
+    "Docker",
+    "FastAPI",
+  ],
   theme: "dark",
   template: "terminal",
 };
