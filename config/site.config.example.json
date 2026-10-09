@@ -16,7 +16,7 @@
     },
     "avatarBlurDataUrl": "",
     "bioRotationInterval": 4500,
-    "bioDesignVariant": "terminal",
+    "bioMode": "role",
     "bioRotations": {
       "en": [
         {

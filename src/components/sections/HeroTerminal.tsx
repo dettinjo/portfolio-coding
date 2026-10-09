@@ -4,9 +4,17 @@ import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+export interface HeroTerminalItem {
+  role: string;
+  description?: string;
+  fullText?: string;
+}
+
 interface HeroTerminalProps {
   name: string;
-  roles: string[];
+  items?: HeroTerminalItem[];
+  roles?: string[];
+  mode?: "role" | "full" | "inline";
   interval?: number;
   className?: string;
 }
@@ -52,10 +60,17 @@ function formatLastLogin(date: Date, device: string): string {
 
 export function HeroTerminal({
   name,
+  items,
   roles,
+  mode = "role",
   interval = 3200,
   className,
 }: HeroTerminalProps) {
+  const normalizedItems: HeroTerminalItem[] =
+    items && items.length > 0
+      ? items
+      : (roles || ["Software Engineer"]).map((r) => ({ role: r, fullText: r }));
+
   const shouldReduceMotion = useReducedMotion();
   const [isPaused, setIsPaused] = useState(false);
   const [lastLogin, setLastLogin] = useState<string>("");
@@ -73,7 +88,9 @@ export function HeroTerminal({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [typedRoleChars, setTypedRoleChars] = useState(0);
 
-  const currentRole = roles[currentIndex] || roles[0] || "";
+  const currentItem = normalizedItems[currentIndex] || normalizedItems[0] || { role: "" };
+  const currentRole = mode === "inline" ? (currentItem.fullText || currentItem.role) : currentItem.role;
+  const currentDescription = mode === "full" ? currentItem.description : undefined;
 
   // Set visitor login timestamp upon mount with detected device (avoids SSR mismatch)
   useEffect(() => {
@@ -125,27 +142,27 @@ export function HeroTerminal({
   // 4. Holding Job Title with blinking cursor
   useEffect(() => {
     if (phase !== "holding") return;
-    if (isPaused || roles.length <= 1) return;
+    if (isPaused || normalizedItems.length <= 1) return;
 
     const holdTimer = setTimeout(() => {
       setPhase("moving-up");
     }, interval);
 
     return () => clearTimeout(holdTimer);
-  }, [phase, isPaused, roles.length, interval]);
+  }, [phase, isPaused, normalizedItems.length, interval]);
 
   // 5. Upward exit ("move up away") -> next role starts
   useEffect(() => {
     if (phase !== "moving-up") return;
 
     const timer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % roles.length);
+      setCurrentIndex((prev) => (prev + 1) % normalizedItems.length);
       setTypedRoleChars(0);
       setPhase("typing-role");
     }, EXIT_DURATION);
 
     return () => clearTimeout(timer);
-  }, [phase, roles.length]);
+  }, [phase, normalizedItems.length]);
 
   // Cursor component helper
   const renderCursor = (size: "lg" | "md", isBlinking = false) => {
@@ -182,7 +199,13 @@ export function HeroTerminal({
 
   return (
     <div
-      className={cn("w-full select-text text-left font-mono min-h-[140px] sm:min-h-[170px] lg:min-h-[190px]", className)}
+      className={cn(
+        "w-full select-text text-left font-mono",
+        mode === "full"
+          ? "min-h-[170px] sm:min-h-[210px] lg:min-h-[230px]"
+          : "min-h-[140px] sm:min-h-[170px] lg:min-h-[190px]",
+        className
+      )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -248,6 +271,42 @@ export function HeroTerminal({
               )}
             </div>
           </div>
+
+          {/* Line 3: Optional description subline when mode === "full" and currentDescription is present */}
+          {mode === "full" && currentDescription && (
+            <div className="mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg font-mono text-muted-foreground/80 flex items-start select-text min-h-[1.75rem]">
+              <span className="text-emerald-400/70 dark:text-emerald-400/70 font-bold mr-2 sm:mr-3 select-none">
+                ↳
+              </span>
+              <div className="relative inline-flex items-baseline overflow-hidden">
+                {phase === "moving-up" ? (
+                  <motion.span
+                    key={`desc-exit-${currentIndex}`}
+                    initial={{ y: 0, opacity: 1 }}
+                    animate={{ y: -24, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                    className="inline-block text-muted-foreground"
+                  >
+                    {currentDescription}
+                  </motion.span>
+                ) : phase === "holding" ? (
+                  <motion.span
+                    key={`desc-${currentIndex}`}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="inline-block text-muted-foreground"
+                  >
+                    {currentDescription}
+                  </motion.span>
+                ) : (
+                  <span className="opacity-0 select-none" aria-hidden="true">
+                    {currentDescription}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
     </div>

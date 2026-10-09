@@ -179,7 +179,7 @@ export function getHeroBioItems(
     }
     const adjectives = item.adjectives?.join(", ") || "";
     const artifacts = item.artifacts || "";
-    const desc = adjectives ? `${adjectives} ${artifacts}`.trim() : artifacts;
+    const desc = (adjectives ? `${adjectives} ${artifacts}`.trim() : artifacts) || item.sentence || "";
     const fullText = item.sentence || (desc ? `${item.role} — ${desc}` : item.role);
 
     return {

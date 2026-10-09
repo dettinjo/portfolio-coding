@@ -17,7 +17,7 @@ import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, getHeroBioItems } from "@/lib/config";
 import { HeroTerminal } from "./HeroTerminal";
 
 const entranceTransition: Transition = {
@@ -30,16 +30,8 @@ export function HeroSection() {
   const locale = useLocale();
   const displayName = siteConfig.person.fullName || siteConfig.person.firstName || "Alex Rivera";
 
-  const roles = useMemo(() => {
-    const bioRotations =
-      siteConfig.person.bioRotations?.[locale] ||
-      siteConfig.person.bioRotations?.["en"] ||
-      [];
-    if (bioRotations.length > 0) {
-      return bioRotations.map((item) => (typeof item === "string" ? item : item.role));
-    }
-    return [siteConfig.person.headline || "Software Engineer"];
-  }, [locale]);
+  const bioMode = siteConfig.person.bioMode ?? "role";
+  const bioItems = useMemo(() => getHeroBioItems(siteConfig, locale), [locale]);
 
   // Generated at build time from the config repo's profile image (or the
   // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
@@ -75,7 +67,8 @@ export function HeroSection() {
         >
           <HeroTerminal
             name={displayName}
-            roles={roles}
+            items={bioItems}
+            mode={bioMode}
             interval={siteConfig.person.bioRotationInterval ?? 3200}
           />
 
