@@ -118,6 +118,7 @@ const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
       bioRotations: (person.bioRotations as Record<string, BioRotationItem[]>) ?? DEFAULT_BIO_ROTATIONS,
       bioRotationInterval: person.bioRotationInterval ?? 4500,
       bioDesignVariant: person.bioDesignVariant ?? "terminal",
+      bioMode: person.bioMode ?? "role",
     },
     site: {
       serverUrl: site.serverUrl ?? "http://localhost:3000",
@@ -148,3 +149,43 @@ const normalize = (raw: DeepPartial<SiteConfig>): SiteConfig => {
 };
 
 export const siteConfig: SiteConfig = normalize(rawConfig as DeepPartial<SiteConfig>);
+
+export interface ResolvedHeroBioItem {
+  role: string;
+  description: string;
+  fullText: string;
+}
+
+/**
+ * Resolves bio items according to locale, generating clean role, description, and fullText.
+ */
+export function getHeroBioItems(
+  config: SiteConfig = siteConfig,
+  locale: string = "en"
+): ResolvedHeroBioItem[] {
+  const bioRotations =
+    config.person.bioRotations?.[locale] ||
+    config.person.bioRotations?.["en"] ||
+    [];
+
+  if (bioRotations.length === 0) {
+    const headline = config.person.headline || "Software Engineer";
+    return [{ role: headline, description: "", fullText: headline }];
+  }
+
+  return bioRotations.map((item) => {
+    if (typeof item === "string") {
+      return { role: item, description: "", fullText: item };
+    }
+    const adjectives = item.adjectives?.join(", ") || "";
+    const artifacts = item.artifacts || "";
+    const desc = adjectives ? `${adjectives} ${artifacts}`.trim() : artifacts;
+    const fullText = item.sentence || (desc ? `${item.role} — ${desc}` : item.role);
+
+    return {
+      role: item.role,
+      description: desc,
+      fullText,
+    };
+  });
+}

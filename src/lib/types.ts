@@ -28,6 +28,7 @@ export interface SiteConfig {
     bioRotations?: Record<string, BioRotationItem[]>;
     bioRotationInterval?: number;
     bioDesignVariant?: BioDesignVariant;
+    bioMode?: BioMode;
   };
   site: {
     serverUrl: string;
@@ -97,6 +98,7 @@ export interface SoftwareProject {
 }
 
 export type BioDesignVariant = "terminal" | "inline" | "carousel" | "git";
+export type BioMode = "role" | "full" | "inline";
 
 export interface BioRotationItem {
   role: string;
