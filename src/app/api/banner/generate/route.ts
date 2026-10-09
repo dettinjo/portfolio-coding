@@ -80,7 +80,10 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
 
   const tagStyleParam = body?.tagStyle || searchParams.get("tagStyle");
   const tagStyle =
-    tagStyleParam === "bracket" || tagStyleParam === "inline"
+    tagStyleParam === "bracket" ||
+    tagStyleParam === "inline" ||
+    tagStyleParam === "pipe" ||
+    tagStyleParam === "kv"
       ? tagStyleParam
       : "block";
 
@@ -89,6 +92,13 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     promptParam === "$" || promptParam === "❯" || promptParam === "none"
       ? promptParam
       : ">";
+
+  const showCursor =
+    body?.showCursor !== undefined
+      ? body.showCursor
+      : searchParams.get("showCursor") !== null
+      ? searchParams.get("showCursor") === "true"
+      : true;
 
   const showName =
     body?.showName !== undefined
@@ -121,23 +131,52 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       ? "corner"
       : "below";
 
+  const linkStyleParam = body?.linkStyle || searchParams.get("linkStyle");
+  const linkStyle =
+    linkStyleParam === "curl" ||
+    linkStyleParam === "kv" ||
+    linkStyleParam === "plain"
+      ? linkStyleParam
+      : "arrow";
+
+  const taglineStyle =
+    (body?.taglineStyle || searchParams.get("taglineStyle")) === "comment"
+      ? "comment"
+      : "plain";
+
+  const statusIconParam = body?.statusIcon || searchParams.get("statusIcon");
+  const statusIcon =
+    statusIconParam === "dot-amber" ||
+    statusIconParam === "dot-blue" ||
+    statusIconParam === "sparkle" ||
+    statusIconParam === "bolt" ||
+    statusIconParam === "chevron" ||
+    statusIconParam === "ring" ||
+    statusIconParam === "none"
+      ? statusIconParam
+      : "dot-green";
+
   return {
     jobTitle,
     showJobTitle,
+    promptSymbol,
+    showCursor,
     name,
     showName,
     nameStyle,
     tagline,
     showTagline,
+    taglineStyle,
     skills,
     showSkills,
     tagStyle,
-    promptSymbol,
     contactUrl,
     showContact,
     linkPosition,
+    linkStyle,
     statusText,
     showStatus,
+    statusIcon,
     theme,
     template,
   };

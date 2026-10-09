@@ -3,13 +3,15 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   BannerData,
-  TerminalTagStyle,
   TerminalPrompt,
 } from "@/types/banner";
 import {
   DEFAULT_BANNER_DATA,
   QUICK_ROLE_PRESETS,
   SUGGESTED_SKILLS,
+  STATUS_ICON_OPTIONS,
+  LINK_STYLE_OPTIONS,
+  TAG_STYLE_OPTIONS,
 } from "@/lib/banner/constants";
 import { renderBannerSvg } from "@/lib/banner/svg-renderer";
 import { siteConfig } from "@/lib/config";
@@ -146,10 +148,12 @@ export function LinkedInBannerGenerator({
         jobTitle: data.jobTitle || "",
         showJobTitle: String(Boolean(data.showJobTitle)),
         promptSymbol: data.promptSymbol || ">",
+        showCursor: String(data.showCursor !== false),
 
         contactUrl: data.contactUrl || "",
         showContact: String(Boolean(data.showContact)),
         linkPosition: data.linkPosition || "below",
+        linkStyle: data.linkStyle || "arrow",
 
         skills: data.skills.join(","),
         showSkills: String(Boolean(data.showSkills)),
@@ -157,9 +161,11 @@ export function LinkedInBannerGenerator({
 
         showTagline: String(Boolean(data.showTagline)),
         tagline: data.tagline || "",
+        taglineStyle: data.taglineStyle || "plain",
 
         showStatus: String(Boolean(data.showStatus)),
         statusText: data.statusText || "",
+        statusIcon: data.statusIcon || "dot-green",
 
         theme: data.theme,
         template: data.template,
@@ -504,6 +510,21 @@ export function LinkedInBannerGenerator({
                         </button>
                       );
                     })}
+                    <span className="text-border/60 text-xs select-none">|</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleUpdate("showCursor", data.showCursor === false)
+                      }
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all ${
+                        data.showCursor !== false
+                          ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                          : "border-border/60 text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={data.showCursor !== false ? "Remove cursor █" : "Enable cursor █"}
+                    >
+                      █
+                    </button>
                   </div>
                 )}
               </div>
@@ -566,7 +587,7 @@ export function LinkedInBannerGenerator({
                           ? "bg-primary text-primary-foreground border-primary font-bold"
                           : "text-muted-foreground border-border/60 hover:text-foreground"
                       }`}
-                      title="Place link in bottom-right corner"
+                      title="Place link in bottom-right corner (inside safe zone)"
                     >
                       Corner
                     </button>
@@ -575,22 +596,48 @@ export function LinkedInBannerGenerator({
               </div>
 
               {Boolean(data.showContact) && (
-                <div className="relative pt-0.5">
-                  <Input
-                    value={data.contactUrl || ""}
-                    onChange={(e) => handleUpdate("contactUrl", e.target.value)}
-                    placeholder="e.g. joeldettinger.com"
-                    className="font-mono text-xs pr-7 bg-background h-7"
-                  />
-                  {data.contactUrl && (
-                    <button
-                      type="button"
-                      onClick={() => handleUpdate("contactUrl", "")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
+                <div className="space-y-1 pt-0.5">
+                  <div className="relative">
+                    <Input
+                      value={data.contactUrl || ""}
+                      onChange={(e) => handleUpdate("contactUrl", e.target.value)}
+                      placeholder="e.g. joeldettinger.com"
+                      className="font-mono text-xs pr-7 bg-background h-7"
+                    />
+                    {data.contactUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleUpdate("contactUrl", "")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  {/* Link format selector */}
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground font-mono">Format:</span>
+                    <div className="flex items-center gap-1">
+                      {LINK_STYLE_OPTIONS.map((ls) => {
+                        const isSel = (data.linkStyle || "arrow") === ls.id;
+                        return (
+                          <button
+                            key={ls.id}
+                            type="button"
+                            onClick={() => handleUpdate("linkStyle", ls.id)}
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                              isSel
+                                ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                                : "text-muted-foreground border-border/60 hover:text-foreground"
+                            }`}
+                            title={`Format as: ${ls.format}`}
+                          >
+                            {ls.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -612,26 +659,21 @@ export function LinkedInBannerGenerator({
                 </label>
                 {data.showSkills !== false && (
                   <div className="flex items-center gap-1">
-                    {(
-                      [
-                        { id: "block", label: "Blocks" },
-                        { id: "bracket", label: "[ ]" },
-                        { id: "inline", label: "· Inline" },
-                      ] as const
-                    ).map((ts) => {
+                    {TAG_STYLE_OPTIONS.map((ts) => {
                       const isSel = (data.tagStyle || "block") === ts.id;
                       return (
                         <button
                           key={ts.id}
                           type="button"
                           onClick={() =>
-                            handleUpdate("tagStyle", ts.id as TerminalTagStyle)
+                            handleUpdate("tagStyle", ts.id)
                           }
                           className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
                             isSel
-                              ? "bg-primary text-primary-foreground border-primary font-bold"
+                              ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
                               : "text-muted-foreground border-border/60 hover:text-foreground"
                           }`}
+                          title={`Example: ${ts.example}`}
                         >
                           {ts.label}
                         </button>
@@ -735,7 +777,7 @@ export function LinkedInBannerGenerator({
                 <span>Extra Terminal Annotations</span>
               </span>
 
-              {/* Tagline Comment */}
+              {/* Tagline */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-foreground">
@@ -748,8 +790,34 @@ export function LinkedInBannerGenerator({
                       className="rounded border-border h-3 w-3 text-primary"
                     />
                     <Hash className="h-3 w-3 text-muted-foreground" />
-                    <span>Tagline (# comment)</span>
+                    <span>Tagline</span>
                   </label>
+                  {Boolean(data.showTagline) && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleUpdate("taglineStyle", "plain")}
+                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                          (data.taglineStyle || "plain") === "plain"
+                            ? "bg-primary text-primary-foreground border-primary font-bold"
+                            : "text-muted-foreground border-border/60 hover:text-foreground"
+                        }`}
+                      >
+                        Plain
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdate("taglineStyle", "comment")}
+                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                          data.taglineStyle === "comment"
+                            ? "bg-primary text-primary-foreground border-primary font-bold"
+                            : "text-muted-foreground border-border/60 hover:text-foreground"
+                        }`}
+                      >
+                        # Comment
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {Boolean(data.showTagline) && (
                   <Input
@@ -762,7 +830,7 @@ export function LinkedInBannerGenerator({
               </div>
 
               {/* Status Indicator */}
-              <div className="space-y-1 pt-1">
+              <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-foreground">
                     <input
@@ -774,16 +842,41 @@ export function LinkedInBannerGenerator({
                       className="rounded border-border h-3 w-3 text-primary"
                     />
                     <Activity className="h-3 w-3 text-emerald-500" />
-                    <span>Statusline (● availability)</span>
+                    <span>Statusline</span>
                   </label>
                 </div>
                 {Boolean(data.showStatus) && (
-                  <Input
-                    value={data.statusText || ""}
-                    onChange={(e) => handleUpdate("statusText", e.target.value)}
-                    placeholder="e.g. open to work"
-                    className="font-mono text-[11px] bg-background h-7"
-                  />
+                  <div className="space-y-1.5">
+                    {/* Selectable Status Icons */}
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="text-[10px] text-muted-foreground font-mono mr-1">Icon:</span>
+                      {STATUS_ICON_OPTIONS.map((ico) => {
+                        const isSel = (data.statusIcon || "dot-green") === ico.id;
+                        return (
+                          <button
+                            key={ico.id}
+                            type="button"
+                            onClick={() => handleUpdate("statusIcon", ico.id)}
+                            className={`inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                              isSel
+                                ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                                : "text-muted-foreground border-border/60 hover:text-foreground hover:bg-muted/40"
+                            }`}
+                            title={ico.label}
+                          >
+                            <span style={{ color: isSel ? undefined : ico.color }}>{ico.glyph}</span>
+                            <span>{ico.label.replace(" Dot", "")}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Input
+                      value={data.statusText || ""}
+                      onChange={(e) => handleUpdate("statusText", e.target.value)}
+                      placeholder="e.g. open to work"
+                      className="font-mono text-[11px] bg-background h-7"
+                    />
+                  </div>
                 )}
               </div>
             </div>

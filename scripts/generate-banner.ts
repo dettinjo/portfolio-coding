@@ -26,7 +26,10 @@ interface BannerCliConfig {
   link?: string;
   skills?: string[];
   theme: "dark" | "light" | "both";
-  tagStyle?: "block" | "bracket" | "inline";
+  tagStyle?: "block" | "bracket" | "inline" | "pipe" | "kv";
+  linkStyle?: "arrow" | "curl" | "kv" | "plain";
+  showCursor: boolean;
+  statusText?: string;
   outDir: string;
   withGuides: boolean;
 }
@@ -80,9 +83,21 @@ function parseArgs(): BannerCliConfig {
 
   const tagStyleRaw = (options["tag-style"] || options.style || "block").toLowerCase();
   const tagStyle =
-    tagStyleRaw === "bracket" || tagStyleRaw === "inline"
+    tagStyleRaw === "bracket" ||
+    tagStyleRaw === "inline" ||
+    tagStyleRaw === "pipe" ||
+    tagStyleRaw === "kv"
       ? tagStyleRaw
       : "block";
+
+  const linkStyleRaw = (options["link-style"] || options["link-format"] || "arrow").toLowerCase();
+  const linkStyle =
+    linkStyleRaw === "curl" || linkStyleRaw === "kv" || linkStyleRaw === "plain"
+      ? linkStyleRaw
+      : "arrow";
+
+  const showCursor = !flags.has("no-cursor");
+  const statusText = options.status || options["status-text"];
 
   const outDir = path.resolve(
     process.cwd(),
@@ -96,6 +111,9 @@ function parseArgs(): BannerCliConfig {
     skills,
     theme,
     tagStyle,
+    linkStyle,
+    showCursor,
+    statusText,
     outDir,
     withGuides: flags.has("guides") || flags.has("safe-guides"),
   };
@@ -153,13 +171,17 @@ async function main() {
       const bannerData: BannerData = {
         jobTitle: config.role,
         showJobTitle: true,
+        showCursor: config.showCursor,
         name: config.name || "",
         showName: Boolean(config.name),
         nameStyle: "path",
         contactUrl: config.link || "",
         showContact: Boolean(config.link),
         linkPosition: "below",
+        linkStyle: config.linkStyle,
         tagline: "",
+        statusText: config.statusText || "",
+        showStatus: Boolean(config.statusText),
         skills: variant.includeSkills ? config.skills || [] : [],
         showSkills: variant.includeSkills,
         tagStyle: config.tagStyle,

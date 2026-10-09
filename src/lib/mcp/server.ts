@@ -989,9 +989,13 @@ Instructions:
         .default("terminal")
         .describe("Layout design idea: 'terminal' (CLI prompt), 'terminal-clean' (clean minimal), or 'title-only'"),
       tagStyle: z
-        .enum(["block", "bracket", "inline"])
+        .enum(["block", "bracket", "inline", "pipe", "kv"])
         .default("block")
-        .describe("Terminal skill tag style: 'block' (rectangular terminal chips), 'bracket' ([ brackets ]), or 'inline' ($ stack: tag · tag)"),
+        .describe("Terminal skill tag style: 'block' (chips), 'bracket' ([ ]), 'inline' (·), 'pipe' (|), or 'kv' (stack: ...)"),
+      showCursor: z
+        .boolean()
+        .default(true)
+        .describe("Whether to display the terminal block cursor █ behind the job title"),
       contactUrl: z
         .string()
         .optional()
@@ -1013,12 +1017,14 @@ Instructions:
       theme,
       template,
       tagStyle,
+      showCursor,
       contactUrl,
       statusText,
       scale,
     }) => {
       const bannerData: BannerData = {
         jobTitle,
+        showCursor,
         name: name || siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
         tagline: tagline || DEFAULT_BANNER_DATA.tagline,
         skills: skills && skills.length > 0 ? skills : DEFAULT_BANNER_DATA.skills,

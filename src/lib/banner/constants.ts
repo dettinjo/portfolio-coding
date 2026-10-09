@@ -1,4 +1,10 @@
-import { BannerTemplateMeta, BannerData } from "@/types/banner";
+import {
+  BannerTemplateMeta,
+  BannerData,
+  StatusIcon,
+  TerminalLinkStyle,
+  TerminalTagStyle,
+} from "@/types/banner";
 
 export const LINKEDIN_BANNER_WIDTH = 1584;
 export const LINKEDIN_BANNER_HEIGHT = 396;
@@ -31,6 +37,45 @@ export const LINKEDIN_SAFE_AREAS = {
     maxY: 350,
   },
 };
+
+export const STATUS_ICON_OPTIONS: {
+  id: StatusIcon;
+  label: string;
+  glyph: string;
+  color?: string;
+}[] = [
+  { id: "dot-green", label: "Green Dot", glyph: "●", color: "#22c55e" },
+  { id: "dot-amber", label: "Amber Dot", glyph: "●", color: "#f59e0b" },
+  { id: "dot-blue", label: "Cyan Dot", glyph: "●", color: "#06b6d4" },
+  { id: "sparkle", label: "Sparkle", glyph: "✦", color: "#a855f7" },
+  { id: "bolt", label: "Bolt", glyph: "⚡", color: "#eab308" },
+  { id: "chevron", label: "Chevron", glyph: "❯", color: "#10b981" },
+  { id: "ring", label: "Ring", glyph: "○", color: "#a1a1aa" },
+  { id: "none", label: "None", glyph: "—" },
+];
+
+export const LINK_STYLE_OPTIONS: {
+  id: TerminalLinkStyle;
+  label: string;
+  format: string;
+}[] = [
+  { id: "arrow", label: "↗ Arrow", format: "↗ url" },
+  { id: "curl", label: "curl", format: "curl url" },
+  { id: "kv", label: "web:", format: "web: url" },
+  { id: "plain", label: "Plain", format: "url" },
+];
+
+export const TAG_STYLE_OPTIONS: {
+  id: TerminalTagStyle;
+  label: string;
+  example: string;
+}[] = [
+  { id: "block", label: "Blocks", example: "[Python]" },
+  { id: "bracket", label: "[  ]", example: "[ Python ]" },
+  { id: "inline", label: "· Inline", example: "Python · Docker" },
+  { id: "pipe", label: "| Pipe", example: "Python | Docker" },
+  { id: "kv", label: "stack:", example: "stack: Python · Docker" },
+];
 
 export const BANNER_TEMPLATES: BannerTemplateMeta[] = [
   {
@@ -134,10 +179,12 @@ export const DEFAULT_BANNER_DATA: BannerData = {
   jobTitle: "AI Engineer",
   showJobTitle: true,
   promptSymbol: ">",
+  showCursor: true,
 
   contactUrl: "joeldettinger.com",
   showContact: true,
   linkPosition: "below",
+  linkStyle: "arrow",
 
   skills: [
     "Python",
@@ -153,9 +200,11 @@ export const DEFAULT_BANNER_DATA: BannerData = {
 
   tagline: "Building scalable agentic AI systems & production RAG",
   showTagline: false,
+  taglineStyle: "plain",
 
   statusText: "open to work",
   showStatus: false,
+  statusIcon: "dot-green",
 
   theme: "dark",
   template: "terminal",

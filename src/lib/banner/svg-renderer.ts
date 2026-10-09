@@ -24,7 +24,7 @@ export function renderBannerSvg(
 ): string {
   const isDark = data.theme === "dark";
 
-  // Exact colors from src/app/globals.css
+  // Exact colors from src/app/globals.css and HeroTerminal / RotatingHeroBio
   const colors = isDark
     ? {
         bg: "#18181b", // hsl(240 5.9% 10%)
@@ -32,7 +32,8 @@ export function renderBannerSvg(
         border: "#3f3f46", // hsl(240 5% 30%)
         badgeBg: "#27272a", // hsl(240 5% 20%)
         badgeFg: "#fafafa", // hsl(240 10% 98%)
-        prompt: "#a1a1aa", // hsl(240 5% 65%) - subtle muted prompt
+        prompt: "#a1a1aa", // hsl(240 5% 65%) - subtle muted prompt tokens/brackets
+        promptSymbol: "#34d399", // emerald-400 (matches hero section > prompt)
         statusDot: "#22c55e", // emerald-500
       }
     : {
@@ -41,7 +42,8 @@ export function renderBannerSvg(
         border: "#e4e4e7", // hsl(240 10% 85%)
         badgeBg: "#f4f4f5", // hsl(240 5% 90%)
         badgeFg: "#18181b", // hsl(240 10% 10%)
-        prompt: "#71717a", // hsl(240 5% 45%) - subtle muted prompt
+        prompt: "#71717a", // hsl(240 5% 45%) - subtle muted prompt tokens/brackets
+        promptSymbol: "#10b981", // emerald-500 (matches hero section > prompt)
         statusDot: "#16a34a", // emerald-600
       };
 
@@ -49,8 +51,10 @@ export function renderBannerSvg(
   const fontMono =
     "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 
-  // Left clearance: x = 380px ensures 100% avoidance of LinkedIn's desktop circular avatar
+  // Left clearance: x = 380px guarantees 40px margin past LinkedIn's 340px circular avatar boundary
   const startX = 380;
+  // Right safe boundary: x = 1400px ensures a 22px buffer inside mobile safe threshold (maxX = 1422)
+  const safeRightX = 1400;
 
   // Active Building Blocks
   const isTitleOnly = data.template === "title-only";
@@ -61,6 +65,7 @@ export function renderBannerSvg(
 
   const showJobTitle = Boolean(data.showJobTitle !== false && data.jobTitle?.trim());
   const safeJobTitle = escapeXml(data.jobTitle || "AI Engineer");
+  const showCursor = data.showCursor !== false;
 
   const showSkills = !isTitleOnly && Boolean(data.showSkills !== false && data.skills && data.skills.length > 0);
   const skills = showSkills ? data.skills.slice(0, 8) : [];
@@ -69,33 +74,37 @@ export function renderBannerSvg(
   const showContact = Boolean(data.showContact && data.contactUrl?.trim());
   const safeContactUrl = escapeXml(data.contactUrl || "");
   const linkPosition = data.linkPosition || "below";
+  const linkStyle = data.linkStyle || "arrow";
   const hasInlineLink = showContact && linkPosition === "below";
 
   const showTagline = !isTitleOnly && Boolean(data.showTagline && data.tagline?.trim());
   const safeTagline = escapeXml(data.tagline || "");
+  const taglineStyle = data.taglineStyle || "plain";
 
   const showStatus = Boolean(data.showStatus && data.statusText?.trim());
   const safeStatusText = escapeXml(data.statusText || "");
+  const statusIcon = data.statusIcon || "dot-green";
 
-  // Dynamic vertical centering of the main content stack
+  // Dynamic vertical centering of the main content stack with terminal line rhythms
   let totalStackHeight = 0;
   if (showTagline) totalStackHeight += 24;
-  if (showName) totalStackHeight += 28;
-  if (showJobTitle) totalStackHeight += isTitleOnly ? 56 : 54;
-  if (showSkills) totalStackHeight += 38;
+  if (showName) totalStackHeight += 38;
+  if (showJobTitle) totalStackHeight += isTitleOnly ? 64 : 58;
+  if (showSkills) totalStackHeight += 40;
   if (hasInlineLink) totalStackHeight += 24;
 
-  let currentY = Math.round((LINKEDIN_BANNER_HEIGHT - totalStackHeight) / 2) + 20;
+  let currentY = Math.round((LINKEDIN_BANNER_HEIGHT - totalStackHeight) / 2) + (showTagline ? 18 : 28);
 
-  // 1. Tagline Building Block (code comment: # ...)
+  // 1. Tagline Building Block (initial plain text or optional # comment)
   let taglineSvg = "";
   if (showTagline) {
+    const prefix = taglineStyle === "comment" && !safeTagline.startsWith("#") ? "# " : "";
     taglineSvg = `
-    <!-- Building Block: Tagline Comment -->
+    <!-- Building Block: Tagline -->
     <g id="block-tagline">
-      <text x="${startX}" y="${currentY}" font-family="${fontMono}" font-size="16" font-weight="500" fill="${colors.prompt}"># ${safeTagline}</text>
+      <text x="${startX}" y="${currentY}" font-family="${fontMono}" font-size="15" font-weight="500" fill="${colors.prompt}">${prefix}${safeTagline}</text>
     </g>`;
-    currentY += 28;
+    currentY += 26;
   }
 
   // 2. Name Building Block (terminal identity: ~/ Name)
@@ -110,31 +119,33 @@ export function renderBannerSvg(
     currentY += 46;
   }
 
-  // 3. Job Title Building Block (command: > Role █)
+  // 3. Job Title Building Block (command: > Role █ matching Hero section)
   let titleSvg = "";
   if (showJobTitle) {
     let promptStr = "";
     if (data.template === "terminal") {
       const symbol = data.promptSymbol || ">";
       if (symbol === ">") {
-        promptStr = `<tspan fill="${colors.prompt}">&gt; </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&gt; </tspan>`;
       } else if (symbol === "$") {
-        promptStr = `<tspan fill="${colors.prompt}">$ </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">$ </tspan>`;
       } else if (symbol === "❯") {
-        promptStr = `<tspan fill="${colors.prompt}">&#10095; </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&#10095; </tspan>`;
       }
     }
 
     const titleFontSize = isTitleOnly ? 56 : 50;
+    const cursorSvg = showCursor ? `<tspan dx="8" fill="${colors.fg}">&#9608;</tspan>` : "";
+
     titleSvg = `
     <!-- Building Block: Job Title / Role -->
     <g id="block-title">
-      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="${titleFontSize}" font-weight="700" letter-spacing="-0.02em">${promptStr}<tspan fill="${colors.fg}">${safeJobTitle}</tspan><tspan dx="8" fill="${colors.fg}">&#9608;</tspan></text>
+      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="${titleFontSize}" font-weight="700" letter-spacing="-0.02em">${promptStr}<tspan fill="${colors.fg}">${safeJobTitle}</tspan>${cursorSvg}</text>
     </g>`;
     currentY += 34;
   }
 
-  // 4. Skills & Tech Stack Building Block (blocks, brackets, inline)
+  // 4. Skills & Tech Stack Building Block (blocks, brackets, inline, pipe, kv)
   let badgesSvg = "";
   if (showSkills) {
     if (tagStyle === "block") {
@@ -176,13 +187,51 @@ export function renderBannerSvg(
         .join("");
       badgesSvg = `\n    <!-- Building Block: Skills (Brackets) -->\n    <g id="block-skills">${rendered}\n    </g>`;
       currentY += 40;
-    } else if (tagStyle === "inline") {
-      // Minimalist terminal pipeline: $ stack: Python · PyTorch · Docker
+    } else if (tagStyle === "pipe") {
+      // Unix pipeline stream: Python | PyTorch | Docker
+      badgesSvg = `
+    <!-- Building Block: Skills (Pipe Stream) -->
+    <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
+      <text font-family="${fontMono}" font-size="14" font-weight="500">
+        ${skills
+          .map(
+            (s, idx) =>
+              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+                idx < skills.length - 1
+                  ? `<tspan fill="${colors.prompt}">  |  </tspan>`
+                  : ""
+              }`
+          )
+          .join("")}
+      </text>
+    </g>`;
+      currentY += 40;
+    } else if (tagStyle === "kv") {
+      // Neofetch / Fastfetch key-value info: stack: Python · PyTorch · Docker
+      badgesSvg = `
+    <!-- Building Block: Skills (Key-Value) -->
+    <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
+      <text font-family="${fontMono}" font-size="14" font-weight="500">
+        <tspan fill="${colors.prompt}">stack: </tspan>
+        ${skills
+          .map(
+            (s, idx) =>
+              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+                idx < skills.length - 1
+                  ? `<tspan fill="${colors.prompt}">  &#183;  </tspan>`
+                  : ""
+              }`
+          )
+          .join("")}
+      </text>
+    </g>`;
+      currentY += 40;
+    } else {
+      // Minimalist terminal pipeline: Python · PyTorch · Docker
       badgesSvg = `
     <!-- Building Block: Skills (Inline Pipeline) -->
     <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
       <text font-family="${fontMono}" font-size="14" font-weight="500">
-        <tspan fill="${colors.prompt}">$ stack: </tspan>
         ${skills
           .map(
             (s, idx) =>
@@ -199,6 +248,21 @@ export function renderBannerSvg(
     }
   }
 
+  // Helper to format link text according to linkStyle
+  const renderLinkText = () => {
+    if (linkStyle === "curl") {
+      return `<tspan fill="${colors.promptSymbol}" font-weight="700">curl </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+    }
+    if (linkStyle === "kv") {
+      return `<tspan fill="${colors.prompt}">web: </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+    }
+    if (linkStyle === "plain") {
+      return `<tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+    }
+    // Default: arrow
+    return `<tspan fill="${colors.prompt}">&#8599; </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+  };
+
   // 5. Portfolio Website / Link Building Block (below stack or corner)
   let linkSvg = "";
   if (showContact) {
@@ -207,28 +271,47 @@ export function renderBannerSvg(
     <!-- Building Block: Portfolio Link (Below Stack) -->
     <g id="block-link" transform="translate(${startX}, ${currentY + 4})">
       <text font-family="${fontMono}" font-size="15" font-weight="500">
-        <tspan fill="${colors.prompt}">&#8599; </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>
+        ${renderLinkText()}
       </text>
     </g>`;
     } else {
       linkSvg = `
-    <!-- Building Block: Portfolio Link (Corner) -->
-    <g id="block-link" transform="translate(1504, 345)" text-anchor="end">
+    <!-- Building Block: Portfolio Link (Safe Corner) -->
+    <g id="block-link" transform="translate(${safeRightX}, 345)" text-anchor="end">
       <text font-family="${fontMono}" font-size="14" font-weight="500">
-        <tspan fill="${colors.prompt}">&#8599; </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>
+        ${renderLinkText()}
       </text>
     </g>`;
     }
   }
 
-  // 6. Statusline Building Block (tmux / statusline style)
+  // 6. Statusline Building Block (strictly inside safe zone bounds: x <= 1400, y = 65)
   let statusSvg = "";
   if (showStatus) {
-    const textWidth = Math.round(safeStatusText.length * 8.5);
+    const textWidth = Math.round(safeStatusText.length * 8.4);
+    let iconElement = "";
+
+    if (statusIcon === "dot-green") {
+      iconElement = `<circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="#22c55e" />`;
+    } else if (statusIcon === "dot-amber") {
+      iconElement = `<circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="#f59e0b" />`;
+    } else if (statusIcon === "dot-blue") {
+      iconElement = `<circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="#06b6d4" />`;
+    } else if (statusIcon === "ring") {
+      iconElement = `<circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="none" stroke="${colors.prompt}" stroke-width="1.5" />`;
+    } else if (statusIcon === "sparkle") {
+      iconElement = `<text x="-${textWidth + 14}" y="0" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="700" fill="#a855f7">&#10022;</text>`;
+    } else if (statusIcon === "bolt") {
+      iconElement = `<text x="-${textWidth + 14}" y="0" text-anchor="middle" font-family="${fontMono}" font-size="13" fill="#eab308">&#9889;</text>`;
+    } else if (statusIcon === "chevron") {
+      iconElement = `<text x="-${textWidth + 14}" y="0" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="700" fill="${colors.promptSymbol}">&#10095;</text>`;
+    }
+    // "none" renders no icon element
+
     statusSvg = `
-    <!-- Building Block: Statusline Indicator -->
-    <g id="block-status" transform="translate(1504, 60)" text-anchor="end">
-      <circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="${colors.statusDot}" />
+    <!-- Building Block: Statusline Indicator (Safe Zone Top Right) -->
+    <g id="block-status" transform="translate(${safeRightX}, 65)" text-anchor="end">
+      ${iconElement}
       <text font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.prompt}">${safeStatusText}</text>
     </g>`;
   }
