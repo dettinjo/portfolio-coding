@@ -60,14 +60,15 @@ export function RotatingHeroBio({
     if (!currentItem) return "";
     if (currentItem.sentence) return currentItem.sentence;
     const article = getArticle(currentItem.role);
-    const traits = currentItem.adjectives.join(", ");
+    const traits = currentItem.adjectives?.join(", ") ?? "";
+    const artifacts = currentItem.artifacts ?? "";
     if (locale === "de") {
-      return `${article} ${currentItem.role} ${bridgeText} ${traits} ${currentItem.artifacts}.`;
+      return `${article} ${currentItem.role} ${bridgeText} ${traits} ${artifacts}.`;
     }
     if (locale === "es") {
-      return `${article} ${currentItem.role} ${bridgeText} ${currentItem.artifacts} ${traits}.`;
+      return `${article} ${currentItem.role} ${bridgeText} ${artifacts} ${traits}.`;
     }
-    return `${article} ${currentItem.role} ${bridgeText} ${traits} ${currentItem.artifacts}.`;
+    return `${article} ${currentItem.role} ${bridgeText} ${traits} ${artifacts}.`;
   }, [currentItem, getArticle, bridgeText, locale]);
 
   // ─── 1. ACTIVATE WHEN GREETING FINISHES ──────────────────────────────────
@@ -164,10 +165,12 @@ export function RotatingHeroBio({
 
   // Display calculations
   const roleText = `${getArticle(currentItem.role)} ${currentItem.role}`;
+  const focusTraits = currentItem.adjectives?.join(", ") ?? "";
+  const focusArtifacts = currentItem.artifacts ?? "";
   const focusText =
     locale === "es"
-      ? `${currentItem.artifacts} ${currentItem.adjectives.join(", ")}.`
-      : `${currentItem.adjectives.join(", ")} ${currentItem.artifacts}.`;
+      ? `${focusArtifacts} ${focusTraits}.`
+      : `${focusTraits} ${focusArtifacts}.`;
 
   const roleLen = roleText.length;
   const bridgePart = ` ${bridgeText} `;

@@ -985,9 +985,9 @@ Instructions:
         .default("dark")
         .describe("Color theme: 'dark' (portfolio zinc-950) or 'light' (portfolio zinc-50)"),
       template: z
-        .enum(["terminal", "terminal-clean", "title-only", "split", "glow", "framed"])
+        .enum(["terminal", "terminal-clean", "title-only"])
         .default("terminal")
-        .describe("Layout design idea: 'terminal' (CLI prompt), 'terminal-clean' (clean minimal), 'title-only', 'split', 'glow', or 'framed'"),
+        .describe("Layout design idea: 'terminal' (CLI prompt), 'terminal-clean' (clean minimal), or 'title-only'"),
       contactUrl: z
         .string()
         .optional()

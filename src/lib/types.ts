@@ -100,8 +100,8 @@ export type BioDesignVariant = "terminal" | "inline" | "carousel" | "git";
 
 export interface BioRotationItem {
   role: string;
-  adjectives: string[];
-  artifacts: string;
+  adjectives?: string[];
+  artifacts?: string;
   sentence?: string;
 }
 
