@@ -203,8 +203,8 @@ export function HeroTerminal({
           </h1>
 
           {/* Line 2: > [JOB TITLE] */}
-          <div className="mt-3 sm:mt-5 text-xl sm:text-3xl lg:text-4xl font-normal min-h-[2rem] sm:min-h-[2.75rem] flex items-baseline">
-            <span className="text-emerald-500 dark:text-emerald-400 font-bold mr-2 sm:mr-3 select-none">
+          <div className="mt-3 sm:mt-5 text-xl sm:text-3xl lg:text-4xl font-light min-h-[2rem] sm:min-h-[2.75rem] flex items-baseline">
+            <span className="text-emerald-500 dark:text-emerald-400 font-normal mr-2 sm:mr-3 select-none">
               &gt;
             </span>
 
@@ -215,12 +215,12 @@ export function HeroTerminal({
                   initial={{ y: 0, opacity: 1 }}
                   animate={{ y: -30, opacity: 0 }}
                   transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-                  className="text-foreground/90 inline-block"
+                  className="text-foreground/85 font-light inline-block"
                 >
                   {currentRole}
                 </motion.span>
               ) : (
-                <span className="text-foreground/90 inline-flex items-baseline">
+                <span className="text-foreground/85 font-light inline-flex items-baseline">
                   {currentRole.slice(0, typedRoleChars)}
                   {renderCursor("md", phase === "holding")}
                 </span>
