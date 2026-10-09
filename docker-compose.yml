@@ -19,6 +19,12 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      # Tier 2 Reverse Proxy Rate Limiting (Average 100 req/min, burst 50)
+      - "traefik.http.middlewares.app-rate-limit.ratelimit.average=100"
+      - "traefik.http.middlewares.app-rate-limit.ratelimit.burst=50"
+      - "traefik.http.middlewares.app-rate-limit.ratelimit.period=1m"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
