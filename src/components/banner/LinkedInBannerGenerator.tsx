@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   BannerData,
-  BannerTemplateId,
   TerminalTagStyle,
   TerminalPrompt,
 } from "@/types/banner";
@@ -13,9 +12,9 @@ import {
   SUGGESTED_SKILLS,
 } from "@/lib/banner/constants";
 import { renderBannerSvg } from "@/lib/banner/svg-renderer";
+import { siteConfig } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import {
   Download,
@@ -30,13 +29,14 @@ import {
   RotateCcw,
   Sparkles,
   Terminal,
-  Type,
   FileCode,
   ArrowLeft,
+  User,
+  Briefcase,
+  Globe,
   Hash,
   Activity,
-  Globe,
-  SlidersHorizontal,
+  Layers,
 } from "lucide-react";
 
 interface LinkedInBannerGeneratorProps {
@@ -48,13 +48,25 @@ export function LinkedInBannerGenerator({
   initialData,
   locale,
 }: LinkedInBannerGeneratorProps) {
-  const [data, setData] = useState<BannerData>(() => ({
-    ...DEFAULT_BANNER_DATA,
-    ...(initialData || {}),
-  }));
+  // Pre-fill name and clean portfolio URL from siteConfig
+  const [data, setData] = useState<BannerData>(() => {
+    const defaultName = siteConfig.person.fullName || DEFAULT_BANNER_DATA.name;
+    const defaultUrl = siteConfig.site.serverUrl
+      ? siteConfig.site.serverUrl
+          .replace(/^https?:\/\//, "")
+          .replace(/\/$/, "")
+          .replace(/^localhost:\d+/, "dettinger.dev")
+      : DEFAULT_BANNER_DATA.contactUrl;
+
+    return {
+      ...DEFAULT_BANNER_DATA,
+      name: defaultName,
+      contactUrl: defaultUrl,
+      ...(initialData || {}),
+    };
+  });
 
   const [showSafeAreas, setShowSafeAreas] = useState<boolean>(true);
-  const [showAdvancedContent, setShowAdvancedContent] = useState<boolean>(false);
   const [newSkillInput, setNewSkillInput] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -93,8 +105,18 @@ export function LinkedInBannerGenerator({
   };
 
   const handleReset = () => {
+    const defaultName = siteConfig.person.fullName || DEFAULT_BANNER_DATA.name;
+    const defaultUrl = siteConfig.site.serverUrl
+      ? siteConfig.site.serverUrl
+          .replace(/^https?:\/\//, "")
+          .replace(/\/$/, "")
+          .replace(/^localhost:\d+/, "dettinger.dev")
+      : DEFAULT_BANNER_DATA.contactUrl;
+
     setData({
       ...DEFAULT_BANNER_DATA,
+      name: defaultName,
+      contactUrl: defaultUrl,
     });
   };
 
@@ -117,16 +139,28 @@ export function LinkedInBannerGenerator({
     try {
       // 1. Server-side sharp generation for razor-sharp antialiased typography
       const params = new URLSearchParams({
-        jobTitle: data.jobTitle,
-        skills: data.skills.join(","),
-        tagStyle: data.tagStyle || "block",
+        name: data.name || "",
+        showName: String(Boolean(data.showName)),
+        nameStyle: data.nameStyle || "path",
+
+        jobTitle: data.jobTitle || "",
+        showJobTitle: String(Boolean(data.showJobTitle)),
         promptSymbol: data.promptSymbol || ">",
+
+        contactUrl: data.contactUrl || "",
+        showContact: String(Boolean(data.showContact)),
+        linkPosition: data.linkPosition || "below",
+
+        skills: data.skills.join(","),
+        showSkills: String(Boolean(data.showSkills)),
+        tagStyle: data.tagStyle || "block",
+
         showTagline: String(Boolean(data.showTagline)),
         tagline: data.tagline || "",
+
         showStatus: String(Boolean(data.showStatus)),
         statusText: data.statusText || "",
-        showContact: String(Boolean(data.showContact)),
-        contactUrl: data.contactUrl || "",
+
         theme: data.theme,
         template: data.template,
         scale: String(scale),
@@ -347,104 +381,109 @@ export function LinkedInBannerGenerator({
           </div>
         </section>
 
-        {/* ─── INSPECTOR SIDEBAR / CONTROLS ──────────────────────────────── */}
-        <aside className="w-full lg:w-80 xl:w-[350px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/60 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-5 lg:space-y-0">
-          {/* Controls Group */}
-          <div className="space-y-4">
-            {/* Section 1: Headline Role */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="banner-job-title" className="text-xs font-semibold">
-                  Job Title / Headline
-                </Label>
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  {data.jobTitle.length} chars
+        {/* ─── INSPECTOR SIDEBAR / MODULAR BUILDING BLOCKS ──────────────── */}
+        <aside className="w-full lg:w-80 xl:w-[360px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-4 lg:space-y-0">
+          {/* Building Blocks Container */}
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between pb-1 border-b border-border/60">
+              <div className="flex items-center gap-1.5">
+                <Layers className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-semibold tracking-tight">
+                  Building Blocks
                 </span>
               </div>
-              <div className="relative">
-                <Input
-                  id="banner-job-title"
-                  value={data.jobTitle}
-                  onChange={(e) => handleUpdate("jobTitle", e.target.value)}
-                  placeholder="e.g. AI Engineer"
-                  className="font-mono text-xs pr-7 bg-background/80 h-9 sm:h-8"
-                />
-                {data.jobTitle && (
-                  <button
-                    type="button"
-                    onClick={() => handleUpdate("jobTitle", "")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
+              <span className="text-[10px] font-mono text-muted-foreground">
+                Terminal Blocks
+              </span>
             </div>
 
-            {/* Section 2: Terminal Style & Format */}
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">Terminal Style</Label>
-                <div className="grid grid-cols-3 gap-1 p-1 bg-muted/40 border border-border/60 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdate("template", "terminal")}
-                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                      data.template === "terminal"
-                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                    title="Terminal Prompt (> Title█)"
-                  >
-                    <Terminal className="h-3 w-3" />
-                    <span>Prompt</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleUpdate("template", "terminal-clean" as BannerTemplateId)
-                    }
-                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                      data.template === "terminal-clean"
-                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                    title="Clean Title (Title█)"
-                  >
-                    <Type className="h-3 w-3" />
-                    <span>Clean</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleUpdate("template", "title-only" as BannerTemplateId)
-                    }
-                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                      data.template === "title-only"
-                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                    title="Centered Title Only"
-                  >
-                    <span>Title Only</span>
-                  </button>
-                </div>
+            {/* ─── BLOCK 1: NAME (IDENTITY) ─────────────────────────────── */}
+            <div className="space-y-1.5 p-2 rounded-lg bg-background/50 border border-border/70">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={data.showName !== false}
+                    onChange={(e) => handleUpdate("showName", e.target.checked)}
+                    className="rounded border-border h-3.5 w-3.5 text-primary"
+                  />
+                  <User className="h-3.5 w-3.5 text-primary" />
+                  <span>Name</span>
+                </label>
+                {data.showName !== false && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("nameStyle", "path")}
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                        (data.nameStyle || "path") === "path"
+                          ? "bg-primary text-primary-foreground border-primary font-bold"
+                          : "text-muted-foreground border-border/60 hover:text-foreground"
+                      }`}
+                      title="Prefix with ~/ (terminal path)"
+                    >
+                      ~/ Name
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("nameStyle", "plain")}
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                        data.nameStyle === "plain"
+                          ? "bg-primary text-primary-foreground border-primary font-bold"
+                          : "text-muted-foreground border-border/60 hover:text-foreground"
+                      }`}
+                      title="Plain text name"
+                    >
+                      Plain
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Sub-controls: Prompt Symbol (if template === 'terminal') */}
-              {data.template === "terminal" && (
-                <div className="flex items-center justify-between pt-0.5">
-                  <span className="text-[11px] text-muted-foreground font-mono">
-                    Prompt Symbol:
-                  </span>
+              {data.showName !== false && (
+                <div className="relative pt-0.5">
+                  <Input
+                    value={data.name || ""}
+                    onChange={(e) => handleUpdate("name", e.target.value)}
+                    placeholder="e.g. Joel Dettinger"
+                    className="font-mono text-xs pr-7 bg-background h-7"
+                  />
+                  {data.name && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("name", "")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ─── BLOCK 2: JOB TITLE (ROLE) ────────────────────────────── */}
+            <div className="space-y-1.5 p-2 rounded-lg bg-background/50 border border-border/70">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={data.showJobTitle !== false}
+                    onChange={(e) =>
+                      handleUpdate("showJobTitle", e.target.checked)
+                    }
+                    className="rounded border-border h-3.5 w-3.5 text-primary"
+                  />
+                  <Briefcase className="h-3.5 w-3.5 text-primary" />
+                  <span>Job Title / Role</span>
+                </label>
+                {data.showJobTitle !== false && (
                   <div className="flex items-center gap-1">
                     {(
                       [
                         { id: ">", label: "> " },
                         { id: "❯", label: "❯ " },
                         { id: "$", label: "$ " },
+                        { id: "none", label: "None" },
                       ] as const
                     ).map((p) => {
                       const isSel = (data.promptSymbol || ">") === p.id;
@@ -452,11 +491,13 @@ export function LinkedInBannerGenerator({
                         <button
                           key={p.id}
                           type="button"
-                          onClick={() => handleUpdate("promptSymbol", p.id as TerminalPrompt)}
-                          className={`px-2 py-0.5 rounded text-[11px] font-mono border transition-all ${
+                          onClick={() =>
+                            handleUpdate("promptSymbol", p.id as TerminalPrompt)
+                          }
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all ${
                             isSel
                               ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
-                              : "bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
+                              : "border-border/60 text-muted-foreground hover:text-foreground"
                           }`}
                         >
                           {p.label}
@@ -464,25 +505,117 @@ export function LinkedInBannerGenerator({
                       );
                     })}
                   </div>
+                )}
+              </div>
+
+              {data.showJobTitle !== false && (
+                <div className="relative pt-0.5">
+                  <Input
+                    value={data.jobTitle || ""}
+                    onChange={(e) => handleUpdate("jobTitle", e.target.value)}
+                    placeholder="e.g. AI Engineer"
+                    className="font-mono text-xs pr-7 bg-background h-8"
+                  />
+                  {data.jobTitle && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("jobTitle", "")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
               )}
+            </div>
 
-              {/* Sub-controls: Tag Format (if template !== 'title-only') */}
-              {data.template !== "title-only" && (
-                <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-muted-foreground">
-                      Tag Style
-                    </span>
-                    <span className="text-[10px] font-mono text-muted-foreground">
-                      Code Terminal
-                    </span>
+            {/* ─── BLOCK 3: PORTFOLIO LINK / WEBSITE ─────────────────────── */}
+            <div className="space-y-1.5 p-2 rounded-lg bg-background/50 border border-border/70">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(data.showContact)}
+                    onChange={(e) =>
+                      handleUpdate("showContact", e.target.checked)
+                    }
+                    className="rounded border-border h-3.5 w-3.5 text-primary"
+                  />
+                  <Globe className="h-3.5 w-3.5 text-primary" />
+                  <span>Portfolio Link / Website</span>
+                </label>
+                {Boolean(data.showContact) && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("linkPosition", "below")}
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                        (data.linkPosition || "below") === "below"
+                          ? "bg-primary text-primary-foreground border-primary font-bold"
+                          : "text-muted-foreground border-border/60 hover:text-foreground"
+                      }`}
+                      title="Place link right below skills stack"
+                    >
+                      Below
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("linkPosition", "corner")}
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
+                        data.linkPosition === "corner"
+                          ? "bg-primary text-primary-foreground border-primary font-bold"
+                          : "text-muted-foreground border-border/60 hover:text-foreground"
+                      }`}
+                      title="Place link in bottom-right corner"
+                    >
+                      Corner
+                    </button>
                   </div>
-                  <div className="grid grid-cols-3 gap-1 p-0.5 bg-muted/40 border border-border/60 rounded-lg">
+                )}
+              </div>
+
+              {Boolean(data.showContact) && (
+                <div className="relative pt-0.5">
+                  <Input
+                    value={data.contactUrl || ""}
+                    onChange={(e) => handleUpdate("contactUrl", e.target.value)}
+                    placeholder="e.g. joeldettinger.com"
+                    className="font-mono text-xs pr-7 bg-background h-7"
+                  />
+                  {data.contactUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdate("contactUrl", "")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ─── BLOCK 4: SKILLS & TECH STACK ─────────────────────────── */}
+            <div className="space-y-1.5 p-2 rounded-lg bg-background/50 border border-border/70">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={data.showSkills !== false}
+                    onChange={(e) =>
+                      handleUpdate("showSkills", e.target.checked)
+                    }
+                    className="rounded border-border h-3.5 w-3.5 text-primary"
+                  />
+                  <Terminal className="h-3.5 w-3.5 text-primary" />
+                  <span>Skills & Tech Stack</span>
+                </label>
+                {data.showSkills !== false && (
+                  <div className="flex items-center gap-1">
                     {(
                       [
                         { id: "block", label: "Blocks" },
-                        { id: "bracket", label: "[ Brackets ]" },
+                        { id: "bracket", label: "[ ]" },
                         { id: "inline", label: "· Inline" },
                       ] as const
                     ).map((ts) => {
@@ -494,10 +627,10 @@ export function LinkedInBannerGenerator({
                           onClick={() =>
                             handleUpdate("tagStyle", ts.id as TerminalTagStyle)
                           }
-                          className={`py-1 px-1 rounded-md text-[10px] font-mono transition-all text-center ${
+                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-all ${
                             isSel
-                              ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                              : "text-muted-foreground hover:text-foreground"
+                              ? "bg-primary text-primary-foreground border-primary font-bold"
+                              : "text-muted-foreground border-border/60 hover:text-foreground"
                           }`}
                         >
                           {ts.label}
@@ -505,214 +638,159 @@ export function LinkedInBannerGenerator({
                       );
                     })}
                   </div>
+                )}
+              </div>
+
+              {data.showSkills !== false && (
+                <div className="space-y-2 pt-0.5">
+                  {/* Active Skill Tags */}
+                  <div className="flex flex-wrap gap-1 p-1.5 rounded bg-background border border-border/70 min-h-[32px]">
+                    {data.skills.length === 0 ? (
+                      <span className="text-[10px] text-muted-foreground/60 italic py-0.5 px-1">
+                        No tags added
+                      </span>
+                    ) : (
+                      data.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-mono border border-border/70 ${
+                            data.tagStyle === "block"
+                              ? "rounded-[3px] bg-secondary text-secondary-foreground"
+                              : data.tagStyle === "bracket"
+                              ? "rounded bg-transparent text-foreground border-transparent"
+                              : "rounded bg-muted/40 text-foreground"
+                          }`}
+                        >
+                          {data.tagStyle === "bracket" ? (
+                            <span className="text-muted-foreground">[</span>
+                          ) : null}
+                          <span>{skill}</span>
+                          {data.tagStyle === "bracket" ? (
+                            <span className="text-muted-foreground">]</span>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSkill(skill)}
+                            className="hover:text-destructive transition-colors ml-0.5 p-0.5 -mr-0.5"
+                            title={`Remove ${skill}`}
+                          >
+                            <X className="h-2.5 w-2.5" />
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Add Skill Input */}
+                  <div className="flex gap-1.5">
+                    <Input
+                      value={newSkillInput}
+                      onChange={(e) => setNewSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddSkill(newSkillInput);
+                        }
+                      }}
+                      placeholder="Add skill (e.g. PyTorch)..."
+                      className="text-xs font-mono bg-background h-7"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => handleAddSkill(newSkillInput)}
+                      disabled={!newSkillInput.trim() || data.skills.length >= 8}
+                    >
+                      <Plus className="h-3 w-3 mr-0.5" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Suggestions Chips */}
+                  {remainingSuggestions.length > 0 && data.skills.length < 8 && (
+                    <div className="pt-0.5">
+                      <div className="flex flex-wrap gap-1">
+                        {remainingSuggestions.slice(0, 5).map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            onClick={() => handleAddSkill(suggestion)}
+                            className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                          >
+                            + {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Section 3: Skills & Tags (only if not title-only) */}
-            {data.template !== "title-only" && (
-              <div className="space-y-2">
+            {/* ─── BLOCK 5: TAGLINE & STATUSLINE (OPTIONAL) ──────────────── */}
+            <div className="space-y-2 p-2 rounded-lg bg-background/50 border border-border/70">
+              <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                <span>Extra Terminal Annotations</span>
+              </span>
+
+              {/* Tagline Comment */}
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold">Skills & Tags</Label>
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    {data.skills.length}/8
-                  </span>
-                </div>
-
-                {/* Active Skill Tags (Modern Code Terminal Style) */}
-                <div className="flex flex-wrap gap-1.5 p-2 rounded-lg bg-background/60 border border-border/80 min-h-[36px]">
-                  {data.skills.length === 0 ? (
-                    <span className="text-[11px] text-muted-foreground/60 italic py-0.5 px-1">
-                      No tags added
-                    </span>
-                  ) : (
-                    data.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono border border-border/70 ${
-                          data.tagStyle === "block"
-                            ? "rounded-[3px] bg-secondary text-secondary-foreground"
-                            : data.tagStyle === "bracket"
-                            ? "rounded bg-transparent text-foreground border-transparent"
-                            : "rounded bg-muted/40 text-foreground"
-                        }`}
-                      >
-                        {data.tagStyle === "bracket" ? (
-                          <span className="text-muted-foreground">[</span>
-                        ) : null}
-                        <span>{skill}</span>
-                        {data.tagStyle === "bracket" ? (
-                          <span className="text-muted-foreground">]</span>
-                        ) : null}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSkill(skill)}
-                          className="hover:text-destructive transition-colors ml-0.5 p-0.5 -mr-1"
-                          title={`Remove ${skill}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))
-                  )}
-                </div>
-
-                {/* Add Skill Input */}
-                <div className="flex gap-1.5">
-                  <Input
-                    value={newSkillInput}
-                    onChange={(e) => setNewSkillInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddSkill(newSkillInput);
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(data.showTagline)}
+                      onChange={(e) =>
+                        handleUpdate("showTagline", e.target.checked)
                       }
-                    }}
-                    placeholder="Add skill (e.g. PyTorch)..."
-                    className="text-xs font-mono bg-background/80 h-8"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="h-8 px-2.5 text-xs"
-                    onClick={() => handleAddSkill(newSkillInput)}
-                    disabled={!newSkillInput.trim() || data.skills.length >= 8}
-                  >
-                    <Plus className="h-3.5 w-3.5 mr-0.5" />
-                    Add
-                  </Button>
+                      className="rounded border-border h-3 w-3 text-primary"
+                    />
+                    <Hash className="h-3 w-3 text-muted-foreground" />
+                    <span>Tagline (# comment)</span>
+                  </label>
                 </div>
-
-                {/* Quick Suggestions Chips */}
-                {remainingSuggestions.length > 0 && data.skills.length < 8 && (
-                  <div className="pt-0.5">
-                    <span className="text-[10px] text-muted-foreground block mb-1">
-                      Suggestions:
-                    </span>
-                    <div className="flex flex-wrap gap-1">
-                      {remainingSuggestions.map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => handleAddSkill(suggestion)}
-                          className="text-[11px] font-mono px-2 py-0.5 rounded border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                        >
-                          + {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                {Boolean(data.showTagline) && (
+                  <Input
+                    value={data.tagline || ""}
+                    onChange={(e) => handleUpdate("tagline", e.target.value)}
+                    placeholder="e.g. Building scalable agentic AI systems"
+                    className="font-mono text-[11px] bg-background h-7"
+                  />
                 )}
               </div>
-            )}
 
-            {/* Section 4: Optional Content Features (Online Builder Analysis) */}
-            <div className="pt-1 border-t border-border/60">
-              <button
-                type="button"
-                onClick={() => setShowAdvancedContent((v) => !v)}
-                className="w-full flex items-center justify-between py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="flex items-center gap-1.5">
-                  <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-                  <span>Optional Details</span>
-                </span>
-                <span className="text-[10px] font-mono text-muted-foreground/70">
-                  {showAdvancedContent ? "Hide ▲" : "Tagline · Status · URL ▼"}
-                </span>
-              </button>
-
-              {showAdvancedContent && (
-                <div className="space-y-3 pt-2 text-xs">
-                  {/* Tagline Comment */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(data.showTagline)}
-                          onChange={(e) =>
-                            handleUpdate("showTagline", e.target.checked)
-                          }
-                          className="rounded border-border"
-                        />
-                        <Hash className="h-3 w-3 text-muted-foreground" />
-                        <span>Code Comment / Tagline</span>
-                      </label>
-                    </div>
-                    {data.showTagline && (
-                      <Input
-                        value={data.tagline || ""}
-                        onChange={(e) => handleUpdate("tagline", e.target.value)}
-                        placeholder="e.g. Building scalable agentic AI systems"
-                        className="font-mono text-[11px] bg-background/80 h-7"
-                      />
-                    )}
-                  </div>
-
-                  {/* Status Indicator */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(data.showStatus)}
-                          onChange={(e) =>
-                            handleUpdate("showStatus", e.target.checked)
-                          }
-                          className="rounded border-border"
-                        />
-                        <Activity className="h-3 w-3 text-emerald-500" />
-                        <span>Terminal Statusline</span>
-                      </label>
-                    </div>
-                    {data.showStatus && (
-                      <Input
-                        value={data.statusText || ""}
-                        onChange={(e) =>
-                          handleUpdate("statusText", e.target.value)
-                        }
-                        placeholder="e.g. open to work"
-                        className="font-mono text-[11px] bg-background/80 h-7"
-                      />
-                    )}
-                  </div>
-
-                  {/* Handle / URL */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(data.showContact)}
-                          onChange={(e) =>
-                            handleUpdate("showContact", e.target.checked)
-                          }
-                          className="rounded border-border"
-                        />
-                        <Globe className="h-3 w-3 text-muted-foreground" />
-                        <span>Terminal Path / Handle</span>
-                      </label>
-                    </div>
-                    {data.showContact && (
-                      <Input
-                        value={data.contactUrl || ""}
-                        onChange={(e) =>
-                          handleUpdate("contactUrl", e.target.value)
-                        }
-                        placeholder="e.g. github.com/username"
-                        className="font-mono text-[11px] bg-background/80 h-7"
-                      />
-                    )}
-                  </div>
+              {/* Status Indicator */}
+              <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(data.showStatus)}
+                      onChange={(e) =>
+                        handleUpdate("showStatus", e.target.checked)
+                      }
+                      className="rounded border-border h-3 w-3 text-primary"
+                    />
+                    <Activity className="h-3 w-3 text-emerald-500" />
+                    <span>Statusline (● availability)</span>
+                  </label>
                 </div>
-              )}
+                {Boolean(data.showStatus) && (
+                  <Input
+                    value={data.statusText || ""}
+                    onChange={(e) => handleUpdate("statusText", e.target.value)}
+                    placeholder="e.g. open to work"
+                    className="font-mono text-[11px] bg-background h-7"
+                  />
+                )}
+              </div>
             </div>
           </div>
 
           {/* Bottom Actions & Secondary Formats */}
-          <div className="pt-3 border-t border-border/60 space-y-2">
+          <div className="pt-2 border-t border-border/60 space-y-1.5">
             {/* Prominent Export Button on Mobile */}
             <Button
               type="button"
@@ -753,7 +831,7 @@ export function LinkedInBannerGenerator({
             <button
               type="button"
               onClick={copySvg}
-              className="w-full text-center text-xs lg:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1 inline-flex items-center justify-center gap-1.5"
+              className="w-full text-center text-xs lg:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-0.5 inline-flex items-center justify-center gap-1.5"
             >
               {copied ? (
                 <>

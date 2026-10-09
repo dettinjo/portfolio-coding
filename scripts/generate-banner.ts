@@ -22,6 +22,8 @@ const DEFAULT_AI_ENGINEER_SKILLS = [
 
 interface BannerCliConfig {
   role: string;
+  name?: string;
+  link?: string;
   skills?: string[];
   theme: "dark" | "light" | "both";
   tagStyle?: "block" | "bracket" | "inline";
@@ -56,6 +58,8 @@ function parseArgs(): BannerCliConfig {
   }
 
   const role = options.role || options.r || options.title || "AI Engineer";
+  const name = options.name || options.n || "Joel Dettinger";
+  const link = options.link || options.l || options.website || "joeldettinger.com";
   const noSkills = flags.has("no-skills") || flags.has("title-only");
   const skillsRaw = options.skills || options.s;
 
@@ -87,6 +91,8 @@ function parseArgs(): BannerCliConfig {
 
   return {
     role,
+    name,
+    link,
     skills,
     theme,
     tagStyle,
@@ -108,7 +114,9 @@ async function main() {
   console.log("\n================================================================================");
   console.log("             MINIMAL TERMINAL LINKEDIN BANNER GENERATOR                         ");
   console.log("================================================================================");
+  console.log(`  Name             : ${config.name}`);
   console.log(`  Job Title        : ${config.role}`);
+  console.log(`  Portfolio Link   : ${config.link}`);
   console.log(`  Skill Tags       : ${config.skills && config.skills.length > 0 ? config.skills.join(" · ") : "(None - Title Only)"}`);
   console.log(`  Tag Style        : ${config.tagStyle || "block"} (rectangular code terminal chips)`);
   console.log(`  Color Themes     : ${themes.join(" & ")} (exact website tokens: #18181b / #fafafa)`);
@@ -144,9 +152,16 @@ async function main() {
     for (const theme of themes) {
       const bannerData: BannerData = {
         jobTitle: config.role,
-        name: "",
+        showJobTitle: true,
+        name: config.name || "",
+        showName: Boolean(config.name),
+        nameStyle: "path",
+        contactUrl: config.link || "",
+        showContact: Boolean(config.link),
+        linkPosition: "below",
         tagline: "",
         skills: variant.includeSkills ? config.skills || [] : [],
+        showSkills: variant.includeSkills,
         tagStyle: config.tagStyle,
         theme,
         template: variant.template,

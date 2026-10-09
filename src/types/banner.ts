@@ -7,19 +7,33 @@ export type BannerTemplateId =
 
 export type TerminalTagStyle = "block" | "bracket" | "inline";
 export type TerminalPrompt = ">" | "$" | "❯" | "none";
+export type LinkPosition = "below" | "corner";
+export type NameStyle = "path" | "plain";
 
 export interface BannerData {
-  jobTitle: string;
+  // Building Blocks
   name: string;
-  tagline: string;
-  showTagline?: boolean;
-  skills: string[];
-  tagStyle?: TerminalTagStyle;
+  showName?: boolean;
+  nameStyle?: NameStyle;
+
+  jobTitle: string;
+  showJobTitle?: boolean;
   promptSymbol?: TerminalPrompt;
+
   contactUrl?: string;
   showContact?: boolean;
+  linkPosition?: LinkPosition;
+
+  skills: string[];
+  showSkills?: boolean;
+  tagStyle?: TerminalTagStyle;
+
+  tagline?: string;
+  showTagline?: boolean;
+
   statusText?: string;
   showStatus?: boolean;
+
   theme: BannerTheme;
   template: BannerTemplateId;
 }

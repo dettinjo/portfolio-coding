@@ -90,16 +90,52 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       ? promptParam
       : ">";
 
+  const showName =
+    body?.showName !== undefined
+      ? body.showName
+      : searchParams.get("showName") !== null
+      ? searchParams.get("showName") === "true"
+      : true;
+
+  const nameStyle =
+    (body?.nameStyle || searchParams.get("nameStyle")) === "plain"
+      ? "plain"
+      : "path";
+
+  const showJobTitle =
+    body?.showJobTitle !== undefined
+      ? body.showJobTitle
+      : searchParams.get("showJobTitle") !== null
+      ? searchParams.get("showJobTitle") === "true"
+      : true;
+
+  const showSkills =
+    body?.showSkills !== undefined
+      ? body.showSkills
+      : searchParams.get("showSkills") !== null
+      ? searchParams.get("showSkills") === "true"
+      : true;
+
+  const linkPosition =
+    (body?.linkPosition || searchParams.get("linkPosition")) === "corner"
+      ? "corner"
+      : "below";
+
   return {
     jobTitle,
+    showJobTitle,
     name,
+    showName,
+    nameStyle,
     tagline,
     showTagline,
     skills,
+    showSkills,
     tagStyle,
     promptSymbol,
     contactUrl,
     showContact,
+    linkPosition,
     statusText,
     showStatus,
     theme,

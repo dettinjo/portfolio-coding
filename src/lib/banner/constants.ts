@@ -126,10 +126,19 @@ export const SUGGESTED_SKILLS: string[] = [
 ];
 
 export const DEFAULT_BANNER_DATA: BannerData = {
+  // Building Blocks
+  name: "Joel Dettinger",
+  showName: true,
+  nameStyle: "path",
+
   jobTitle: "AI Engineer",
-  name: "",
-  tagline: "Building scalable agentic AI systems & production RAG",
-  showTagline: false,
+  showJobTitle: true,
+  promptSymbol: ">",
+
+  contactUrl: "joeldettinger.com",
+  showContact: true,
+  linkPosition: "below",
+
   skills: [
     "Python",
     "PyTorch",
@@ -139,12 +148,15 @@ export const DEFAULT_BANNER_DATA: BannerData = {
     "Docker",
     "FastAPI",
   ],
+  showSkills: true,
   tagStyle: "block",
-  promptSymbol: ">",
+
+  tagline: "Building scalable agentic AI systems & production RAG",
+  showTagline: false,
+
   statusText: "open to work",
   showStatus: false,
-  contactUrl: "",
-  showContact: false,
+
   theme: "dark",
   template: "terminal",
 };
