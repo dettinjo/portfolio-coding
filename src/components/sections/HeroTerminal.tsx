@@ -196,16 +196,16 @@ export function HeroTerminal({
         >
           {/* Line 1: ~ [My name] */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight flex items-baseline">
-            <span className="text-cyan-500 dark:text-cyan-400 select-none mr-2 sm:mr-3">
+            <span className="text-slate-400 dark:text-slate-400 font-normal select-none mr-2 sm:mr-3">
               ~
             </span>
             <span className="text-foreground">{name}</span>
           </h1>
 
-          {/* Line 2: > [JOB TITLE] */}
+          {/* Line 2: ❯ [JOB TITLE] */}
           <div className="mt-3 sm:mt-5 text-xl sm:text-3xl lg:text-4xl font-light min-h-[2rem] sm:min-h-[2.75rem] flex items-baseline">
-            <span className="text-emerald-500 dark:text-emerald-400 font-normal mr-2 sm:mr-3 select-none">
-              &gt;
+            <span className="text-emerald-400 dark:text-emerald-400 font-bold mr-2 sm:mr-3 select-none">
+              ❯
             </span>
 
             <div className="relative inline-flex items-baseline overflow-hidden py-1">
