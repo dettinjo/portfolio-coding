@@ -14,7 +14,27 @@ interface HeroTerminalProps {
 const TYPING_SPEED = 38; // Snappy keystroke speed (~38ms/char)
 const EXIT_DURATION = 220; // Upward scroll duration
 
-function formatLastLogin(date: Date): string {
+function getVisitorEnvironment(): string {
+  if (typeof window === "undefined" || !navigator) return "console";
+
+  const ua = navigator.userAgent || "";
+  const navAny = navigator as unknown as { userAgentData?: { platform?: string } };
+  const platform = navAny.userAgentData?.platform || "";
+
+  // 1. Mobile devices
+  if (/iPhone/i.test(ua)) return "iphone";
+  if (/iPad/i.test(ua) || (platform === "macOS" && navigator.maxTouchPoints > 1)) return "ipad";
+  if (/Android/i.test(ua)) return "android";
+
+  // 2. Desktop Operating Systems
+  if (/Macintosh|Mac OS X/i.test(ua) || platform === "macOS") return "macos";
+  if (/Windows/i.test(ua) || platform === "Windows") return "windows";
+  if (/Linux/i.test(ua) || platform === "Linux") return "linux";
+
+  return "console";
+}
+
+function formatLastLogin(date: Date, device: string): string {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -27,7 +47,7 @@ function formatLastLogin(date: Date): string {
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
 
-  return `Last login: ${dayName} ${monthName} ${dayNum} ${hours}:${minutes}:${seconds} on ttys001`;
+  return `Last login: ${dayName} ${monthName} ${dayNum} ${hours}:${minutes}:${seconds} on ${device}`;
 }
 
 export function HeroTerminal({
@@ -55,9 +75,10 @@ export function HeroTerminal({
 
   const currentRole = roles[currentIndex] || roles[0] || "";
 
-  // Set visitor login timestamp upon mount (avoids SSR mismatch)
+  // Set visitor login timestamp upon mount with detected device (avoids SSR mismatch)
   useEffect(() => {
-    setLastLogin(formatLastLogin(new Date()));
+    const device = getVisitorEnvironment();
+    setLastLogin(formatLastLogin(new Date(), device));
   }, []);
 
   // 1. Initial cursor blinks once, then drops prompt
@@ -161,12 +182,12 @@ export function HeroTerminal({
 
   return (
     <div
-      className={cn("w-full select-none text-left font-mono min-h-[140px] sm:min-h-[170px] lg:min-h-[190px]", className)}
+      className={cn("w-full select-text text-left font-mono min-h-[140px] sm:min-h-[170px] lg:min-h-[190px]", className)}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Top Banner: Last login timestamp line */}
-      <div className="text-xs sm:text-sm font-mono text-muted-foreground/75 mb-2 sm:mb-3 min-h-[1.25rem] select-none tracking-tight whitespace-pre">
+      <div className="text-xs sm:text-sm font-mono text-muted-foreground/75 mb-2 sm:mb-3 min-h-[1.25rem] tracking-tight whitespace-pre select-text">
         {lastLogin || "\u00A0"}
       </div>
 
@@ -192,19 +213,19 @@ export function HeroTerminal({
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="flex flex-col"
+          className="flex flex-col select-text"
         >
           {/* Line 1: ~ [My name] */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight flex items-baseline">
-            <span className="text-slate-400 dark:text-slate-400 font-normal select-none mr-2 sm:mr-3">
+            <span className="text-slate-400 dark:text-slate-400 font-normal mr-2 sm:mr-3 select-text">
               ~
             </span>
-            <span className="text-foreground">{name}</span>
+            <span className="text-foreground select-text">{name}</span>
           </h1>
 
           {/* Line 2: ❯ [JOB TITLE] */}
-          <div className="mt-3 sm:mt-5 text-xl sm:text-3xl lg:text-4xl font-light min-h-[2rem] sm:min-h-[2.75rem] flex items-baseline">
-            <span className="text-emerald-400 dark:text-emerald-400 font-bold mr-2 sm:mr-3 select-none">
+          <div className="mt-3 sm:mt-5 text-xl sm:text-3xl lg:text-4xl font-light min-h-[2rem] sm:min-h-[2.75rem] flex items-baseline select-text">
+            <span className="text-emerald-400 dark:text-emerald-400 font-bold mr-2 sm:mr-3 select-text">
               ❯
             </span>
 
