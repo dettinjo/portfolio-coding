@@ -10,7 +10,7 @@ export interface SvgRenderOptions {
 }
 
 function escapeXml(unsafe: string): string {
-  return unsafe
+  return String(unsafe || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -35,6 +35,7 @@ export function renderBannerSvg(
         badgeBg: "#27272a", // hsl(240 5% 20%)
         badgeFg: "#fafafa", // hsl(240 10% 98%)
         prompt: "#a1a1aa", // hsl(240 5% 65%) - subtle muted prompt
+        statusDot: "#22c55e", // emerald-500
       }
     : {
         bg: "#fafafa", // hsl(240 10% 98%)
@@ -43,14 +44,25 @@ export function renderBannerSvg(
         badgeBg: "#f4f4f5", // hsl(240 5% 90%)
         badgeFg: "#18181b", // hsl(240 10% 10%)
         prompt: "#71717a", // hsl(240 5% 45%) - subtle muted prompt
+        statusDot: "#16a34a", // emerald-600
       };
 
   const safeJobTitle = escapeXml(data.jobTitle || "AI Engineer");
   const isTitleOnly = data.template === "title-only";
   const hasSkills = !isTitleOnly && Array.isArray(data.skills) && data.skills.length > 0;
   const skills = hasSkills ? data.skills.slice(0, 8) : [];
+  const tagStyle = data.tagStyle || "block";
 
-  // Exact font stacks from tailwind.config.ts / next.js layout
+  const showTagline = Boolean(data.showTagline && data.tagline?.trim());
+  const safeTagline = escapeXml(data.tagline || "");
+
+  const showStatus = Boolean(data.showStatus && data.statusText?.trim());
+  const safeStatusText = escapeXml(data.statusText || "");
+
+  const showContact = Boolean(data.showContact && data.contactUrl?.trim());
+  const safeContactUrl = escapeXml(data.contactUrl || "");
+
+  // Exact monospace font stack
   const fontMono =
     "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 
@@ -59,43 +71,134 @@ export function renderBannerSvg(
   // Left clearance: x = 380px ensures 100% avoidance of LinkedIn's desktop circular avatar
   const startX = 380;
 
-  // Title vertical position
-  // If skills are present: title at y = 180 and badges at y = 226
-  // If skills are absent or title-only: title is centered at y = 216
-  const titleY = hasSkills ? 180 : 216;
+  // Vertical placement
+  let titleY = 182;
+  let taglineY = 138;
+  let badgesY = 230;
 
-  // Show prompt only for terminal style (hidden for terminal-clean and clean)
-  const showPrompt = data.template === "terminal";
+  if (isTitleOnly) {
+    titleY = 216;
+  } else if (showTagline) {
+    titleY = 192;
+    taglineY = 144;
+    badgesY = 242;
+  }
 
-  // Skill badge pills rendering (styled identical to src/components/ui/badge.tsx)
-  let badgesContent = "";
+  // Prompt prefix resolution
+  let promptStr = "";
+  if (data.template === "terminal") {
+    const symbol = data.promptSymbol || ">";
+    if (symbol === ">") {
+      promptStr = `<tspan fill="${colors.prompt}">&gt; </tspan>`;
+    } else if (symbol === "$") {
+      promptStr = `<tspan fill="${colors.prompt}">$ </tspan>`;
+    } else if (symbol === "❯") {
+      promptStr = `<tspan fill="${colors.prompt}">&#10095; </tspan>`;
+    }
+  }
+
+  // 1. Title SVG
+  const titleSvg = `
+    <!-- Terminal Title Line with cursor block -->
+    <g id="terminal-title">
+      <text x="${startX}" y="${titleY}" xml:space="preserve" font-family="${fontMono}" font-size="52" font-weight="700" letter-spacing="-0.02em">${promptStr}<tspan fill="${colors.fg}">${safeJobTitle}</tspan><tspan dx="8" fill="${colors.fg}">&#9608;</tspan></text>
+    </g>`;
+
+  // 2. Optional Tagline (Code comment style)
+  let taglineSvg = "";
+  if (showTagline) {
+    taglineSvg = `
+    <!-- Terminal Comment / Tagline -->
+    <g id="terminal-tagline">
+      <text x="${startX}" y="${taglineY}" font-family="${fontMono}" font-size="16" font-weight="500" fill="${colors.prompt}"># ${safeTagline}</text>
+    </g>`;
+  }
+
+  // 3. Skill Tags SVG (Modern Terminal Style)
+  let badgesSvg = "";
   if (hasSkills) {
-    const badgeY = 226;
-    const badgeHeight = 30;
-    let currentBadgeX = startX;
-
-    const renderedBadges = skills
-      .map((skill) => {
-        const text = escapeXml(skill);
-        // Estimate badge width: ~8.2px per char in 13px mono font + 24px horizontal padding (px-2.5)
-        const itemWidth = Math.round(text.length * 8.2) + 24;
-        const x = currentBadgeX;
-        currentBadgeX += itemWidth + 10;
-
-        return `
-      <g transform="translate(${x}, ${badgeY})">
-        <rect width="${itemWidth}" height="${badgeHeight}" rx="15" fill="${colors.badgeBg}" stroke="${colors.border}" stroke-width="1" />
-        <text x="${itemWidth / 2}" y="19" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">
+    if (tagStyle === "block") {
+      // Modern terminal rectangular chips (rx="3", crisp monospace)
+      let curX = startX;
+      const rendered = skills
+        .map((skill) => {
+          const text = escapeXml(skill);
+          const itemWidth = Math.round(text.length * 8.2) + 20;
+          const x = curX;
+          curX += itemWidth + 8;
+          return `
+      <g transform="translate(${x}, ${badgesY})">
+        <rect width="${itemWidth}" height="28" rx="3" fill="${colors.badgeBg}" stroke="${colors.border}" stroke-width="1" />
+        <text x="${itemWidth / 2}" y="18" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">
           ${text}
         </text>
       </g>`;
-      })
-      .join("");
-
-    badgesContent = `<g id="skill-badges">${renderedBadges}\n    </g>`;
+        })
+        .join("");
+      badgesSvg = `\n    <!-- Terminal Code Tag Blocks -->\n    <g id="skill-badges">${rendered}\n    </g>`;
+    } else if (tagStyle === "bracket") {
+      // Bracketed code array tokens: [ Python ] [ PyTorch ]
+      let curX = startX;
+      const rendered = skills
+        .map((skill) => {
+          const text = escapeXml(skill);
+          const textLen = Math.round((text.length + 4) * 8.5);
+          const x = curX;
+          curX += textLen + 10;
+          return `
+      <g transform="translate(${x}, ${badgesY + 18})">
+        <text font-family="${fontMono}" font-size="14" font-weight="500">
+          <tspan fill="${colors.prompt}">[ </tspan><tspan fill="${colors.fg}">${text}</tspan><tspan fill="${colors.prompt}"> ]</tspan>
+        </text>
+      </g>`;
+        })
+        .join("");
+      badgesSvg = `\n    <!-- Terminal Bracket Tokens -->\n    <g id="skill-badges">${rendered}\n    </g>`;
+    } else if (tagStyle === "inline") {
+      // Minimalist terminal pipeline: $ stack: Python · PyTorch · Docker
+      badgesSvg = `
+    <!-- Terminal Inline Pipeline -->
+    <g id="skill-badges" transform="translate(${startX}, ${badgesY + 18})">
+      <text font-family="${fontMono}" font-size="14" font-weight="500">
+        <tspan fill="${colors.prompt}">$ stack: </tspan>
+        ${skills
+          .map(
+            (s, idx) =>
+              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+                idx < skills.length - 1
+                  ? `<tspan fill="${colors.prompt}">  &#183;  </tspan>`
+                  : ""
+              }`
+          )
+          .join("")}
+      </text>
+    </g>`;
+    }
   }
 
-  // Optional LinkedIn Safe Area Guides Overlay
+  // 4. Optional Status (tmux / statusline style)
+  let statusSvg = "";
+  if (showStatus) {
+    const textWidth = Math.round(safeStatusText.length * 8.5);
+    statusSvg = `
+    <!-- Terminal Statusline Indicator -->
+    <g id="terminal-status" transform="translate(1504, 60)" text-anchor="end">
+      <circle cx="-${textWidth + 12}" cy="-4" r="4.5" fill="${colors.statusDot}" />
+      <text font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.prompt}">${safeStatusText}</text>
+    </g>`;
+  }
+
+  // 5. Optional Handle / URL (terminal path)
+  let contactSvg = "";
+  if (showContact) {
+    contactSvg = `
+    <!-- Terminal Path / Handle -->
+    <g id="terminal-handle" transform="translate(1504, 345)" text-anchor="end">
+      <text font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.prompt}">~/ ${safeContactUrl}</text>
+    </g>`;
+  }
+
+  // 6. Optional LinkedIn Safe Area Guides Overlay
   const safeAreaOverlay = options.showSafeAreas
     ? `
     <!-- LinkedIn Safe Area Overlay Guide -->
@@ -111,15 +214,11 @@ export function renderBannerSvg(
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LINKEDIN_BANNER_WIDTH} ${LINKEDIN_BANNER_HEIGHT}" width="${LINKEDIN_BANNER_WIDTH}" height="${LINKEDIN_BANNER_HEIGHT}">
     <!-- Background: exact portfolio color -->
     <rect width="${LINKEDIN_BANNER_WIDTH}" height="${LINKEDIN_BANNER_HEIGHT}" fill="${colors.bg}" />
-
-    <!-- Terminal Title Line with inline prompt and block cursor -->
-    <g id="terminal-title">
-      <text x="${startX}" y="${titleY}" xml:space="preserve" font-family="${fontMono}" font-size="52" font-weight="700" letter-spacing="-0.02em">${showPrompt ? `<tspan fill="${colors.prompt}">&gt; </tspan>` : ""}<tspan fill="${colors.fg}">${safeJobTitle}</tspan><tspan dx="6" fill="${colors.fg}">&#9608;</tspan></text>
-    </g>
-
-    <!-- Optional Skill Badges (matches badge.tsx) -->
-    ${badgesContent}
-
+    ${statusSvg}
+    ${taglineSvg}
+    ${titleSvg}
+    ${badgesSvg}
+    ${contactSvg}
     ${safeAreaOverlay}
   </svg>`;
 }

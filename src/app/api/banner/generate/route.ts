@@ -26,6 +26,11 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     searchParams.get("tagline") ||
     DEFAULT_BANNER_DATA.tagline;
 
+  const showTagline =
+    body?.showTagline !== undefined
+      ? body.showTagline
+      : searchParams.get("showTagline") === "true";
+
   let skills: string[] = DEFAULT_BANNER_DATA.skills;
   if (body?.skills && Array.isArray(body.skills)) {
     skills = body.skills;
@@ -43,6 +48,11 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
     DEFAULT_BANNER_DATA.contactUrl;
 
+  const showContact =
+    body?.showContact !== undefined
+      ? body.showContact
+      : searchParams.get("showContact") === "true";
+
   const statusText =
     body?.statusText ||
     searchParams.get("statusText") ||
@@ -51,9 +61,7 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
   const showStatus =
     body?.showStatus !== undefined
       ? body.showStatus
-      : searchParams.get("showStatus") !== null
-      ? searchParams.get("showStatus") === "true"
-      : true;
+      : searchParams.get("showStatus") === "true";
 
   const theme: BannerTheme =
     (body?.theme || searchParams.get("theme") || DEFAULT_BANNER_DATA.theme) === "light"
@@ -70,12 +78,28 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       ? (templateParam as BannerTemplateId)
       : "terminal";
 
+  const tagStyleParam = body?.tagStyle || searchParams.get("tagStyle");
+  const tagStyle =
+    tagStyleParam === "bracket" || tagStyleParam === "inline"
+      ? tagStyleParam
+      : "block";
+
+  const promptParam = body?.promptSymbol || searchParams.get("promptSymbol");
+  const promptSymbol =
+    promptParam === "$" || promptParam === "❯" || promptParam === "none"
+      ? promptParam
+      : ">";
+
   return {
     jobTitle,
     name,
     tagline,
+    showTagline,
     skills,
+    tagStyle,
+    promptSymbol,
     contactUrl,
+    showContact,
     statusText,
     showStatus,
     theme,

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { BannerData, BannerTemplateId } from "@/types/banner";
+import {
+  BannerData,
+  BannerTemplateId,
+  TerminalTagStyle,
+  TerminalPrompt,
+} from "@/types/banner";
 import {
   DEFAULT_BANNER_DATA,
   QUICK_ROLE_PRESETS,
@@ -28,6 +33,10 @@ import {
   Type,
   FileCode,
   ArrowLeft,
+  Hash,
+  Activity,
+  Globe,
+  SlidersHorizontal,
 } from "lucide-react";
 
 interface LinkedInBannerGeneratorProps {
@@ -45,6 +54,7 @@ export function LinkedInBannerGenerator({
   }));
 
   const [showSafeAreas, setShowSafeAreas] = useState<boolean>(true);
+  const [showAdvancedContent, setShowAdvancedContent] = useState<boolean>(false);
   const [newSkillInput, setNewSkillInput] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -109,6 +119,14 @@ export function LinkedInBannerGenerator({
       const params = new URLSearchParams({
         jobTitle: data.jobTitle,
         skills: data.skills.join(","),
+        tagStyle: data.tagStyle || "block",
+        promptSymbol: data.promptSymbol || ">",
+        showTagline: String(Boolean(data.showTagline)),
+        tagline: data.tagline || "",
+        showStatus: String(Boolean(data.showStatus)),
+        statusText: data.statusText || "",
+        showContact: String(Boolean(data.showContact)),
+        contactUrl: data.contactUrl || "",
         theme: data.theme,
         template: data.template,
         scale: String(scale),
@@ -295,7 +313,7 @@ export function LinkedInBannerGenerator({
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
         {/* ─── ARTBOARD / CANVAS STAGE ───────────────────────────────────── */}
         <section className="sticky top-0 lg:static z-20 bg-background/95 lg:bg-zinc-950/20 backdrop-blur-md lg:backdrop-blur-none border-b lg:border-b-0 border-border/80 lg:flex-1 lg:min-h-0 lg:h-full flex flex-col items-center justify-center p-3 sm:p-4 lg:p-6 shadow-xs lg:shadow-none">
-          {/* Banner Box */}
+          {/* Banner Box: Pure minimal canvas with zero window parts */}
           <div className="w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md lg:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
             <div
               className="w-full h-full flex items-center justify-center select-none"
@@ -330,7 +348,7 @@ export function LinkedInBannerGenerator({
         </section>
 
         {/* ─── INSPECTOR SIDEBAR / CONTROLS ──────────────────────────────── */}
-        <aside className="w-full lg:w-80 xl:w-[350px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-5 lg:space-y-0">
+        <aside className="w-full lg:w-80 xl:w-[350px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/60 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-5 lg:space-y-0">
           {/* Controls Group */}
           <div className="space-y-4">
             {/* Section 1: Headline Role */}
@@ -363,55 +381,132 @@ export function LinkedInBannerGenerator({
               </div>
             </div>
 
-            {/* Section 2: Terminal Style Selector */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Terminal Style</Label>
-              <div className="grid grid-cols-3 gap-1 p-1 bg-muted/40 border border-border/60 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => handleUpdate("template", "terminal")}
-                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                    data.template === "terminal"
-                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Terminal Prompt (> Title█)"
-                >
-                  <Terminal className="h-3 w-3" />
-                  <span>Prompt</span>
-                </button>
+            {/* Section 2: Terminal Style & Format */}
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Terminal Style</Label>
+                <div className="grid grid-cols-3 gap-1 p-1 bg-muted/40 border border-border/60 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => handleUpdate("template", "terminal")}
+                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                      data.template === "terminal"
+                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    title="Terminal Prompt (> Title█)"
+                  >
+                    <Terminal className="h-3 w-3" />
+                    <span>Prompt</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleUpdate("template", "terminal-clean" as BannerTemplateId)
-                  }
-                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                    data.template === "terminal-clean"
-                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Clean Title (Title█)"
-                >
-                  <Type className="h-3 w-3" />
-                  <span>Clean</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdate("template", "terminal-clean" as BannerTemplateId)
+                    }
+                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                      data.template === "terminal-clean"
+                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    title="Clean Title (Title█)"
+                  >
+                    <Type className="h-3 w-3" />
+                    <span>Clean</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleUpdate("template", "title-only" as BannerTemplateId)
-                  }
-                  className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
-                    data.template === "title-only"
-                      ? "bg-card text-foreground font-semibold shadow-xs border border-border"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Centered Title Only"
-                >
-                  <span>Title Only</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdate("template", "title-only" as BannerTemplateId)
+                    }
+                    className={`flex items-center justify-center gap-1 py-1.5 sm:py-1 px-1.5 rounded-md text-[11px] font-mono transition-all ${
+                      data.template === "title-only"
+                        ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    title="Centered Title Only"
+                  >
+                    <span>Title Only</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Sub-controls: Prompt Symbol (if template === 'terminal') */}
+              {data.template === "terminal" && (
+                <div className="flex items-center justify-between pt-0.5">
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    Prompt Symbol:
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {(
+                      [
+                        { id: ">", label: "> " },
+                        { id: "❯", label: "❯ " },
+                        { id: "$", label: "$ " },
+                      ] as const
+                    ).map((p) => {
+                      const isSel = (data.promptSymbol || ">") === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleUpdate("promptSymbol", p.id as TerminalPrompt)}
+                          className={`px-2 py-0.5 rounded text-[11px] font-mono border transition-all ${
+                            isSel
+                              ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                              : "bg-muted/40 border-border/60 text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-controls: Tag Format (if template !== 'title-only') */}
+              {data.template !== "title-only" && (
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      Tag Style
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      Code Terminal
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 p-0.5 bg-muted/40 border border-border/60 rounded-lg">
+                    {(
+                      [
+                        { id: "block", label: "Blocks" },
+                        { id: "bracket", label: "[ Brackets ]" },
+                        { id: "inline", label: "· Inline" },
+                      ] as const
+                    ).map((ts) => {
+                      const isSel = (data.tagStyle || "block") === ts.id;
+                      return (
+                        <button
+                          key={ts.id}
+                          type="button"
+                          onClick={() =>
+                            handleUpdate("tagStyle", ts.id as TerminalTagStyle)
+                          }
+                          className={`py-1 px-1 rounded-md text-[10px] font-mono transition-all text-center ${
+                            isSel
+                              ? "bg-card text-foreground font-semibold shadow-xs border border-border"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {ts.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Section 3: Skills & Tags (only if not title-only) */}
@@ -424,7 +519,7 @@ export function LinkedInBannerGenerator({
                   </span>
                 </div>
 
-                {/* Active Skill Pills */}
+                {/* Active Skill Tags (Modern Code Terminal Style) */}
                 <div className="flex flex-wrap gap-1.5 p-2 rounded-lg bg-background/60 border border-border/80 min-h-[36px]">
                   {data.skills.length === 0 ? (
                     <span className="text-[11px] text-muted-foreground/60 italic py-0.5 px-1">
@@ -434,13 +529,26 @@ export function LinkedInBannerGenerator({
                     data.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono bg-secondary text-secondary-foreground border border-border/60"
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono border border-border/70 ${
+                          data.tagStyle === "block"
+                            ? "rounded-[3px] bg-secondary text-secondary-foreground"
+                            : data.tagStyle === "bracket"
+                            ? "rounded bg-transparent text-foreground border-transparent"
+                            : "rounded bg-muted/40 text-foreground"
+                        }`}
                       >
+                        {data.tagStyle === "bracket" ? (
+                          <span className="text-muted-foreground">[</span>
+                        ) : null}
                         <span>{skill}</span>
+                        {data.tagStyle === "bracket" ? (
+                          <span className="text-muted-foreground">]</span>
+                        ) : null}
                         <button
                           type="button"
                           onClick={() => handleRemoveSkill(skill)}
                           className="hover:text-destructive transition-colors ml-0.5 p-0.5 -mr-1"
+                          title={`Remove ${skill}`}
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -498,6 +606,109 @@ export function LinkedInBannerGenerator({
                 )}
               </div>
             )}
+
+            {/* Section 4: Optional Content Features (Online Builder Analysis) */}
+            <div className="pt-1 border-t border-border/60">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedContent((v) => !v)}
+                className="w-full flex items-center justify-between py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <span className="flex items-center gap-1.5">
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+                  <span>Optional Details</span>
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground/70">
+                  {showAdvancedContent ? "Hide ▲" : "Tagline · Status · URL ▼"}
+                </span>
+              </button>
+
+              {showAdvancedContent && (
+                <div className="space-y-3 pt-2 text-xs">
+                  {/* Tagline Comment */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(data.showTagline)}
+                          onChange={(e) =>
+                            handleUpdate("showTagline", e.target.checked)
+                          }
+                          className="rounded border-border"
+                        />
+                        <Hash className="h-3 w-3 text-muted-foreground" />
+                        <span>Code Comment / Tagline</span>
+                      </label>
+                    </div>
+                    {data.showTagline && (
+                      <Input
+                        value={data.tagline || ""}
+                        onChange={(e) => handleUpdate("tagline", e.target.value)}
+                        placeholder="e.g. Building scalable agentic AI systems"
+                        className="font-mono text-[11px] bg-background/80 h-7"
+                      />
+                    )}
+                  </div>
+
+                  {/* Status Indicator */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(data.showStatus)}
+                          onChange={(e) =>
+                            handleUpdate("showStatus", e.target.checked)
+                          }
+                          className="rounded border-border"
+                        />
+                        <Activity className="h-3 w-3 text-emerald-500" />
+                        <span>Terminal Statusline</span>
+                      </label>
+                    </div>
+                    {data.showStatus && (
+                      <Input
+                        value={data.statusText || ""}
+                        onChange={(e) =>
+                          handleUpdate("statusText", e.target.value)
+                        }
+                        placeholder="e.g. open to work"
+                        className="font-mono text-[11px] bg-background/80 h-7"
+                      />
+                    )}
+                  </div>
+
+                  {/* Handle / URL */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-medium text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(data.showContact)}
+                          onChange={(e) =>
+                            handleUpdate("showContact", e.target.checked)
+                          }
+                          className="rounded border-border"
+                        />
+                        <Globe className="h-3 w-3 text-muted-foreground" />
+                        <span>Terminal Path / Handle</span>
+                      </label>
+                    </div>
+                    {data.showContact && (
+                      <Input
+                        value={data.contactUrl || ""}
+                        onChange={(e) =>
+                          handleUpdate("contactUrl", e.target.value)
+                        }
+                        placeholder="e.g. github.com/username"
+                        className="font-mono text-[11px] bg-background/80 h-7"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Bottom Actions & Secondary Formats */}

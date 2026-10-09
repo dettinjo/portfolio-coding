@@ -988,6 +988,10 @@ Instructions:
         .enum(["terminal", "terminal-clean", "title-only"])
         .default("terminal")
         .describe("Layout design idea: 'terminal' (CLI prompt), 'terminal-clean' (clean minimal), or 'title-only'"),
+      tagStyle: z
+        .enum(["block", "bracket", "inline"])
+        .default("block")
+        .describe("Terminal skill tag style: 'block' (rectangular terminal chips), 'bracket' ([ brackets ]), or 'inline' ($ stack: tag · tag)"),
       contactUrl: z
         .string()
         .optional()
@@ -1008,6 +1012,7 @@ Instructions:
       skills,
       theme,
       template,
+      tagStyle,
       contactUrl,
       statusText,
       scale,
@@ -1019,6 +1024,7 @@ Instructions:
         skills: skills && skills.length > 0 ? skills : DEFAULT_BANNER_DATA.skills,
         theme,
         template,
+        tagStyle,
         contactUrl:
           contactUrl ||
           siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||

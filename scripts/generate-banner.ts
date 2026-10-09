@@ -24,6 +24,7 @@ interface BannerCliConfig {
   role: string;
   skills?: string[];
   theme: "dark" | "light" | "both";
+  tagStyle?: "block" | "bracket" | "inline";
   outDir: string;
   withGuides: boolean;
 }
@@ -73,6 +74,12 @@ function parseArgs(): BannerCliConfig {
   const theme =
     themeRaw === "dark" || themeRaw === "light" ? themeRaw : "both";
 
+  const tagStyleRaw = (options["tag-style"] || options.style || "block").toLowerCase();
+  const tagStyle =
+    tagStyleRaw === "bracket" || tagStyleRaw === "inline"
+      ? tagStyleRaw
+      : "block";
+
   const outDir = path.resolve(
     process.cwd(),
     options.out || options.o || "banners"
@@ -82,6 +89,7 @@ function parseArgs(): BannerCliConfig {
     role,
     skills,
     theme,
+    tagStyle,
     outDir,
     withGuides: flags.has("guides") || flags.has("safe-guides"),
   };
@@ -101,7 +109,8 @@ async function main() {
   console.log("             MINIMAL TERMINAL LINKEDIN BANNER GENERATOR                         ");
   console.log("================================================================================");
   console.log(`  Job Title        : ${config.role}`);
-  console.log(`  Skill Pills      : ${config.skills && config.skills.length > 0 ? config.skills.join(" · ") : "(None - Title Only)"}`);
+  console.log(`  Skill Tags       : ${config.skills && config.skills.length > 0 ? config.skills.join(" · ") : "(None - Title Only)"}`);
+  console.log(`  Tag Style        : ${config.tagStyle || "block"} (rectangular code terminal chips)`);
   console.log(`  Color Themes     : ${themes.join(" & ")} (exact website tokens: #18181b / #fafafa)`);
   console.log(`  Typography       : Monospace (font-mono, font-bold 700, tracking-tight)`);
   console.log(`  Cursor Style     : Block cursor (█ matching AnimatedGreeting.tsx)`);
@@ -138,6 +147,7 @@ async function main() {
         name: "",
         tagline: "",
         skills: variant.includeSkills ? config.skills || [] : [],
+        tagStyle: config.tagStyle,
         theme,
         template: variant.template,
       };

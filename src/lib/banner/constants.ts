@@ -36,7 +36,7 @@ export const BANNER_TEMPLATES: BannerTemplateMeta[] = [
   {
     id: "terminal",
     name: "Terminal Prompt",
-    description: "Signature CLI prompt (> Title█) with skill pills",
+    description: "Signature CLI prompt (> Title█) with code tags",
     tag: "Signature",
   },
   {
@@ -128,7 +128,8 @@ export const SUGGESTED_SKILLS: string[] = [
 export const DEFAULT_BANNER_DATA: BannerData = {
   jobTitle: "AI Engineer",
   name: "",
-  tagline: "",
+  tagline: "Building scalable agentic AI systems & production RAG",
+  showTagline: false,
   skills: [
     "Python",
     "PyTorch",
@@ -138,6 +139,12 @@ export const DEFAULT_BANNER_DATA: BannerData = {
     "Docker",
     "FastAPI",
   ],
+  tagStyle: "block",
+  promptSymbol: ">",
+  statusText: "open to work",
+  showStatus: false,
+  contactUrl: "",
+  showContact: false,
   theme: "dark",
   template: "terminal",
 };
