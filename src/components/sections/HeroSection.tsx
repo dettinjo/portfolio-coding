@@ -68,9 +68,9 @@ export function HeroSection() {
     >
       <div className="max-w-6xl mx-auto px-6 flex flex-col-reverse items-center gap-8 lg:gap-12 text-center lg:grid lg:grid-cols-2 lg:text-left w-full">
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={entranceTransition}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
           className="flex flex-col items-center lg:items-start w-full"
         >
           <HeroTerminal
