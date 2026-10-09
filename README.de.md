@@ -71,6 +71,18 @@ vergeben und eine Config-Datei ausfüllen – ohne Code-Änderungen.
   mit modularen Terminal-Bausteinen (Name, Rollentitel, Skills, Link, Statusline),
   smaragdfarbenen CLI-Prompts passend zur Hero-Section, Kollisionsschutz für das Profilbild und
   exakten Design-Tokens.
+- **Interaktiver Ghostty-Style Monospace Terminal Hero.** Terminal-Startbereich basierend
+  auf JetBrains Mono mit dynamischem `Last login:`-Banner, das das Betriebssystem und
+  Gerät des Besuchers erkennt (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`),
+  initialisierendem Blockcursor mit schnellem Abwärts-Drop, Prompt-Zeilen (`~ Name` und
+  smaragdfarbenes `❯ Job Title`), sanfter Tipp-Animation für rotierende Rollenbezeichnungen
+  und vollständiger Textauswahl über alle Elemente.
+- **Terminal- & CLI-Portfolio via `curl`.** Der Abruf der Domain aus dem Terminal
+  (`curl https://deine-domain.com`) liefert dank User-Agent-Erkennung direkt eine farbige,
+  ANSI-formatierte Terminal-Oberfläche mit Unicode-Rahmenkarten, visuellen Skill-Balken,
+  spezifischen Unterpfaden (`/projects`, `/skills`, `/resume`, `/contact`, `/<slug>`),
+  Ausgabeoptionen (`?plain=1`, `?json=1`, `?lang=de`) und 3-stufigem Rate-Limiting
+  (Cloudflare, Traefik, In-App Sliding Window).
 - **Mitgelieferter Demo-Datensatz**, damit ein frischer Clone (oder eine
   öffentliche Live-Demo) eine vollständige, realistische Site ohne Secrets zeigt.
 
@@ -287,6 +299,54 @@ Unterstützte CLI-Optionen:
 - **Single-Viewport-Design**: Auf Desktop-Bildschirmen passt das Studio vollständig in ein bildschirmfüllendes Layout (`h-screen overflow-hidden`) ohne Scrollbalken.
 - **Responsives Mobile-Studio**: Fixierte Live-Vorschau oben mit Touch-optimierten Schaltern im unteren Bereich.
 - **Exportformate**: Standard-PNG (1584×396 px), Retina-2x-PNG (3168×792 px), Vektor-SVG, SVG-Direktkopie in die Zwischenablage und automatisierte REST-API (`/api/banner/generate`).
+
+---
+
+## Terminal- & CLI-Portfolio (`curl`-Schnittstelle)
+
+Entwickler und Terminal-Nutzer können das gesamte Portfolio direkt von der Shell aus über `curl`, `wget` oder `httpie` aufrufen – ohne einen Browser zu öffnen. Eine Next.js-Middleware prüft den eingehenden `User-Agent`-Header sowie URL-Parameter und liefert eine farbige ANSI-Terminal-Ausgabe mit Unicode-Rahmenkarten, grafischen Skill-Balken und hervorgehobenen Abschnitten.
+
+```bash
+# Gesamtes Portfolio im Terminal aufrufen
+curl https://deine-domain.com
+
+# Einzelne Unterseiten gezielt ansteuern
+curl https://deine-domain.com/projects      # Projektkarten mit Tech-Tags und URLs
+curl https://deine-domain.com/skills        # Kategorisierte Skills mit visuellen Balken
+curl https://deine-domain.com/resume        # Kompakter Lebenslauf / CV
+curl https://deine-domain.com/contact       # Kontaktdaten, E-Mail und Social-Profile
+curl https://deine-domain.com/<slug>        # Detailansicht eines Projekts (z. B. /portfolio-template)
+```
+
+### CLI-Ausgabemodi & URL-Parameter
+
+| Parameter / Header | Beispiel | Verhalten |
+|---|---|---|
+| `?plain=1` / `NO_COLOR=1` | `curl -H "NO_COLOR: 1" https://deine-domain.com` | Entfernt alle ANSI-Farbcodes für sauberen Plain-Text oder automatisierte Shell-Pipes. |
+| `?json=1` / `Accept: application/json` | `curl -H "Accept: application/json" https://deine-domain.com` | Liefert ein strukturiertes JSON-Dokument mit Profil, Skills und Projekten für Skripte. |
+| `?lang=de` / `/de/<route>` | `curl https://deine-domain.com/de/projects` | Gibt die deutsche Terminal-Version aus (beachtet auch `Accept-Language: de`). |
+| `?cli=1` / `/cli` | Im Browser: `https://deine-domain.com?cli=1` | Erzwingt die Terminalansicht auch in regulären Webbrowsern ohne CLI-User-Agent. |
+
+### 3-Stufen-Sicherheits- & Rate-Limiting-Architektur
+
+Zum Schutz vor Scrapern, automatisierten Schleifen und Denial-of-Service-Angriffen ist der Endpunkt durch drei aufeinander abgestimmte Stufen geschützt:
+
+1. **Stufe 1 (Edge / Cloudflare):** CDN-basierter DDoS-Schutz, Bot-Erkennung und globales Caching.
+2. **Stufe 2 (Reverse Proxy / Traefik):** Konfiguriert über Docker-Compose-Labels (`traefik.http.middlewares.app-rate-limit.ratelimit`) mit durchschnittlich **100 Anfragen/Minute** und einem Burst-Puffer von **50 Anfragen**.
+3. **Stufe 3 (Anwendung / Middleware):** In-Memory Sliding-Window-Ratenbegrenzung in [`src/lib/rate-limiter.ts`](src/lib/rate-limiter.ts) basierend auf echten Client-IPs (`X-Forwarded-For`, `X-Real-IP`, `CF-Connecting-IP`):
+   - **CLI-Anfragen:** 60 Anfragen / Minute pro IP (liefert eine ANSI-Fehlerkarte mit HTTP `429 Too Many Requests` und `Retry-After`-Header).
+   - **Kontaktformular:** 5 Absendungen / 15 Minuten pro IP (schützt vor SMTP-Spam).
+   - **Allgemeiner Webseitenaufruf:** 120 Anfragen / Minute pro IP.
+
+---
+
+## Interaktiver Monospace Terminal Hero
+
+Der Startbereich ([`HeroTerminal.tsx`](src/components/sections/HeroTerminal.tsx)) orientiert sich an modernen Terminal-Emulatoren wie Ghostty:
+- **Dynamische Geräteerkennung:** Liest Betriebssystem und Touch-Funktionen aus und rendert ein realistisches `Last login: <Datum> on <device>`-Banner (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android` oder `console`).
+- **Präzise Animations-Choreografie:** Blinkender initialer Blockcursor, flüssiger Drop der Prompt-Zeilen (`~ Name` und smaragdfarbenes `❯ Job Title`), zeichenweises Tippen des Titels und sanfter Übergang nach oben zur nächsten Rolle.
+- **Freie Textauswahl:** Sämtliche Inhalte (Login-Banner, Prompts, Name und Rollen) können mit der Maus markiert und kopiert werden. Der Cursor-Block ist dabei selektionsneutral, damit keine störenden Steuerzeichen mitkopiert werden.
+- **Konfigurierbare Rollenwechsel:** Rollen und Anzeigeintervalle lassen sich in `site.config.json` unter `person.bioRotations` und `person.bioRotationInterval` flexibel anpassen.
 
 ---
 

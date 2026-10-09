@@ -66,6 +66,18 @@ and filling one config file; no code changes required.
   pixel-perfect 1584×396px LinkedIn background banners with zero window chrome,
   modular terminal building blocks (Name, Job Title, Skills, Link, Statusline),
   emerald CLI prompts matching the hero section, avatar collision clearance, and exact brand tokens.
+- **Ghostty-style Monospace Terminal Hero.** Landing header powered by JetBrains Mono
+  featuring a dynamic `Last login:` banner that detects the visitor's operating system
+  and device environment (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`),
+  an initializing blinking block cursor with snappy downward drop, prompt lines (`~ Name`
+  and emerald `❯ Job Title`), smooth typing animations cycling through configurable roles,
+  and fully selectable text across all elements.
+- **Terminal & CLI Portfolio over `curl`.** Querying your live domain from a terminal
+  (`curl https://your-domain.com`) automatically routes via User-Agent inspection to a rich,
+  ANSI-colored terminal portfolio. Features Unicode box-drawing project cards, visual
+  skill proficiency meters, subroutes (`/projects`, `/skills`, `/resume`, `/contact`, `/<slug>`),
+  query flags (`?plain=1`, `?json=1`, `?lang=de`), and 3-tier rate limiting (Cloudflare,
+  Traefik, in-app sliding window).
 - **Bundled demo dataset** so a clean clone (or a public live demo) renders a
   full, realistic site with no secrets.
 
@@ -312,6 +324,54 @@ All generated CV and Cover Letter variants are assigned unique IDs matching the 
 Every generated variant receives unique URLs:
 - **Web Preview**: `/[locale]/resume/preview/[id]` and `/[locale]/cover-letter/preview/[id]`
 - **Direct PDF Download**: `/api/resume/download/[id]` and `/api/cover-letter/download/[id]`
+
+---
+
+## Terminal & CLI Portfolio (`curl` Interface)
+
+Developers and terminal enthusiasts can browse your entire portfolio directly from their shell using `curl`, `wget`, or `httpie` without opening a browser. Next.js middleware inspects incoming `User-Agent` headers and request parameters to serve a colorized, ANSI-formatted terminal experience with Unicode box-drawing cards, visual skill meters, and syntax-highlighted summaries.
+
+```bash
+# Browse the complete interactive portfolio
+curl https://your-domain.com
+
+# Explore dedicated subroutes
+curl https://your-domain.com/projects      # Boxed project cards with tech tags and URLs
+curl https://your-domain.com/skills        # Categorized skills with visual proficiency meters
+curl https://your-domain.com/resume        # Compact plain-text résumé / CV overview
+curl https://your-domain.com/contact       # Direct contact channels, email, and socials
+curl https://your-domain.com/<slug>        # In-depth project breakdown (e.g. /portfolio-template)
+```
+
+### CLI Output Modes & Query Parameters
+
+| Parameter / Header | Example Command | Output Behavior |
+|---|---|---|
+| `?plain=1` / `NO_COLOR=1` | `curl -H "NO_COLOR: 1" https://your-domain.com` | Strips all ANSI colors and styling for plain-text terminal viewing or piped shell scripts. |
+| `?json=1` / `Accept: application/json` | `curl -H "Accept: application/json" https://your-domain.com` | Returns structured JSON containing the candidate bio, skills, and projects for automation. |
+| `?lang=de` / `/de/<route>` | `curl https://your-domain.com/de/projects` | Delivers fully localized German terminal output (respects `Accept-Language: de` automatically). |
+| `?cli=1` / `/cli` | Open in browser at `https://your-domain.com?cli=1` | Forces the terminal output in regular web browsers that don't send a CLI User-Agent. |
+
+### 3-Tier Security & Rate Limiting Architecture
+
+To ensure high availability and protect the server against automated scraper loops or denial-of-service attempts, the CLI and public endpoints are guarded by three complementary layers:
+
+1. **Tier 1 (Edge / Cloudflare):** CDN-level DDoS mitigation, bot inspection, and global caching.
+2. **Tier 2 (Reverse Proxy / Traefik):** Configured via Docker Compose labels (`traefik.http.middlewares.app-rate-limit.ratelimit`), enforcing an average limit of **100 requests/minute** with a burst allowance of **50 requests**.
+3. **Tier 3 (Application / Middleware):** In-memory sliding-window rate limiter in [`src/lib/rate-limiter.ts`](src/lib/rate-limiter.ts) inspecting real client IPs (`X-Forwarded-For`, `X-Real-IP`, `CF-Connecting-IP`):
+   - **CLI Requests:** 60 requests / minute per IP (returns an ANSI box card with HTTP `429 Too Many Requests` and standard `Retry-After` header).
+   - **Contact Form:** 5 submissions / 15 minutes per IP (protects SMTP relay from spam).
+   - **General Web Traffic:** 120 requests / minute per IP.
+
+---
+
+## Interactive Monospace Terminal Hero
+
+The hero section ([`HeroTerminal.tsx`](src/components/sections/HeroTerminal.tsx)) features a Ghostty-inspired terminal aesthetic:
+- **Dynamic Device Detection:** Reads client platform and touch capabilities to format a realistic `Last login: <Date> on <device>` banner (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`, or `console`).
+- **Snappy Motion Choreography:** Initializing blinking block cursor, snappy downward reveal of prompt lines (`~ Name` and emerald `❯ Job Title`), character-by-character typing animation, and upward transition into the next role.
+- **Full Text Selection:** All terminal text (login banner, prompt symbols, name, and rotating roles) can be highlighted and copied cleanly with the mouse, while keeping the cursor glyph unselectable to avoid artifact characters.
+- **Configurable Bio Rotations:** Roles cycle automatically with customizable timing and localized roles configured in `site.config.json` under `person.bioRotations` and `person.bioRotationInterval`.
 
 ---
 
