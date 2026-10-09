@@ -244,9 +244,9 @@ The portfolio includes a private LinkedIn Banner Generator studio accessible at 
 
 | Building Block | Customization Options | Terminal Representation |
 |---|---|---|
-| **Name** | Toggle on/off · Name input · Prefix switch (`~/ Name` vs `Plain`) | `~/ Joel Dettinger` (path style) or `Joel Dettinger` |
+| **Name** | Toggle on/off · Name input · Prefix switch (`~/ Name` vs `Plain`) | `~/ Alex Rivera` (path style) or `Alex Rivera` |
 | **Job Title** | Toggle on/off · Title input · Prompt symbol (`>` / `❯` / `$` / `None`) · **Cursor Toggle (`█`)** | `> AI Engineer █` (bold emerald prompt matching the hero section) |
-| **Portfolio Link** | Toggle on/off · URL input · Placement (`Below` stack vs `Corner`) · Format (`↗ Arrow`, `curl`, `web:`, `Plain`) | `↗ joeldettinger.com` or `curl joeldettinger.com` |
+| **Portfolio Link** | Toggle on/off · URL input · Placement (`Below` stack vs `Corner`) · Format (`↗ Arrow`, `curl`, `web:`, `Plain`) | `↗ alexrivera.dev` or `curl alexrivera.dev` |
 | **Skills & Tech Stack** | Toggle on/off · Add/delete chips (`×`) · 1-click suggested skills · 5 Terminal styles (`Blocks`, `[ ]`, `· Inline`, `\| Pipe`, `stack:`) | `[Python]` `[PyTorch]` or `Python \| PyTorch` or `stack: Python · PyTorch` |
 | **Tagline** | Toggle on/off · Tagline input · Style switch (`Plain` vs `# Comment`) | `Building intelligent systems & agents` or `# Comment` |
 | **Statusline** | Toggle on/off · Status text · Safe Top-Right anchor (`x=1400, y=65`) · 8 Selectable status icons | `● open to work` (Green, Amber, Cyan, Star ✦, Bolt ⚡, Chevron ❯, Ring ○, None) |
@@ -257,13 +257,13 @@ Generate banners directly from your terminal without opening a browser:
 
 ```bash
 # Basic export with role and portfolio link
-npm run banner -- --title "AI Engineer" --link "joeldettinger.com"
+npm run banner -- --title "AI Engineer" --link "alexrivera.dev"
 
 # Fully customized CLI export
 npm run banner -- \
   --title "AI Engineer" \
-  --name "Joel Dettinger" \
-  --link "joeldettinger.com" \
+  --name "Alex Rivera" \
+  --link "alexrivera.dev" \
   --tag-style pipe \
   --link-style curl \
   --no-cursor \
@@ -369,9 +369,13 @@ To ensure high availability and protect the server against automated scraper loo
 
 The hero section ([`HeroTerminal.tsx`](src/components/sections/HeroTerminal.tsx)) features a Ghostty-inspired terminal aesthetic:
 - **Dynamic Device Detection:** Reads client platform and touch capabilities to format a realistic `Last login: <Date> on <device>` banner (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`, or `console`).
+- **Developer-Native Prompt:** The terminal prompt displays the developer's first name (`~ Alex`) for a concise, personal touch.
 - **Snappy Motion Choreography:** Initializing blinking block cursor, snappy downward reveal of prompt lines (`~ Name` and emerald `❯ Job Title`), character-by-character typing animation, and upward transition into the next role.
 - **Full Text Selection:** All terminal text (login banner, prompt symbols, name, and rotating roles) can be highlighted and copied cleanly with the mouse, while keeping the cursor glyph unselectable to avoid artifact characters.
-- **Configurable Bio Rotations:** Roles cycle automatically with customizable timing and localized roles configured in `site.config.json` under `person.bioRotations` and `person.bioRotationInterval`.
+- **Configurable Bio Rotations & Modes:** Roles cycle automatically with customizable timing in `site.config.json` under `person.bioRotations` and `person.bioRotationInterval`. Use `person.bioMode` to select between:
+  - `"role"` (default): Minimal prompt typing only the job title (`❯ AI Engineer█`).
+  - `"full"`: Types the role and smoothly animates the synchronized description subline underneath (`↳ [adjectives] [artifacts]`).
+  - `"inline"`: Types the full sentence inline on the prompt line.
 
 ---
 

@@ -28,7 +28,7 @@ const entranceTransition: Transition = {
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
   const locale = useLocale();
-  const displayName = siteConfig.person.fullName || siteConfig.person.firstName || "Alex Rivera";
+  const displayName = siteConfig.person.firstName || siteConfig.person.fullName.split(" ")[0] || "Alex";
 
   const bioMode = siteConfig.person.bioMode ?? "role";
   const bioItems = useMemo(() => getHeroBioItems(siteConfig, locale), [locale]);

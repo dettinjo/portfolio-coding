@@ -80,7 +80,7 @@ export function formatMarkdownForTerminal(md: string): string {
 export function renderHeader(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
   const p = siteConfig.person;
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const name = p.fullName || resume.basics.name;
   const isJoel = /joel/i.test(name);
   const isAlex = /alex/i.test(name);
@@ -155,7 +155,7 @@ export function renderRoutePill(route: string, subtitle?: string, width = 74): s
  */
 export function renderProjectCard(proj: SoftwareProject, options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
 
   const title = lang === "de" && proj.titleDe ? proj.titleDe : proj.title;
   const desc = lang === "de" && proj.descriptionDe ? proj.descriptionDe : proj.description;
@@ -244,7 +244,7 @@ export function renderProjects(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
   const limit = options.projectLimit ?? projects.length;
   const list = projects.slice(0, limit);
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
 
   const sectionTitle =
     lang === "de"
@@ -281,7 +281,7 @@ export function renderProjects(options: CliRenderOptions = {}): string {
  */
 export function renderProjectsSubroute(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const subtitle =
     lang === "de"
       ? `Alle Software-Projekte & Repositories (${projects.length} insgesamt)`
@@ -313,7 +313,7 @@ export function renderProjectsSubroute(options: CliRenderOptions = {}): string {
  */
 export function renderProjectDetail(slug: string, options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
 
   const proj = projects.find(
     (p) => p.slug.toLowerCase() === slug.toLowerCase() || String(p.id).toLowerCase() === slug.toLowerCase()
@@ -416,7 +416,7 @@ export function renderSkills(options: CliRenderOptions = {}): string {
  */
 export function renderSkillsSubroute(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const subtitle =
     lang === "de"
       ? "Technische Fähigkeiten & Kompetenzmatrix"
@@ -505,7 +505,7 @@ export function renderResume(options: CliRenderOptions = {}): string {
  */
 export function renderResumeSubroute(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const p = siteConfig.person;
   const subtitle =
     lang === "de"
@@ -525,7 +525,7 @@ export function renderResumeSubroute(options: CliRenderOptions = {}): string {
 export function renderContact(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
   const p = siteConfig.person;
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const sectionTitle = lang === "de" ? "KONTAKT & LINKS" : "CONTACT & SOCIALS";
 
   let out = `\n${divider(sectionTitle)}\n\n`;
@@ -567,7 +567,7 @@ export function renderContact(options: CliRenderOptions = {}): string {
  */
 export function renderContactSubroute(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const subtitle =
     lang === "de"
       ? "Direkte Kontaktdaten & soziale Profile"
@@ -585,7 +585,7 @@ export function renderContactSubroute(options: CliRenderOptions = {}): string {
  */
 export function renderCommands(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const domain = origin.replace(/^https?:\/\//, "");
 
   const sectionTitle = lang === "de" ? "TERMINAL BEFEHLE" : "TERMINAL COMMANDS";
@@ -630,7 +630,7 @@ export function renderFullPortfolio(options: CliRenderOptions = {}): string {
  * Render machine-readable JSON representation.
  */
 export function renderJsonSummary(options: CliRenderOptions = {}): string {
-  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const p = siteConfig.person;
 
   const data = {

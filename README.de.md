@@ -253,9 +253,9 @@ Das Portfolio enthält ein privates LinkedIn-Banner-Studio unter `/banner` (ohne
 
 | Baustein | Optionen | Terminal-Darstellung |
 |---|---|---|
-| **Name** | Ein/Aus · Texteingabe · Präfix (`~/ Name` vs `Plain`) | `~/ Joel Dettinger` (Pfad-Stil) oder `Joel Dettinger` |
+| **Name** | Ein/Aus · Texteingabe · Präfix (`~/ Name` vs `Plain`) | `~/ Alex Rivera` (Pfad-Stil) oder `Alex Rivera` |
 | **Rollentitel** | Ein/Aus · Texteingabe · Prompt-Symbol (`>` / `❯` / `$` / `None`) · **Cursor-Schalter (`█`)** | `> AI Engineer █` (mit smaragdfarbenem Prompt passend zur Hero-Section) |
-| **Portfolio-Link** | Ein/Aus · URL-Eingabe · Position (`Below` unter dem Stack vs `Corner` rechts unten) · Format (`↗ Arrow`, `curl`, `web:`, `Plain`) | `↗ joeldettinger.com` oder `curl joeldettinger.com` |
+| **Portfolio-Link** | Ein/Aus · URL-Eingabe · Position (`Below` unter dem Stack vs `Corner` rechts unten) · Format (`↗ Arrow`, `curl`, `web:`, `Plain`) | `↗ alexrivera.dev` oder `curl alexrivera.dev` |
 | **Skills & Tech-Stack** | Ein/Aus · Chips hinzufügen/löschen (`×`) · 1-Klick-Vorschläge · 5 Terminal-Stile (`Blocks`, `[ ]`, `· Inline`, `\| Pipe`, `stack:`) | `[Python]` `[PyTorch]` oder `Python \| PyTorch` oder `stack: Python · PyTorch` |
 | **Tagline** | Ein/Aus · Texteingabe · Format (`Plain` vs `# Comment`) | `Building intelligent systems & agents` oder `# Comment` |
 | **Statusline** | Ein/Aus · Statustext · Oben rechts (`x=1400, y=65`) · 8 wählbare Terminal-Icons | `● open to work` (Grün, Bernstein, Cyan, Stern ✦, Blitz ⚡, Pfeil ❯, Ring ○, Kein Icon) |
@@ -266,13 +266,13 @@ Banner direkt im Terminal rendern, ohne den Browser öffnen zu müssen:
 
 ```bash
 # Standard-Export mit Rolle und Link
-npm run banner -- --title "AI Engineer" --link "joeldettinger.com"
+npm run banner -- --title "AI Engineer" --link "alexrivera.dev"
 
 # Vollständig angepasster CLI-Export
 npm run banner -- \
   --title "AI Engineer" \
-  --name "Joel Dettinger" \
-  --link "joeldettinger.com" \
+  --name "Alex Rivera" \
+  --link "alexrivera.dev" \
   --tag-style pipe \
   --link-style curl \
   --no-cursor \
@@ -344,9 +344,13 @@ Zum Schutz vor Scrapern, automatisierten Schleifen und Denial-of-Service-Angriff
 
 Der Startbereich ([`HeroTerminal.tsx`](src/components/sections/HeroTerminal.tsx)) orientiert sich an modernen Terminal-Emulatoren wie Ghostty:
 - **Dynamische Geräteerkennung:** Liest Betriebssystem und Touch-Funktionen aus und rendert ein realistisches `Last login: <Datum> on <device>`-Banner (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android` oder `console`).
+- **Entwickler-Prompt mit Vornamen:** Der Prompt zeigt den Vornamen des Entwicklers (`~ Alex`) für eine kompakte, persönliche Ansprache.
 - **Präzise Animations-Choreografie:** Blinkender initialer Blockcursor, flüssiger Drop der Prompt-Zeilen (`~ Name` und smaragdfarbenes `❯ Job Title`), zeichenweises Tippen des Titels und sanfter Übergang nach oben zur nächsten Rolle.
 - **Freie Textauswahl:** Sämtliche Inhalte (Login-Banner, Prompts, Name und Rollen) können mit der Maus markiert und kopiert werden. Der Cursor-Block ist dabei selektionsneutral, damit keine störenden Steuerzeichen mitkopiert werden.
-- **Konfigurierbare Rollenwechsel:** Rollen und Anzeigeintervalle lassen sich in `site.config.json` unter `person.bioRotations` und `person.bioRotationInterval` flexibel anpassen.
+- **Konfigurierbare Rollenwechsel & Modi:** Rollen und Anzeigeintervalle lassen sich in `site.config.json` unter `person.bioRotations` und `person.bioRotationInterval` flexibel anpassen. Mit `person.bioMode` kann der Anzeigemodus gewählt werden:
+  - `"role"` (Standard): Minimalistischer Prompt, der nur die Berufsbezeichnung tippt (`❯ AI Engineer█`).
+  - `"full"`: Tippt den Titel und blendet synchron darunter die Unterzeile mit Beschreibung ein (`↳ [adjectives] [artifacts]`).
+  - `"inline"`: Tippt die vollständige Beschreibung direkt einzeilig in die Prompt-Zeile.
 
 ---
 

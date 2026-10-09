@@ -172,7 +172,7 @@ export const SUGGESTED_SKILLS: string[] = [
 
 export const DEFAULT_BANNER_DATA: BannerData = {
   // Building Blocks
-  name: "Joel Dettinger",
+  name: "Alex Rivera",
   showName: true,
   nameStyle: "path",
 
@@ -181,7 +181,7 @@ export const DEFAULT_BANNER_DATA: BannerData = {
   promptSymbol: ">",
   showCursor: true,
 
-  contactUrl: "joeldettinger.com",
+  contactUrl: "alexrivera.dev",
   showContact: true,
   linkPosition: "below",
   linkStyle: "arrow",

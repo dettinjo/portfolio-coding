@@ -226,7 +226,7 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+          process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
         const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
         const fullPreviewUrl = `${baseUrl}/${locale}/resume/preview/${result.variant.id}`;
@@ -275,7 +275,7 @@ export function createResumeMcpServer(): McpServer {
     {},
     async () => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       const variants = listVariants().map((v) => ({
         ...v,
         downloadUrl: `${baseUrl}/api/resume/download/${v.id}`,
@@ -313,7 +313,7 @@ export function createResumeMcpServer(): McpServer {
         };
       }
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       return {
         content: [
           {
@@ -414,7 +414,7 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+          process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
         const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
         const fullPreviewUrl = `${baseUrl}/${locale}/cover-letter/preview/${result.variant.id}`;
@@ -463,7 +463,7 @@ export function createResumeMcpServer(): McpServer {
     {},
     async () => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       const variants = listCoverLetterVariants().map((v) => ({
         ...v,
         downloadUrl: `${baseUrl}/api/cover-letter/download/${v.id}`,
@@ -501,7 +501,7 @@ export function createResumeMcpServer(): McpServer {
         };
       }
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       return {
         content: [
           {
@@ -534,7 +534,7 @@ export function createResumeMcpServer(): McpServer {
     },
     async ({ variantId }) => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       if (variantId === "official" || variantId === "canonical") {
         return {
@@ -716,7 +716,7 @@ Instructions:
       pruneExpiredCoverLetterVariants();
 
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       const allResumes = listVariants();
       const allCoverLetters = listCoverLetterVariants();
@@ -880,7 +880,7 @@ Instructions:
       pruneExpiredCoverLetterVariants();
 
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       const resumes = listVariants().map((v) => ({
         type: "resume" as const,

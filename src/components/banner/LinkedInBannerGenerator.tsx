@@ -57,7 +57,7 @@ export function LinkedInBannerGenerator({
       ? siteConfig.site.serverUrl
           .replace(/^https?:\/\//, "")
           .replace(/\/$/, "")
-          .replace(/^localhost:\d+/, "dettinger.dev")
+          .replace(/^localhost:\d+/, "alexrivera.dev")
       : DEFAULT_BANNER_DATA.contactUrl;
 
     return {
@@ -112,7 +112,7 @@ export function LinkedInBannerGenerator({
       ? siteConfig.site.serverUrl
           .replace(/^https?:\/\//, "")
           .replace(/\/$/, "")
-          .replace(/^localhost:\d+/, "dettinger.dev")
+          .replace(/^localhost:\d+/, "alexrivera.dev")
       : DEFAULT_BANNER_DATA.contactUrl;
 
     setData({
@@ -451,7 +451,7 @@ export function LinkedInBannerGenerator({
                   <Input
                     value={data.name || ""}
                     onChange={(e) => handleUpdate("name", e.target.value)}
-                    placeholder="e.g. Joel Dettinger"
+                    placeholder="e.g. Alex Rivera"
                     className="font-mono text-xs pr-7 bg-background h-7"
                   />
                   {data.name && (
@@ -601,7 +601,7 @@ export function LinkedInBannerGenerator({
                     <Input
                       value={data.contactUrl || ""}
                       onChange={(e) => handleUpdate("contactUrl", e.target.value)}
-                      placeholder="e.g. joeldettinger.com"
+                      placeholder="e.g. alexrivera.dev"
                       className="font-mono text-xs pr-7 bg-background h-7"
                     />
                     {data.contactUrl && (

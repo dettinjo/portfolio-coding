@@ -61,8 +61,8 @@ function parseArgs(): BannerCliConfig {
   }
 
   const role = options.role || options.r || options.title || "AI Engineer";
-  const name = options.name || options.n || "Joel Dettinger";
-  const link = options.link || options.l || options.website || "joeldettinger.com";
+  const name = options.name || options.n || "Alex Rivera";
+  const link = options.link || options.l || options.website || "alexrivera.dev";
   const noSkills = flags.has("no-skills") || flags.has("title-only");
   const skillsRaw = options.skills || options.s;
 
