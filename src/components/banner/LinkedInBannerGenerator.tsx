@@ -253,7 +253,7 @@ export function LinkedInBannerGenerator({
   }, [data.skills]);
 
   return (
-    <div className="h-screen max-h-screen w-screen overflow-hidden flex flex-col bg-background text-foreground select-none">
+    <div className="h-dvh max-h-dvh w-full max-w-full overflow-hidden flex flex-col bg-background text-foreground select-none">
       {/* ─── COMPACT STUDIO TOPBAR (48px) ─────────────────────────────────── */}
       <header className="h-12 shrink-0 border-b border-border/80 px-3 sm:px-4 flex items-center justify-between bg-card/60 backdrop-blur-md z-30">
         {/* Left: Home link, title & canvas info */}
@@ -349,14 +349,14 @@ export function LinkedInBannerGenerator({
         </div>
       </header>
 
-      {/* ─── WORKSPACE (MOBILE: FLUID SCROLL WITH STICKY PREVIEW; DESKTOP: 2-COLUMN ZERO-SCROLL) ──── */}
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+      {/* ─── WORKSPACE (MOBILE & PORTRAIT TABLET: FLUID SCROLL WITH STICKY PREVIEW; DESKTOP: 2-COLUMN ZERO-SCROLL) ──── */}
+      <div className="flex-1 min-h-0 w-full min-w-0 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden">
         {/* ─── ARTBOARD / CANVAS STAGE ───────────────────────────────────── */}
-        <section className="sticky top-0 lg:static z-20 bg-background/95 lg:bg-zinc-950/20 backdrop-blur-md lg:backdrop-blur-none border-b lg:border-b-0 border-border/80 lg:flex-1 lg:min-h-0 lg:h-full flex flex-col items-center justify-center p-3 sm:p-4 lg:p-6 shadow-xs lg:shadow-none">
+        <section className="sticky top-0 xl:static z-20 bg-background/95 xl:bg-zinc-950/20 backdrop-blur-md xl:backdrop-blur-none border-b xl:border-b-0 border-border/80 xl:flex-1 min-w-0 xl:min-w-0 xl:min-h-0 xl:h-full flex flex-col items-center justify-center p-3 sm:p-4 xl:p-6 shadow-xs xl:shadow-none">
           {/* Banner Box: Pure minimal canvas with zero window parts */}
-          <div className="w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md lg:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
+          <div className="w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md xl:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
             <div
-              className="w-full h-full flex items-center justify-center select-none"
+              className="w-full h-full flex items-center justify-center select-none [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
               dangerouslySetInnerHTML={{ __html: previewSvg }}
             />
           </div>
@@ -388,7 +388,7 @@ export function LinkedInBannerGenerator({
         </section>
 
         {/* ─── INSPECTOR SIDEBAR / MODULAR BUILDING BLOCKS ──────────────── */}
-        <aside className="w-full lg:w-80 xl:w-[360px] shrink-0 lg:h-full lg:border-l border-border/80 bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between lg:overflow-y-auto space-y-4 lg:space-y-0">
+        <aside className="w-full max-w-4xl mx-auto xl:max-w-none xl:w-[360px] 2xl:w-[390px] shrink-0 xl:h-full xl:border-l border-border/80 bg-card/40 backdrop-blur-md p-4 flex flex-col justify-between xl:overflow-y-auto space-y-4 xl:space-y-0 min-w-0">
           {/* Building Blocks Container */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between pb-1 border-b border-border/60">
@@ -884,10 +884,10 @@ export function LinkedInBannerGenerator({
 
           {/* Bottom Actions & Secondary Formats */}
           <div className="pt-2 border-t border-border/60 space-y-1.5">
-            {/* Prominent Export Button on Mobile */}
+            {/* Prominent Export Button on Mobile & Portrait Tablet */}
             <Button
               type="button"
-              className="w-full lg:hidden h-10 font-semibold text-xs shadow-xs"
+              className="w-full xl:hidden h-10 font-semibold text-xs shadow-xs"
               onClick={() => downloadPng(1)}
               disabled={downloading !== null}
             >
@@ -902,7 +902,7 @@ export function LinkedInBannerGenerator({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-8 lg:h-7 text-xs lg:text-[11px] font-mono px-2"
+                className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
                 onClick={() => downloadPng(2)}
                 disabled={downloading !== null}
               >
@@ -913,7 +913,7 @@ export function LinkedInBannerGenerator({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-8 lg:h-7 text-xs lg:text-[11px] font-mono px-2"
+                className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
                 onClick={downloadSvg}
               >
                 <FileCode className="h-3.5 w-3.5 mr-1" />
@@ -924,7 +924,7 @@ export function LinkedInBannerGenerator({
             <button
               type="button"
               onClick={copySvg}
-              className="w-full text-center text-xs lg:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-0.5 inline-flex items-center justify-center gap-1.5"
+              className="w-full text-center text-xs xl:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-0.5 inline-flex items-center justify-center gap-1.5"
             >
               {copied ? (
                 <>

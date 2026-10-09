@@ -24,7 +24,7 @@ export function LinkedInBannerPreview({
       {/* 4:1 aspect ratio container */}
       <div className="relative w-full aspect-[4/1] bg-muted/20 flex items-center justify-center">
         <div
-          className="w-full h-full flex items-center justify-center"
+          className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
           dangerouslySetInnerHTML={{ __html: svgString }}
         />
       </div>
