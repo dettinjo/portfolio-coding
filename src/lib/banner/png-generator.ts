@@ -36,6 +36,7 @@ export async function generateBannerPng(
   options: {
     scale?: 1 | 2;
     saveToFile?: boolean;
+    outputDir?: string;
     svgOptions?: SvgRenderOptions;
   } = {}
 ): Promise<PngGenerationResult> {
@@ -56,7 +57,7 @@ export async function generateBannerPng(
   let downloadUrl: string | undefined;
 
   if (options.saveToFile) {
-    const outputDir = getBannerOutputDir();
+    const outputDir = options.outputDir || getBannerOutputDir();
     const safeName = (data.name || "LinkedIn_Banner")
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .toLowerCase();

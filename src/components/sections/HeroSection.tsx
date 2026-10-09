@@ -1,7 +1,7 @@
 // src/components/sections/software/HeroSection.tsx
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -13,12 +13,12 @@ import {
   type Transition,
 } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import { AnimatedGreeting } from "@/components/AnimatedGreeting";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { withBasePath } from "@/lib/basePath";
 import { Link } from "@/i18n/navigation";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, getHeroBioItems } from "@/lib/config";
+import { HeroTerminal } from "./HeroTerminal";
 
 const entranceTransition: Transition = {
   duration: 0.5,
@@ -28,6 +28,11 @@ const entranceTransition: Transition = {
 export function HeroSection() {
   const t = useTranslations("software.SoftwareHeroSection");
   const locale = useLocale();
+  const displayName = siteConfig.person.firstName || siteConfig.person.fullName.split(" ")[0] || "Alex";
+
+  const bioMode = siteConfig.person.bioMode ?? "role";
+  const bioItems = useMemo(() => getHeroBioItems(siteConfig, locale), [locale]);
+
   // Generated at build time from the config repo's profile image (or the
   // committed placeholder when none is provided). See scripts/fetch-portfolio.ts.
   const avatarSrc = withBasePath("/images/profile.webp");
@@ -55,15 +60,18 @@ export function HeroSection() {
     >
       <div className="max-w-6xl mx-auto px-6 flex flex-col-reverse items-center gap-8 lg:gap-12 text-center lg:grid lg:grid-cols-2 lg:text-left w-full">
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={entranceTransition}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
           className="flex flex-col items-center lg:items-start w-full"
         >
-          <AnimatedGreeting />
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-muted-foreground">
-            {t("intro")}
-          </p>
+          <HeroTerminal
+            name={displayName}
+            items={bioItems}
+            mode={bioMode}
+            interval={siteConfig.person.bioRotationInterval ?? 3200}
+          />
+
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto lg:mx-0">
             <Button asChild className="w-full sm:w-auto">
               <Link href="#projekte">{t("button_projects")}</Link>

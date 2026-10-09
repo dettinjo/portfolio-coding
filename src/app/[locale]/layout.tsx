@@ -15,6 +15,13 @@ import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/config";
 import { withBasePath } from "@/lib/basePath";
 import { ThemeProvider } from "@/components/Theme-Provider";
+import { JetBrains_Mono } from "next/font/google";
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -114,7 +121,8 @@ export default async function RootLocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased"
+          "min-h-screen bg-background font-sans antialiased",
+          jetbrainsMono.variable
         )}
       >
         <script

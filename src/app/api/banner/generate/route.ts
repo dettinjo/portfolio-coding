@@ -26,6 +26,11 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     searchParams.get("tagline") ||
     DEFAULT_BANNER_DATA.tagline;
 
+  const showTagline =
+    body?.showTagline !== undefined
+      ? body.showTagline
+      : searchParams.get("showTagline") === "true";
+
   let skills: string[] = DEFAULT_BANNER_DATA.skills;
   if (body?.skills && Array.isArray(body.skills)) {
     skills = body.skills;
@@ -43,6 +48,11 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
     DEFAULT_BANNER_DATA.contactUrl;
 
+  const showContact =
+    body?.showContact !== undefined
+      ? body.showContact
+      : searchParams.get("showContact") === "true";
+
   const statusText =
     body?.statusText ||
     searchParams.get("statusText") ||
@@ -51,9 +61,7 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
   const showStatus =
     body?.showStatus !== undefined
       ? body.showStatus
-      : searchParams.get("showStatus") !== null
-      ? searchParams.get("showStatus") === "true"
-      : true;
+      : searchParams.get("showStatus") === "true";
 
   const theme: BannerTheme =
     (body?.theme || searchParams.get("theme") || DEFAULT_BANNER_DATA.theme) === "light"
@@ -62,20 +70,113 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
 
   const templateParam = body?.template || searchParams.get("template");
   const template: BannerTemplateId =
+    templateParam === "terminal-clean" ||
+    templateParam === "title-only" ||
     templateParam === "split" ||
     templateParam === "glow" ||
     templateParam === "framed"
-      ? templateParam
+      ? (templateParam as BannerTemplateId)
       : "terminal";
+
+  const tagStyleParam = body?.tagStyle || searchParams.get("tagStyle");
+  const tagStyle =
+    tagStyleParam === "bracket" ||
+    tagStyleParam === "inline" ||
+    tagStyleParam === "pipe" ||
+    tagStyleParam === "kv"
+      ? tagStyleParam
+      : "block";
+
+  const promptParam = body?.promptSymbol || searchParams.get("promptSymbol");
+  const promptSymbol =
+    promptParam === "$" || promptParam === "❯" || promptParam === "none"
+      ? promptParam
+      : ">";
+
+  const showCursor =
+    body?.showCursor !== undefined
+      ? body.showCursor
+      : searchParams.get("showCursor") !== null
+      ? searchParams.get("showCursor") === "true"
+      : true;
+
+  const showName =
+    body?.showName !== undefined
+      ? body.showName
+      : searchParams.get("showName") !== null
+      ? searchParams.get("showName") === "true"
+      : true;
+
+  const nameStyle =
+    (body?.nameStyle || searchParams.get("nameStyle")) === "plain"
+      ? "plain"
+      : "path";
+
+  const showJobTitle =
+    body?.showJobTitle !== undefined
+      ? body.showJobTitle
+      : searchParams.get("showJobTitle") !== null
+      ? searchParams.get("showJobTitle") === "true"
+      : true;
+
+  const showSkills =
+    body?.showSkills !== undefined
+      ? body.showSkills
+      : searchParams.get("showSkills") !== null
+      ? searchParams.get("showSkills") === "true"
+      : true;
+
+  const linkPosition =
+    (body?.linkPosition || searchParams.get("linkPosition")) === "corner"
+      ? "corner"
+      : "below";
+
+  const linkStyleParam = body?.linkStyle || searchParams.get("linkStyle");
+  const linkStyle =
+    linkStyleParam === "curl" ||
+    linkStyleParam === "kv" ||
+    linkStyleParam === "plain"
+      ? linkStyleParam
+      : "arrow";
+
+  const taglineStyle =
+    (body?.taglineStyle || searchParams.get("taglineStyle")) === "comment"
+      ? "comment"
+      : "plain";
+
+  const statusIconParam = body?.statusIcon || searchParams.get("statusIcon");
+  const statusIcon =
+    statusIconParam === "dot-amber" ||
+    statusIconParam === "dot-blue" ||
+    statusIconParam === "sparkle" ||
+    statusIconParam === "bolt" ||
+    statusIconParam === "chevron" ||
+    statusIconParam === "ring" ||
+    statusIconParam === "none"
+      ? statusIconParam
+      : "dot-green";
 
   return {
     jobTitle,
+    showJobTitle,
+    promptSymbol,
+    showCursor,
     name,
+    showName,
+    nameStyle,
     tagline,
+    showTagline,
+    taglineStyle,
     skills,
+    showSkills,
+    tagStyle,
     contactUrl,
+    showContact,
+    linkPosition,
+    linkStyle,
     statusText,
     showStatus,
+    statusIcon,
     theme,
     template,
   };

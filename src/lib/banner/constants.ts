@@ -1,4 +1,10 @@
-import { BannerTemplateMeta, BannerData } from "@/types/banner";
+import {
+  BannerTemplateMeta,
+  BannerData,
+  StatusIcon,
+  TerminalLinkStyle,
+  TerminalTagStyle,
+} from "@/types/banner";
 
 export const LINKEDIN_BANNER_WIDTH = 1584;
 export const LINKEDIN_BANNER_HEIGHT = 396;
@@ -32,43 +38,118 @@ export const LINKEDIN_SAFE_AREAS = {
   },
 };
 
+export const STATUS_ICON_OPTIONS: {
+  id: StatusIcon;
+  label: string;
+  glyph: string;
+  color?: string;
+}[] = [
+  { id: "dot-green", label: "Green Dot", glyph: "●", color: "#22c55e" },
+  { id: "dot-amber", label: "Amber Dot", glyph: "●", color: "#f59e0b" },
+  { id: "dot-blue", label: "Cyan Dot", glyph: "●", color: "#06b6d4" },
+  { id: "sparkle", label: "Sparkle", glyph: "✦", color: "#a855f7" },
+  { id: "bolt", label: "Bolt", glyph: "⚡", color: "#eab308" },
+  { id: "chevron", label: "Chevron", glyph: "❯", color: "#10b981" },
+  { id: "ring", label: "Ring", glyph: "○", color: "#a1a1aa" },
+  { id: "none", label: "None", glyph: "—" },
+];
+
+export const LINK_STYLE_OPTIONS: {
+  id: TerminalLinkStyle;
+  label: string;
+  format: string;
+}[] = [
+  { id: "arrow", label: "↗ Arrow", format: "↗ url" },
+  { id: "curl", label: "curl", format: "curl url" },
+  { id: "kv", label: "web:", format: "web: url" },
+  { id: "plain", label: "Plain", format: "url" },
+];
+
+export const TAG_STYLE_OPTIONS: {
+  id: TerminalTagStyle;
+  label: string;
+  example: string;
+}[] = [
+  { id: "block", label: "Blocks", example: "[Python]" },
+  { id: "bracket", label: "[  ]", example: "[ Python ]" },
+  { id: "inline", label: "· Inline", example: "Python · Docker" },
+  { id: "pipe", label: "| Pipe", example: "Python | Docker" },
+  { id: "kv", label: "stack:", example: "stack: Python · Docker" },
+];
+
 export const BANNER_TEMPLATES: BannerTemplateMeta[] = [
   {
     id: "terminal",
-    name: "Terminal Minimalist",
-    description: "Signature portfolio command-line aesthetic with monospace prompt, cursor, and code pill tokens.",
+    name: "Terminal Prompt",
+    description: "Signature CLI prompt (> Title█) with code tags",
     tag: "Signature",
   },
   {
-    id: "split",
-    name: "Architectural Split",
-    description: "Executive modern dual-zone layout honoring the avatar safe zone with a sleek vertical rule.",
-    tag: "Modernist",
+    id: "terminal-clean",
+    name: "Clean Minimal",
+    description: "Title with terminal block cursor (Title█) without prompt symbol",
+    tag: "Clean",
   },
   {
-    id: "glow",
-    name: "Ambient Tech Glow",
-    description: "Contemporary neo-tech aesthetic with subtle ambient radial illumination and high-contrast typography.",
-    tag: "Neo-Tech",
-  },
-  {
-    id: "framed",
-    name: "Framed Card",
-    description: "Framed showcase container matching the portfolio's ResumeCard and CoverLetterCard styling.",
-    tag: "Showcase",
+    id: "title-only",
+    name: "Title Only",
+    description: "Centered headline with cursor, focusing purely on your role",
+    tag: "Focused",
   },
 ];
 
-export const PRESET_JOB_TITLES: string[] = [
-  "AI Engineer",
-  "Full-Stack Engineer",
-  "Senior Full-Stack Engineer",
-  "Lead Software Architect",
-  "Staff Software Engineer",
-  "Cloud & DevOps Engineer",
-  "Backend & Distributed Systems Engineer",
-  "Frontend Architect & Design Technologist",
+export interface RolePreset {
+  title: string;
+  skills: string[];
+}
+
+export const QUICK_ROLE_PRESETS: RolePreset[] = [
+  {
+    title: "AI Engineer",
+    skills: [
+      "Python",
+      "PyTorch",
+      "LLMs & RAG",
+      "LangChain",
+      "Vector DBs",
+      "Docker",
+      "FastAPI",
+    ],
+  },
+  {
+    title: "Full-Stack Engineer",
+    skills: ["TypeScript", "Next.js", "React", "Node.js", "Docker", "PostgreSQL"],
+  },
+  {
+    title: "Cloud & DevOps Engineer",
+    skills: ["Kubernetes", "Docker", "AWS", "Terraform", "CI/CD", "Go", "Python"],
+  },
+  {
+    title: "Software Architect",
+    skills: [
+      "TypeScript",
+      "Go",
+      "Kubernetes",
+      "AWS",
+      "PostgreSQL",
+      "Kafka",
+      "Distributed Systems",
+    ],
+  },
+  {
+    title: "Frontend Architect",
+    skills: [
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Tailwind CSS",
+      "Design Systems",
+      "Web Performance",
+    ],
+  },
 ];
+
+export const PRESET_JOB_TITLES: string[] = QUICK_ROLE_PRESETS.map((p) => p.title);
 
 export const SUGGESTED_SKILLS: string[] = [
   "Python",
@@ -76,12 +157,12 @@ export const SUGGESTED_SKILLS: string[] = [
   "LLMs & RAG",
   "LangChain",
   "Vector DBs",
+  "Docker",
   "FastAPI",
   "TypeScript",
   "Next.js",
   "React",
   "Node.js",
-  "Docker",
   "PostgreSQL",
   "Kubernetes",
   "AWS",
@@ -90,13 +171,41 @@ export const SUGGESTED_SKILLS: string[] = [
 ];
 
 export const DEFAULT_BANNER_DATA: BannerData = {
-  jobTitle: "Senior Full-Stack Engineer",
+  // Building Blocks
   name: "Alex Rivera",
-  tagline: "Building resilient distributed systems, modern web architectures & high-performance APIs.",
-  skills: ["TypeScript", "Next.js", "React", "Node.js", "Docker", "PostgreSQL"],
+  showName: true,
+  nameStyle: "path",
+
+  jobTitle: "AI Engineer",
+  showJobTitle: true,
+  promptSymbol: ">",
+  showCursor: true,
+
   contactUrl: "alexrivera.dev",
-  statusText: "Available for select roles",
-  showStatus: true,
+  showContact: true,
+  linkPosition: "below",
+  linkStyle: "arrow",
+
+  skills: [
+    "Python",
+    "PyTorch",
+    "LLMs & RAG",
+    "LangChain",
+    "Vector DBs",
+    "Docker",
+    "FastAPI",
+  ],
+  showSkills: true,
+  tagStyle: "block",
+
+  tagline: "Building scalable agentic AI systems & production RAG",
+  showTagline: false,
+  taglineStyle: "plain",
+
+  statusText: "open to work",
+  showStatus: false,
+  statusIcon: "dot-green",
+
   theme: "dark",
   template: "terminal",
 };

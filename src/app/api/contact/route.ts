@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { siteConfig } from "@/lib/config";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 export const POST = async (req: NextRequest) => {
   try {
+    const ip = getClientIp(req.headers);
+    const rateLimit = checkRateLimit(ip, "contact");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many messages sent. Please wait before submitting again." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.resetInSeconds),
+            "X-RateLimit-Limit": String(rateLimit.limit),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     const { name, email, message, locale = "en" } = await req.json();
 
     if (!name || !email || !message) {

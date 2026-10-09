@@ -226,7 +226,7 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+          process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
         const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
         const fullPreviewUrl = `${baseUrl}/${locale}/resume/preview/${result.variant.id}`;
@@ -275,7 +275,7 @@ export function createResumeMcpServer(): McpServer {
     {},
     async () => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       const variants = listVariants().map((v) => ({
         ...v,
         downloadUrl: `${baseUrl}/api/resume/download/${v.id}`,
@@ -313,7 +313,7 @@ export function createResumeMcpServer(): McpServer {
         };
       }
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       return {
         content: [
           {
@@ -414,7 +414,7 @@ export function createResumeMcpServer(): McpServer {
         });
 
         const baseUrl =
-          process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+          process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
         const fullDownloadUrl = `${baseUrl}${result.downloadUrl}`;
         const fullPreviewUrl = `${baseUrl}/${locale}/cover-letter/preview/${result.variant.id}`;
@@ -463,7 +463,7 @@ export function createResumeMcpServer(): McpServer {
     {},
     async () => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       const variants = listCoverLetterVariants().map((v) => ({
         ...v,
         downloadUrl: `${baseUrl}/api/cover-letter/download/${v.id}`,
@@ -501,7 +501,7 @@ export function createResumeMcpServer(): McpServer {
         };
       }
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
       return {
         content: [
           {
@@ -534,7 +534,7 @@ export function createResumeMcpServer(): McpServer {
     },
     async ({ variantId }) => {
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       if (variantId === "official" || variantId === "canonical") {
         return {
@@ -716,7 +716,7 @@ Instructions:
       pruneExpiredCoverLetterVariants();
 
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       const allResumes = listVariants();
       const allCoverLetters = listCoverLetterVariants();
@@ -880,7 +880,7 @@ Instructions:
       pruneExpiredCoverLetterVariants();
 
       const baseUrl =
-        process.env.NEXT_PUBLIC_SERVER_URL || "https://codeby.joeldettinger.de";
+        process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
       const resumes = listVariants().map((v) => ({
         type: "resume" as const,
@@ -985,9 +985,17 @@ Instructions:
         .default("dark")
         .describe("Color theme: 'dark' (portfolio zinc-950) or 'light' (portfolio zinc-50)"),
       template: z
-        .enum(["terminal", "split", "glow", "framed"])
+        .enum(["terminal", "terminal-clean", "title-only"])
         .default("terminal")
-        .describe("Layout design idea: 'terminal' (signature CLI), 'split' (architectural modern), 'glow' (ambient neo-tech), or 'framed' (portfolio showcase)"),
+        .describe("Layout design idea: 'terminal' (CLI prompt), 'terminal-clean' (clean minimal), or 'title-only'"),
+      tagStyle: z
+        .enum(["block", "bracket", "inline", "pipe", "kv"])
+        .default("block")
+        .describe("Terminal skill tag style: 'block' (chips), 'bracket' ([ ]), 'inline' (·), 'pipe' (|), or 'kv' (stack: ...)"),
+      showCursor: z
+        .boolean()
+        .default(true)
+        .describe("Whether to display the terminal block cursor █ behind the job title"),
       contactUrl: z
         .string()
         .optional()
@@ -1008,17 +1016,21 @@ Instructions:
       skills,
       theme,
       template,
+      tagStyle,
+      showCursor,
       contactUrl,
       statusText,
       scale,
     }) => {
       const bannerData: BannerData = {
         jobTitle,
+        showCursor,
         name: name || siteConfig.person.fullName || DEFAULT_BANNER_DATA.name,
         tagline: tagline || DEFAULT_BANNER_DATA.tagline,
         skills: skills && skills.length > 0 ? skills : DEFAULT_BANNER_DATA.skills,
         theme,
         template,
+        tagStyle,
         contactUrl:
           contactUrl ||
           siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||

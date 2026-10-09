@@ -25,6 +25,10 @@ export interface SiteConfig {
     };
     hasCustomAvatar?: boolean;
     avatarBlurDataUrl?: string;
+    bioRotations?: Record<string, BioRotationItem[]>;
+    bioRotationInterval?: number;
+    bioDesignVariant?: BioDesignVariant;
+    bioMode?: BioMode;
   };
   site: {
     serverUrl: string;
@@ -92,3 +96,14 @@ export interface SoftwareProject {
     locale: string;
   }>;
 }
+
+export type BioDesignVariant = "terminal" | "inline" | "carousel" | "git";
+export type BioMode = "role" | "full" | "inline";
+
+export interface BioRotationItem {
+  role: string;
+  adjectives?: string[];
+  artifacts?: string;
+  sentence?: string;
+}
+

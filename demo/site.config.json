@@ -15,7 +15,8 @@
       "linkedin": "",
       "instagram": ""
     },
-    "avatarBlurDataUrl": ""
+    "avatarBlurDataUrl": "",
+    "bioMode": "role"
   },
   "site": {
     "serverUrl": "https://portfolio-demo.example.com",

@@ -61,6 +61,23 @@ and filling one config file; no code changes required.
   `/api/mcp` endpoint connects AI assistants (Claude Desktop, Cursor, Antigravity)
   directly to your verified profile to generate tailored, single-page A4 résumés and
   matching cover letters with pixel-perfect PDF rendering (Puppeteer) and web previews.
+- **Minimal Terminal LinkedIn Banner Studio & CLI Generator.** A private visual
+  studio (`/banner`) and offline CLI tool (`npm run banner`) for generating
+  pixel-perfect 1584×396px LinkedIn background banners with zero window chrome,
+  modular terminal building blocks (Name, Job Title, Skills, Link, Statusline),
+  emerald CLI prompts matching the hero section, avatar collision clearance, and exact brand tokens.
+- **Ghostty-style Monospace Terminal Hero.** Landing header powered by JetBrains Mono
+  featuring a dynamic `Last login:` banner that detects the visitor's operating system
+  and device environment (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`),
+  an initializing blinking block cursor with snappy downward drop, prompt lines (`~ Name`
+  and emerald `❯ Job Title`), smooth typing animations cycling through configurable roles,
+  and fully selectable text across all elements.
+- **Terminal & CLI Portfolio over `curl`.** Querying your live domain from a terminal
+  (`curl https://your-domain.com`) automatically routes via User-Agent inspection to a rich,
+  ANSI-colored terminal portfolio. Features Unicode box-drawing project cards, visual
+  skill proficiency meters, subroutes (`/projects`, `/skills`, `/resume`, `/contact`, `/<slug>`),
+  query flags (`?plain=1`, `?json=1`, `?lang=de`), and 3-tier rate limiting (Cloudflare,
+  Traefik, in-app sliding window).
 - **Bundled demo dataset** so a clean clone (or a public live demo) renders a
   full, realistic site with no secrets.
 
@@ -203,28 +220,76 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | `prune_expired_materials` | Manually triggers the cleanup engine to delete materials and PDFs older than 60 days. |
 | `get_download_link` | Direct lookup tool for PDF download URLs and web preview links for any variant ID or the live website CV. |
 | `list_saved_variants` / `list_saved_cover_letters` | Lists previously generated documents with metadata and download links. |
-| `generate_linkedin_banner` | Generates a 1584×396px LinkedIn background banner tailored with a custom Job Title, name, tagline, and skills pills matching the portfolio theme. Supports Light & Dark modes and 4 layout templates (terminal, split, glow, framed). |
+| `generate_linkedin_banner` | Generates a 1584×396px LinkedIn background banner tailored with a custom Job Title, name, portfolio link, skills, and statusline matching the minimal terminal theme with avatar safe zone clearance. |
 | `get_linkedin_banner_guidelines` | Returns official LinkedIn banner dimensions (1584×396, 4:1), avatar safe zones, mobile cropping margins, and design rules. |
 | `prompt: tailor_cv_for_job` | Step-by-step guided workflow for AI assistants to tailor the CV for any target job posting while guaranteeing single-page A4 constraints. |
 | `prompt: write_cover_letter_for_job` | Step-by-step guided workflow for AI assistants to draft and render a matching cover letter. |
 | `prompt: prep_for_interview` | Guided workflow for AI assistants to run a tailored mock interview preparation and briefing based on the exact application materials submitted to a specific company. |
 
-### LinkedIn Banner Generator & Design Studio
+### LinkedIn Banner Generator & Terminal Studio
 
-The portfolio includes a dedicated LinkedIn Banner Generator studio accessible at `/[locale]/banner` (and via API `/api/banner/generate` & MCP tool `generate_linkedin_banner`):
+The portfolio includes a private LinkedIn Banner Generator studio accessible at `/banner` (unlinked from public navigation, disallowed in `robots.ts`), alongside an offline CLI tool (`npm run banner`), headless REST API (`/api/banner/generate`), and MCP tool (`generate_linkedin_banner`):
 
-- **Official Resolution**: Exactly 1584 × 396 pixels (4:1 aspect ratio), under 8 MB.
-- **Safe Area Collision Guarantees**:
-  - **Desktop Profile Picture Zone**: Reserves the left ~340px to ensure the circular profile photo (overlapping at bottom-left) never covers names, job titles, or tech tags.
-  - **Mobile Cropping Boundary**: Guarantees all critical branding elements stay within the central 1260 × 316 px viewport area.
-- **Settable Elements**: Customizable Job Title / Headline, candidate name, tagline / value proposition, interactive core skills pill tokens (up to 8 technologies), contact / portfolio URL, and active status indicator badge.
-- **Themes**: Full **Light Mode** (portfolio zinc-50 / #fafafa) and **Dark Mode** (portfolio zinc-950 / #18181b) support.
-- **4 Distinct Layout Templates**:
-  1. **Terminal Minimalist** (Signature): CLI prompt `> alex.rivera@portfolio:~$`, bold monospace Job Title with blinking cursor `_`, code token badges, and subtle dot-matrix engineering grid.
-  2. **Architectural Split** (Modernist): Clean asymmetric divider with dedicated avatar framing, status badge, bold sans-serif Job Title, and specialty pills.
-  3. **Ambient Tech Glow** (Neo-Tech): Ambient radial light aura, high-contrast typography, and glowing tech chips.
-  4. **Framed Card** (Showcase): Inset floating card mirroring the portfolio's ResumeCard and CoverLetterCard styling.
-- **Export Options**: 1x PNG (1584 × 396 px), Retina 2x PNG (3168 × 792 px), Vector SVG, Direct Clipboard Copy, and headless REST API (`/api/banner/generate`).
+- **Official Resolution & Specifications**: Exactly 1584 × 396 pixels (4:1 aspect ratio), crisp monospace typography, under 8 MB, with zero window chrome (no artificial macOS window frames, titlebars, or traffic-light dots).
+- **Exact Brand Aesthetic**: Monospace typography matching the site's `font-mono`, rendered on exact portfolio theme tokens:
+  - **Dark Mode**: `#18181b` (zinc-900 background), `#fafafa` (foreground), `#a1a1aa` (muted tokens/brackets), `#27272a` (badges), `#34d399` (emerald-400 bold prompt symbol).
+  - **Light Mode**: `#fafafa` (background), `#18181b` (foreground), `#71717a` (muted tokens), `#f4f4f5` (badges), `#10b981` (emerald-500 bold prompt symbol).
+- **Collision-Proof Safe Area Guarantees**:
+  - **Desktop Profile Picture Zone**: Anchored with a 40px margin at `x = 380px` to ensure LinkedIn's 160px circular avatar (which overlaps the left `0..340px`) never collides with names, job titles, or tech tags.
+  - **Mobile Cropping Threshold**: Right-aligned elements (Statusline, Corner Link) anchor at `x = 1400px`, providing a safe 22px buffer inside mobile viewport bounds (`maxX = 1422px`).
+  - **Dynamic Centering**: Recalculates total vertical stack height across enabled blocks and centers content around `y = 198px`, comfortably within `y = 40..356px` safe bounds.
+  - **Visual Safe Area Overlay**: Optional guide overlay toggle in the studio to visually verify avatar and mobile safe zones.
+
+#### Modular Building Blocks
+
+| Building Block | Customization Options | Terminal Representation |
+|---|---|---|
+| **Name** | Toggle on/off · Name input · Prefix switch (`~/ Name` vs `Plain`) | `~/ Alex Rivera` (path style) or `Alex Rivera` |
+| **Job Title** | Toggle on/off · Title input · Prompt symbol (`>` / `❯` / `$` / `None`) · **Cursor Toggle (`█`)** | `> AI Engineer █` (bold emerald prompt matching the hero section) |
+| **Portfolio Link** | Toggle on/off · URL input · Placement (`Below` stack vs `Corner`) · Format (`↗ Arrow`, `curl`, `web:`, `Plain`) | `↗ alexrivera.dev` or `curl alexrivera.dev` |
+| **Skills & Tech Stack** | Toggle on/off · Add/delete chips (`×`) · 1-click suggested skills · 5 Terminal styles (`Blocks`, `[ ]`, `· Inline`, `\| Pipe`, `stack:`) | `[Python]` `[PyTorch]` or `Python \| PyTorch` or `stack: Python · PyTorch` |
+| **Tagline** | Toggle on/off · Tagline input · Style switch (`Plain` vs `# Comment`) | `Building intelligent systems & agents` or `# Comment` |
+| **Statusline** | Toggle on/off · Status text · Safe Top-Right anchor (`x=1400, y=65`) · 8 Selectable status icons | `● open to work` (Green, Amber, Cyan, Star ✦, Bolt ⚡, Chevron ❯, Ring ○, None) |
+
+#### CLI Generation & Batch Export
+
+Generate banners directly from your terminal without opening a browser:
+
+```bash
+# Basic export with role and portfolio link
+npm run banner -- --title "AI Engineer" --link "alexrivera.dev"
+
+# Fully customized CLI export
+npm run banner -- \
+  --title "AI Engineer" \
+  --name "Alex Rivera" \
+  --link "alexrivera.dev" \
+  --tag-style pipe \
+  --link-style curl \
+  --no-cursor \
+  --status "open to work" \
+  --theme dark \
+  --out banners
+```
+
+Supported CLI options:
+- `--title, -r`: Job Title (default: `AI Engineer`).
+- `--name, -n`: Candidate name (default from `site.config.json`).
+- `--link, -l`: Portfolio or GitHub URL.
+- `--tag-style, --style`: Terminal skill format (`block`, `bracket`, `inline`, `pipe`, `kv`).
+- `--link-style`: Link format (`arrow`, `curl`, `kv`, `plain`).
+- `--no-cursor`: Omit the `█` terminal block cursor behind the job title.
+- `--status`: Text for the top-right statusline indicator.
+- `--skills, -s`: Comma-separated list of skills (e.g. `Python,PyTorch,Docker`).
+- `--theme, -t`: `dark`, `light`, or `both` (generates dark and light variants).
+- `--guides`: Render the banner with LinkedIn safe area overlay guides enabled.
+- `--out, -o`: Output directory for PNG and SVG files (default: `banners/`).
+
+#### Studio UX & Export Formats
+
+- **Single-Viewport Ergonomics**: On desktop, the studio fits completely within `h-screen overflow-hidden`, eliminating page scrolling between controls and live artboard.
+- **Responsive Mobile Studio**: Sticky top live preview artboard with touch-friendly inspector controls below.
+- **Export Options**: 1x Standard PNG (1584×396 px), 2x Retina PNG (3168×792 px), Vector SVG, Direct SVG Clipboard Copy, and headless REST API (`/api/banner/generate`).
 
 ### Layout Restrictions & Description Size Budgets
 
@@ -259,6 +324,58 @@ All generated CV and Cover Letter variants are assigned unique IDs matching the 
 Every generated variant receives unique URLs:
 - **Web Preview**: `/[locale]/resume/preview/[id]` and `/[locale]/cover-letter/preview/[id]`
 - **Direct PDF Download**: `/api/resume/download/[id]` and `/api/cover-letter/download/[id]`
+
+---
+
+## Terminal & CLI Portfolio (`curl` Interface)
+
+Developers and terminal enthusiasts can browse your entire portfolio directly from their shell using `curl`, `wget`, or `httpie` without opening a browser. Next.js middleware inspects incoming `User-Agent` headers and request parameters to serve a colorized, ANSI-formatted terminal experience with Unicode box-drawing cards, visual skill meters, and syntax-highlighted summaries.
+
+```bash
+# Browse the complete interactive portfolio
+curl https://your-domain.com
+
+# Explore dedicated subroutes
+curl https://your-domain.com/projects      # Boxed project cards with tech tags and URLs
+curl https://your-domain.com/skills        # Categorized skills with visual proficiency meters
+curl https://your-domain.com/resume        # Compact plain-text résumé / CV overview
+curl https://your-domain.com/contact       # Direct contact channels, email, and socials
+curl https://your-domain.com/<slug>        # In-depth project breakdown (e.g. /portfolio-template)
+```
+
+### CLI Output Modes & Query Parameters
+
+| Parameter / Header | Example Command | Output Behavior |
+|---|---|---|
+| `?plain=1` / `NO_COLOR=1` | `curl -H "NO_COLOR: 1" https://your-domain.com` | Strips all ANSI colors and styling for plain-text terminal viewing or piped shell scripts. |
+| `?json=1` / `Accept: application/json` | `curl -H "Accept: application/json" https://your-domain.com` | Returns structured JSON containing the candidate bio, skills, and projects for automation. |
+| `?lang=de` / `/de/<route>` | `curl https://your-domain.com/de/projects` | Delivers fully localized German terminal output (respects `Accept-Language: de` automatically). |
+| `?cli=1` / `/cli` | Open in browser at `https://your-domain.com?cli=1` | Forces the terminal output in regular web browsers that don't send a CLI User-Agent. |
+
+### 3-Tier Security & Rate Limiting Architecture
+
+To ensure high availability and protect the server against automated scraper loops or denial-of-service attempts, the CLI and public endpoints are guarded by three complementary layers:
+
+1. **Tier 1 (Edge / Cloudflare):** CDN-level DDoS mitigation, bot inspection, and global caching.
+2. **Tier 2 (Reverse Proxy / Traefik):** Configured via Docker Compose labels (`traefik.http.middlewares.app-rate-limit.ratelimit`), enforcing an average limit of **100 requests/minute** with a burst allowance of **50 requests**.
+3. **Tier 3 (Application / Middleware):** In-memory sliding-window rate limiter in [`src/lib/rate-limiter.ts`](src/lib/rate-limiter.ts) inspecting real client IPs (`X-Forwarded-For`, `X-Real-IP`, `CF-Connecting-IP`):
+   - **CLI Requests:** 60 requests / minute per IP (returns an ANSI box card with HTTP `429 Too Many Requests` and standard `Retry-After` header).
+   - **Contact Form:** 5 submissions / 15 minutes per IP (protects SMTP relay from spam).
+   - **General Web Traffic:** 120 requests / minute per IP.
+
+---
+
+## Interactive Monospace Terminal Hero
+
+The hero section ([`HeroTerminal.tsx`](src/components/sections/HeroTerminal.tsx)) features a Ghostty-inspired terminal aesthetic:
+- **Dynamic Device Detection:** Reads client platform and touch capabilities to format a realistic `Last login: <Date> on <device>` banner (`macos`, `windows`, `linux`, `iphone`, `ipad`, `android`, or `console`).
+- **Developer-Native Prompt:** The terminal prompt displays the developer's first name (`~ Alex`) for a concise, personal touch.
+- **Snappy Motion Choreography:** Initializing blinking block cursor, snappy downward reveal of prompt lines (`~ Name` and emerald `❯ Job Title`), character-by-character typing animation, and upward transition into the next role.
+- **Full Text Selection:** All terminal text (login banner, prompt symbols, name, and rotating roles) can be highlighted and copied cleanly with the mouse, while keeping the cursor glyph unselectable to avoid artifact characters.
+- **Configurable Bio Rotations & Modes:** Roles cycle automatically with customizable timing in `site.config.json` under `person.bioRotations` and `person.bioRotationInterval`. Use `person.bioMode` to select between:
+  - `"role"` (default): Minimal prompt typing only the job title (`❯ AI Engineer█`).
+  - `"full"`: Types the role and smoothly animates the synchronized description subline underneath (`↳ [adjectives] [artifacts]`).
+  - `"inline"`: Types the full sentence inline on the prompt line.
 
 ---
 

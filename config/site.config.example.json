@@ -14,7 +14,55 @@
       "linkedin": "",
       "instagram": ""
     },
-    "avatarBlurDataUrl": ""
+    "avatarBlurDataUrl": "",
+    "bioRotationInterval": 4500,
+    "bioMode": "role",
+    "bioRotations": {
+      "en": [
+        {
+          "role": "AI Engineer",
+          "adjectives": ["intelligent", "context-aware", "autonomous"],
+          "artifacts": "agentic workflows & AI implementations"
+        },
+        {
+          "role": "Full-Stack Developer",
+          "adjectives": ["robust", "scalable", "user-friendly"],
+          "artifacts": "web applications & cloud platforms"
+        },
+        {
+          "role": "Backend Architect",
+          "adjectives": ["high-throughput", "resilient", "fault-tolerant"],
+          "artifacts": "distributed microservices & APIs"
+        },
+        {
+          "role": "App Developer",
+          "adjectives": ["fluid", "native", "responsive"],
+          "artifacts": "cross-platform mobile applications"
+        }
+      ],
+      "de": [
+        {
+          "role": "KI-Engineer",
+          "adjectives": ["intelligente", "kontextsensitive", "autonome"],
+          "artifacts": "Agentic Workflows & KI-Lösungen"
+        },
+        {
+          "role": "Full-Stack Entwickler",
+          "adjectives": ["robuste", "skalierbare", "benutzerfreundliche"],
+          "artifacts": "Webanwendungen & Cloud-Plattformen"
+        },
+        {
+          "role": "Backend Architekt",
+          "adjectives": ["hochperformante", "resiliente", "fehlertolerante"],
+          "artifacts": "verteilte Microservices & APIs"
+        },
+        {
+          "role": "App Entwickler",
+          "adjectives": ["flüssige", "native", "reaktive"],
+          "artifacts": "Cross-Platform Mobile Apps"
+        }
+      ]
+    }
   },
   "site": {
     "serverUrl": "http://localhost:3000",
