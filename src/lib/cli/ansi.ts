@@ -68,6 +68,32 @@ export function badge(text: string, color: string = c.gray): string {
 }
 
 /**
+ * Wraps text into lines not exceeding maxWidth.
+ */
+export function wrapText(text: string, maxWidth: number): string[] {
+  if (!text) return [];
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    if (!word) continue;
+    if (!current) {
+      current = word;
+    } else if (stripAnsi(current).length + 1 + stripAnsi(word).length <= maxWidth) {
+      current += " " + word;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) {
+    lines.push(current);
+  }
+  return lines;
+}
+
+/**
  * Renders a section divider with an optional label.
  */
 export function divider(label?: string, width = 74): string {
@@ -77,6 +103,66 @@ export function divider(label?: string, width = 74): string {
   const prefix = `── ${label} `;
   const remaining = Math.max(0, width - prefix.length);
   return `${c.gray}${prefix}${"─".repeat(remaining)}${c.reset}`;
+}
+
+export interface CardOptions {
+  title?: string;
+  rightBadge?: string;
+  lines: string[];
+  width?: number;
+  borderColor?: string;
+}
+
+/**
+ * Renders a rounded box card with clean borders:
+ * ╭─ Title ───────────────────────────────── RightBadge ─╮
+ * │  line 1                                              │
+ * │  line 2                                              │
+ * ╰──────────────────────────────────────────────────────╯
+ */
+export function renderCard({
+  title,
+  rightBadge,
+  lines,
+  width = 74,
+  borderColor = c.gray,
+}: CardOptions): string {
+  let top = `${borderColor}╭─${c.reset}`;
+  let usedWidth = 2; // "╭─"
+
+  if (title) {
+    const titleVisible = stripAnsi(title);
+    top += ` ${title} ${borderColor}`;
+    usedWidth += titleVisible.length + 2;
+  }
+
+  const finalLines = [...lines];
+
+  if (rightBadge) {
+    const badgeVisible = stripAnsi(rightBadge);
+    const available = width - usedWidth - badgeVisible.length - 4; // " ...  [badge] ─╮"
+    if (available >= 2) {
+      top += `${"─".repeat(available)} ${rightBadge} ${borderColor}─╮${c.reset}`;
+    } else {
+      // Not enough space on top border for right badge, put plain top and insert badge into body
+      const remainingDashes = Math.max(1, width - usedWidth - 1);
+      top += `${"─".repeat(remainingDashes)}╮${c.reset}`;
+      finalLines.unshift(`  ${rightBadge}`);
+    }
+  } else {
+    const dashes = Math.max(1, width - usedWidth - 1);
+    top += `${"─".repeat(dashes)}╮${c.reset}`;
+  }
+
+  const innerWidth = width - 4;
+  const body = finalLines.map((line) => {
+    const visibleLen = stripAnsi(line).length;
+    const pad = Math.max(0, innerWidth - visibleLen);
+    return `${borderColor}│${c.reset} ${line}${" ".repeat(pad)} ${borderColor}│${c.reset}`;
+  });
+
+  const bottom = `${borderColor}╰${"─".repeat(width - 2)}╯${c.reset}`;
+  return [top, ...body, bottom].join("\n");
 }
 
 /**
@@ -93,4 +179,21 @@ export function box(lines: string[], width = 74): string {
     })
     .join("\n");
   return `${top}\n${content}\n${bottom}`;
+}
+
+/**
+ * Renders a route header block.
+ */
+export function renderRouteHeader(route: string, subtitle?: string, width = 74): string {
+  const line1 = `${c.gray}╭─${c.reset} ${c.brightGreen}~${c.reset} ${c.brightCyan}${route}${c.reset}`;
+  const innerWidth = width - 4;
+  const line2Content = subtitle ? `  ${c.dim}${subtitle}${c.reset}` : "";
+  const pad2 = Math.max(0, innerWidth - stripAnsi(line2Content).length);
+  const line2 = `${c.gray}│${c.reset} ${line2Content}${" ".repeat(pad2)} ${c.gray}│${c.reset}`;
+  const bottom = `${c.gray}╰${"─".repeat(width - 2)}╯${c.reset}`;
+
+  if (subtitle) {
+    return `${line1}\n${line2}\n${bottom}`;
+  }
+  return `${line1}\n${bottom}`;
 }

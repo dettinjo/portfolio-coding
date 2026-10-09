@@ -10,6 +10,8 @@ import {
   skillBar,
   divider,
   stripAnsi,
+  wrapText,
+  renderCard,
 } from "./ansi";
 
 const projects = projectsData as unknown as SoftwareProject[];
@@ -21,6 +23,23 @@ export interface CliRenderOptions {
   isPlain?: boolean;
   origin?: string;
   projectLimit?: number;
+}
+
+/**
+ * Format project developedAt ISO date into clean "Mon YYYY" string.
+ */
+function formatProjectDate(isoDate?: string, lang: "en" | "de" = "en"): string {
+  if (!isoDate) return "";
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }
 
 /**
@@ -36,16 +55,16 @@ export function formatMarkdownForTerminal(md: string): string {
     // Strip HTML tags like <p align="...">
     .replace(/<\/?[^>]+(>|$)/g, "")
     // Convert headings
-    .replace(/^### (.*$)/gim, `\n${c.bold}${c.yellow}▸ $1${c.reset}`)
+    .replace(/^### (.*$)/gim, `\n${c.bold}${c.brightYellow}▸ $1${c.reset}`)
     .replace(/^## (.*$)/gim, `\n${c.bold}${c.brightCyan}◆ $1${c.reset}\n`)
     .replace(/^# (.*$)/gim, `\n${c.bold}${c.brightCyan}══ $1 ══${c.reset}\n`)
     // Convert bullet lists
-    .replace(/^[\*\-] (.*$)/gim, `  ${c.cyan}•${c.reset} $1`)
+    .replace(/^[\*\-] (.*$)/gim, `  ${c.brightCyan}•${c.reset} $1`)
     // Convert bold & italic
     .replace(/\*\*(.*?)\*\*/g, `${c.bold}$1${c.reset}`)
     .replace(/\*(.*?)\*/g, `${c.italic}$1${c.reset}`)
     // Convert inline code
-    .replace(/`([^`]+)`/g, `${c.yellow}$1${c.reset}`)
+    .replace(/`([^`]+)`/g, `${c.brightYellow}$1${c.reset}`)
     // Convert markdown links [text](url) -> terminalLink or text (url)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
       return `${c.brightBlue}${terminalLink(text, url)}${c.reset} ${c.gray}(${url})${c.reset}`;
@@ -59,6 +78,7 @@ export function formatMarkdownForTerminal(md: string): string {
  * Render stylized ASCII / Ghostty prompt header.
  */
 export function renderHeader(options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
   const p = siteConfig.person;
   const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
   const name = p.fullName || resume.basics.name;
@@ -86,15 +106,106 @@ export function renderHeader(options: CliRenderOptions = {}): string {
     asciiArt = `${c.brightCyan}${c.bold}   ${name.toUpperCase()}${c.reset}`;
   }
 
-  const location = `${p.address.city}${p.address.city && p.address.country ? ", " : ""}${p.address.country}`;
+  // Location resolution: site.config.json person.address -> resume.json location fallback
+  const locationCity = p.address?.city || "";
+  const locationCountry = p.address?.country || "";
+  const location =
+    locationCity && locationCountry
+      ? `${locationCity}, ${locationCountry}`
+      : locationCity || locationCountry || resume.basics?.location || "Remote";
+
+  // Status badge resolution: person.status / availability override or default
+  const customStatus = (p as { status?: string; availability?: string }).status ||
+    (p as { status?: string; availability?: string }).availability;
+  const statusBadge = customStatus
+    ? `${c.brightGreen}● ${customStatus}${c.reset}`
+    : lang === "de"
+    ? `${c.brightGreen}● Verfügbar für Projekte${c.reset}`
+    : `${c.brightGreen}● Available for opportunities${c.reset}`;
+
   const webLink = terminalLink(origin, origin);
 
-  const promptLine = `${c.gray}╭─${c.reset} ${c.brightGreen}${name.toLowerCase().replace(/\s+/g, "")}${c.gray}@${c.brightBlue}terminal${c.reset} ${c.gray}in${c.reset} ${c.yellow}~${c.reset} ${c.gray}on${c.reset} ${c.brightMagenta}main${c.reset}
+  const promptLine = `${c.gray}╭─${c.reset} ${c.brightGreen}${name.toLowerCase().replace(/\s+/g, "")}${c.gray}@${c.brightBlue}terminal${c.reset} ${c.gray}in${c.reset} ${c.brightYellow}~${c.reset} ${c.gray}on${c.reset} ${c.brightMagenta}main${c.reset}
 ${c.gray}╰─${c.reset} ${c.brightCyan}❯${c.reset} ${c.bold}${name}${c.reset} ${c.gray}—${c.reset} ${c.brightYellow}${p.headline}${c.reset}`;
 
-  const metaPill = `${c.gray}📍 ${location || "Remote"}  ${c.gray}│${c.reset}  ${c.brightGreen}● Available for hire${c.reset}  ${c.gray}│${c.reset}  🌐 ${c.brightBlue}${webLink}${c.reset}`;
+  const metaPill = `${c.gray}📍 ${location}  ${c.gray}│${c.reset}  ${statusBadge}  ${c.gray}│${c.reset}  🌐 ${c.brightBlue}${webLink}${c.reset}`;
 
   return `${asciiArt}\n\n${promptLine}\n${metaPill}\n${divider()}`;
+}
+
+/**
+ * Render a route header banner pill (for subroutes).
+ */
+export function renderRoutePill(route: string, subtitle?: string, width = 74): string {
+  const top = `${c.gray}╭─${c.reset} ${c.brightGreen}~${c.reset} ${c.brightCyan}${route}${c.reset} ${c.gray}${"─".repeat(Math.max(1, width - stripAnsi(route).length - 6))}╮${c.reset}`;
+  const lines = [top];
+
+  if (subtitle) {
+    const visibleSub = stripAnsi(subtitle);
+    const pad = Math.max(0, width - visibleSub.length - 4);
+    lines.push(`${c.gray}│${c.reset}  ${c.dim}${subtitle}${c.reset}${" ".repeat(pad)}${c.gray}│${c.reset}`);
+  }
+
+  lines.push(`${c.gray}╰${"─".repeat(width - 2)}╯${c.reset}`);
+  return lines.join("\n");
+}
+
+/**
+ * Render a single project inside a styled rounded card box.
+ */
+export function renderProjectCard(proj: SoftwareProject, options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+
+  const title = lang === "de" && proj.titleDe ? proj.titleDe : proj.title;
+  const desc = lang === "de" && proj.descriptionDe ? proj.descriptionDe : proj.description;
+  const projectType =
+    lang === "de" && proj.projectTypeDe ? proj.projectTypeDe : proj.projectType || proj.categories?.[0] || "Project";
+  const dateStr = formatProjectDate(proj.developedAt, lang);
+  const projectUrl = `${origin}/${proj.slug}`;
+  const clickUrl = terminalLink(projectUrl, projectUrl);
+
+  const tags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`).join(" ");
+
+  const lines: string[] = [""];
+
+  // Date & Tech stack with safe line wrapping
+  if (dateStr) {
+    lines.push(`  ${c.gray}Date:${c.reset}   ${c.dim}${dateStr}${c.reset}`);
+  }
+  if (tags) {
+    const wrappedTags = wrapText(tags, 58);
+    if (wrappedTags.length > 0) {
+      lines.push(`  ${c.gray}Stack:${c.reset}  ${wrappedTags[0]}`);
+      for (let j = 1; j < wrappedTags.length; j++) {
+        lines.push(`          ${wrappedTags[j]}`);
+      }
+    }
+  }
+
+  // Description with word-wrap
+  const wrappedDesc = wrapText(desc, 58);
+  if (wrappedDesc.length > 0) {
+    lines.push(`  ${c.gray}About:${c.reset} ${wrappedDesc[0]}`);
+    for (let j = 1; j < wrappedDesc.length; j++) {
+      lines.push(`         ${wrappedDesc[j]}`);
+    }
+  }
+
+  // Link
+  lines.push("");
+  lines.push(`  ${c.gray}Link:${c.reset}  ${c.brightBlue}${clickUrl}${c.reset}`);
+  lines.push("");
+
+  const rightBadge = `${c.dim}[${c.brightYellow}${projectType}${c.reset}${c.dim}]${c.reset}`;
+
+  return renderCard({
+    title: `${c.bold}${c.brightWhite}${title}${c.reset}`,
+    rightBadge,
+    lines,
+    width: 74,
+    borderColor: c.gray,
+  });
 }
 
 /**
@@ -109,7 +220,8 @@ export function renderAbout(options: CliRenderOptions = {}): string {
   let out = `\n${divider(sectionTitle)}\n`;
 
   if (summary) {
-    out += `\n${summary}\n`;
+    const wrappedSummary = wrapText(summary, 70);
+    out += `\n${wrappedSummary.join("\n")}\n`;
   }
 
   if (rotations.length > 0) {
@@ -117,7 +229,7 @@ export function renderAbout(options: CliRenderOptions = {}): string {
     for (const item of rotations) {
       const roleStr = `${c.brightYellow}${item.role.padEnd(22)}${c.reset}`;
       const adjectives = item.adjectives?.length ? item.adjectives.join(", ") : "";
-      const desc = adjectives ? `${adjectives} ${item.artifacts || ""}` : (item.artifacts || "");
+      const desc = adjectives ? `${adjectives} ${item.artifacts || ""}` : item.artifacts || "";
       out += `  ${c.cyan}▸${c.reset} ${roleStr} ${c.dim}${desc}${c.reset}\n`;
     }
   }
@@ -126,7 +238,7 @@ export function renderAbout(options: CliRenderOptions = {}): string {
 }
 
 /**
- * Render Projects Section (all or limited).
+ * Render Projects Section (featured subset or full).
  */
 export function renderProjects(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
@@ -146,25 +258,9 @@ export function renderProjects(options: CliRenderOptions = {}): string {
   let out = `\n${divider(sectionTitle)}\n\n`;
 
   for (let i = 0; i < list.length; i++) {
-    const proj = list[i];
-    const title = lang === "de" && proj.titleDe ? proj.titleDe : proj.title;
-    const desc = lang === "de" && proj.descriptionDe ? proj.descriptionDe : proj.description;
-    const projectType =
-      lang === "de" && proj.projectTypeDe ? proj.projectTypeDe : proj.projectType || proj.categories?.[0] || "Project";
-    const projectUrl = `${origin}/${proj.slug}`;
-    const clickUrl = terminalLink(projectUrl, projectUrl);
-
-    const tagBadges = proj.tags.map((t) => `${c.gray}[${c.cyan}${t}${c.gray}]${c.reset}`).join(" ");
-
-    out += `  ${c.bold}${c.brightWhite}${title}${c.reset}  ${c.dim}(${projectType})${c.reset}\n`;
-    if (tagBadges) {
-      out += `  ${tagBadges}\n`;
-    }
-    out += `  ${desc}\n`;
-    out += `  ${c.gray}Link:${c.reset} ${c.brightBlue}${clickUrl}${c.reset}\n`;
-
+    out += renderProjectCard(list[i], options);
     if (i < list.length - 1) {
-      out += `\n`;
+      out += `\n\n`;
     }
   }
 
@@ -174,8 +270,40 @@ export function renderProjects(options: CliRenderOptions = {}): string {
       lang === "de"
         ? `... und ${remaining} weitere Projekte.`
         : `... and ${remaining} more projects.`;
-    out += `\n  ${c.dim}${moreText} Run: ${c.brightCyan}curl ${origin}/projects${c.reset}${c.dim} to see all.${c.reset}\n`;
+    out += `\n\n  ${c.dim}${moreText} Run: ${c.brightCyan}curl ${origin}/projects${c.reset}${c.dim} to see all.${c.reset}\n`;
   }
+
+  return out;
+}
+
+/**
+ * Render full dedicated `/projects` subroute view.
+ */
+export function renderProjectsSubroute(options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const subtitle =
+    lang === "de"
+      ? `Alle Software-Projekte & Repositories (${projects.length} insgesamt)`
+      : `All Software Projects & Repositories (${projects.length} total)`;
+
+  let out = renderHeader(options);
+  out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/projects`, subtitle)}\n\n`;
+
+  for (let i = 0; i < projects.length; i++) {
+    out += renderProjectCard(projects[i], options);
+    if (i < projects.length - 1) {
+      out += `\n\n`;
+    }
+  }
+
+  out += `\n\n${divider()}\n`;
+  const tipText =
+    lang === "de"
+      ? `Tipp: Detaillierte README zu einem Projekt ansehen: curl ${origin}/<slug>`
+      : `Tip: View detailed README for any project: curl ${origin}/<slug>`;
+  out += `${c.dim}${tipText}${c.reset}\n`;
+  out += `${c.dim}Example: ${c.brightCyan}curl ${origin}/${projects[0]?.slug || "nexus-cli"}${c.reset}\n`;
 
   return out;
 }
@@ -198,14 +326,28 @@ export function renderProjectDetail(slug: string, options: CliRenderOptions = {}
   const title = lang === "de" && proj.titleDe ? proj.titleDe : proj.title;
   const projectType =
     lang === "de" && proj.projectTypeDe ? proj.projectTypeDe : proj.projectType || "Software Project";
-  const tags = proj.tags.map((t) => `${c.gray}[${c.cyan}${t}${c.gray}]${c.reset}`).join(" ");
+  const dateStr = formatProjectDate(proj.developedAt, lang);
+  const tags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`).join(" ");
   const projectUrl = `${origin}/${proj.slug}`;
 
   let out = renderHeader(options);
-  out += `\n${divider(title.toUpperCase())}\n\n`;
-  out += `  ${c.bold}${c.brightWhite}${title}${c.reset} ${c.dim}(${projectType})${c.reset}\n`;
-  out += `  ${tags}\n`;
-  out += `  ${c.gray}URL:${c.reset} ${c.brightBlue}${terminalLink(projectUrl, projectUrl)}${c.reset}\n\n`;
+  out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/${proj.slug}`, `Project Deep Dive: ${title}`)}\n\n`;
+
+  // Top summary card
+  const summaryLines = [
+    "",
+    `  ${c.gray}Stack:${c.reset}  ${tags}${dateStr ? `  ${c.gray}•${c.reset} ${c.dim}${dateStr}${c.reset}` : ""}`,
+    `  ${c.gray}URL:${c.reset}    ${c.brightBlue}${terminalLink(projectUrl, projectUrl)}${c.reset}`,
+    "",
+  ];
+  out += renderCard({
+    title: `${c.bold}${c.brightWhite}${title}${c.reset}`,
+    rightBadge: `${c.dim}[${c.brightYellow}${projectType}${c.reset}${c.dim}]${c.reset}`,
+    lines: summaryLines,
+    width: 74,
+  });
+
+  out += `\n\n`;
 
   const mdContent =
     lang === "de" && (proj as { longDescriptionDe?: string }).longDescriptionDe
@@ -220,7 +362,7 @@ export function renderProjectDetail(slug: string, options: CliRenderOptions = {}
 }
 
 /**
- * Render categorized skills with visual proficiency meters.
+ * Render categorized skills with boxed cards and visual proficiency meters.
  */
 export function renderSkills(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
@@ -229,35 +371,66 @@ export function renderSkills(options: CliRenderOptions = {}): string {
   let out = `\n${divider(sectionTitle)}\n\n`;
 
   for (const cat of skills) {
-    out += `  ${c.bold}${c.brightYellow}${cat.name}${c.reset}\n`;
+    const lines: string[] = [""];
 
-    // Format skills neatly with rating meters
-    const lineItems: string[] = [];
-    for (const s of cat.skills) {
-      lineItems.push(`${s.name} ${skillBar(s.level)}`);
-    }
+    // Format skills in clean 2-column layout inside the card
+    const items = cat.skills.map((s) => ({
+      name: s.name,
+      bar: skillBar(s.level),
+      level: s.level,
+    }));
 
-    // Wrap items across lines nicely
-    let currentLine = "    ";
-    for (const item of lineItems) {
-      if (stripAnsi(currentLine).length + stripAnsi(item).length + 4 > 74) {
-        out += `${currentLine}\n`;
-        currentLine = `    ${item}    `;
+    for (let i = 0; i < items.length; i += 2) {
+      const left = items[i];
+      const right = items[i + 1];
+
+      const leftCol = `  ${c.brightWhite}${left.name.padEnd(14)}${c.reset} ${left.bar}`;
+      if (right) {
+        const rightCol = `    ${c.brightWhite}${right.name.padEnd(14)}${c.reset} ${right.bar}`;
+        lines.push(`${leftCol}${rightCol}`);
       } else {
-        currentLine += `${item}    `;
+        lines.push(`${leftCol}`);
       }
     }
-    if (currentLine.trim()) {
-      out += `${currentLine}\n`;
-    }
-    out += `\n`;
+
+    lines.push("");
+
+    out += renderCard({
+      title: `${c.bold}${c.brightYellow}${cat.name}${c.reset}`,
+      rightBadge: `${c.dim}[${cat.skills.length} ${lang === "de" ? "Technologien" : "Skills"}]${c.reset}`,
+      lines,
+      width: 74,
+    });
+    out += "\n\n";
   }
+
+  // Legend
+  const legend = `${c.dim}Legend: ${c.brightCyan}■■■■■${c.reset} Expert  ${c.brightCyan}■■■■□${c.reset} Advanced  ${c.brightCyan}■■■□□${c.reset} Proficient  ${c.brightCyan}■■□□□${c.reset} Familiar`;
+  out += `  ${legend}\n`;
 
   return out;
 }
 
 /**
- * Render Experience & Education from Resume data.
+ * Render full dedicated `/skills` subroute view.
+ */
+export function renderSkillsSubroute(options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const subtitle =
+    lang === "de"
+      ? "Technische Fähigkeiten & Kompetenzmatrix"
+      : "Technical Skills & Competency Matrix";
+
+  let out = renderHeader(options);
+  out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/skills`, subtitle)}\n\n`;
+  out += renderSkills(options);
+  out += `\n${renderCommands(options)}`;
+  return out;
+}
+
+/**
+ * Render Experience & Education from Resume data with boxed cards.
  */
 export function renderResume(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
@@ -271,14 +444,31 @@ export function renderResume(options: CliRenderOptions = {}): string {
     const exp = items[i];
     if (exp.visible === false) continue;
 
-    out += `  ${c.bold}${c.brightWhite}${exp.position}${c.reset}  ${c.brightYellow}@ ${exp.company}${c.reset}\n`;
     const loc = (exp as { location?: string }).location;
-    out += `  ${c.dim}${exp.date}${loc ? `  •  ${loc}` : ""}${c.reset}\n`;
-    if (exp.summary) {
-      out += `  ${exp.summary}\n`;
+    const lines: string[] = [""];
+
+    if (loc) {
+      lines.push(`  ${c.gray}Location:${c.reset} ${loc}`);
     }
+
+    if (exp.summary) {
+      const wrapped = wrapText(exp.summary, 62);
+      lines.push(`  ${c.gray}Summary:${c.reset}  ${wrapped[0]}`);
+      for (let j = 1; j < wrapped.length; j++) {
+        lines.push(`            ${wrapped[j]}`);
+      }
+    }
+    lines.push("");
+
+    out += renderCard({
+      title: `${c.bold}${c.brightWhite}${exp.position}${c.reset} ${c.yellow}@ ${exp.company}${c.reset}`,
+      rightBadge: `${c.dim}[${exp.date}]${c.reset}`,
+      lines,
+      width: 74,
+    });
+
     if (i < items.length - 1) {
-      out += `\n`;
+      out += `\n\n`;
     }
   }
 
@@ -288,10 +478,21 @@ export function renderResume(options: CliRenderOptions = {}): string {
     for (let i = 0; i < education.length; i++) {
       const edu = education[i];
       if (edu.visible === false) continue;
-      out += `  ${c.bold}${c.brightWhite}${edu.studyType ? `${edu.studyType} in ` : ""}${edu.area}${c.reset}\n`;
-      out += `  ${c.yellow}${edu.institution}${c.reset}  ${c.dim}(${edu.date})${c.reset}\n`;
+
+      const lines: string[] = [""];
+      const degree = `${edu.studyType ? `${edu.studyType} in ` : ""}${edu.area}`;
+      lines.push(`  ${c.brightWhite}${degree}${c.reset}`);
+      lines.push("");
+
+      out += renderCard({
+        title: `${c.bold}${c.brightYellow}${edu.institution}${c.reset}`,
+        rightBadge: `${c.dim}[${edu.date}]${c.reset}`,
+        lines,
+        width: 74,
+      });
+
       if (i < education.length - 1) {
-        out += `\n`;
+        out += `\n\n`;
       }
     }
   }
@@ -300,7 +501,26 @@ export function renderResume(options: CliRenderOptions = {}): string {
 }
 
 /**
- * Render Contact information & Social links.
+ * Render full dedicated `/resume` subroute view.
+ */
+export function renderResumeSubroute(options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const p = siteConfig.person;
+  const subtitle =
+    lang === "de"
+      ? `Lebenslauf & Karriereübersicht — ${p.fullName || resume.basics.name}`
+      : `Curriculum Vitae & Career History — ${p.fullName || resume.basics.name}`;
+
+  let out = renderHeader(options);
+  out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/resume`, subtitle)}\n\n`;
+  out += renderResume(options);
+  out += `\n\n${renderCommands(options)}`;
+  return out;
+}
+
+/**
+ * Render Contact information & Social links inside a styled card.
  */
 export function renderContact(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
@@ -310,29 +530,53 @@ export function renderContact(options: CliRenderOptions = {}): string {
 
   let out = `\n${divider(sectionTitle)}\n\n`;
 
-  const items: [string, string, string][] = [];
+  const contactItems: [string, string, string][] = [];
 
   if (p.email) {
-    items.push(["Email", p.email, `mailto:${p.email}`]);
+    contactItems.push(["Email", p.email, `mailto:${p.email}`]);
   }
   if (p.socials?.github) {
     const ghUrl = `https://github.com/${p.socials.github}`;
-    items.push(["GitHub", ghUrl, ghUrl]);
+    contactItems.push(["GitHub", ghUrl, ghUrl]);
   }
   if (p.socials?.linkedin) {
     const liUrl = `https://linkedin.com/in/${p.socials.linkedin}`;
-    items.push(["LinkedIn", liUrl, liUrl]);
+    contactItems.push(["LinkedIn", liUrl, liUrl]);
   }
-  if (resume.basics?.url?.href) {
-    items.push(["Website", origin, origin]);
-  }
-  items.push(["MCP Server", `${origin}/api/mcp`, `${origin}/api/mcp`]);
+  contactItems.push(["Website", origin, origin]);
+  contactItems.push(["MCP Server", `${origin}/api/mcp`, `${origin}/api/mcp`]);
 
-  for (const [label, display, link] of items) {
-    const padded = `${label}:`.padEnd(14);
-    out += `  ${c.gray}${padded}${c.reset} ${c.brightBlue}${terminalLink(display, link)}${c.reset}\n`;
+  const lines: string[] = [""];
+  for (const [label, display, link] of contactItems) {
+    lines.push(`  ${c.gray}${label.padEnd(12)}:${c.reset} ${c.brightBlue}${terminalLink(display, link)}${c.reset}`);
   }
+  lines.push("");
 
+  out += renderCard({
+    title: `${c.bold}${c.brightWhite}Contact Card${c.reset}`,
+    rightBadge: `${c.dim}[${p.fullName || resume.basics.name}]${c.reset}`,
+    lines,
+    width: 74,
+  });
+
+  return out;
+}
+
+/**
+ * Render full dedicated `/contact` subroute view.
+ */
+export function renderContactSubroute(options: CliRenderOptions = {}): string {
+  const lang = options.lang || "en";
+  const origin = options.origin || siteConfig.site.serverUrl || "https://codeby.joeldettinger.de";
+  const subtitle =
+    lang === "de"
+      ? "Direkte Kontaktdaten & soziale Profile"
+      : "Direct Contact Details & Social Profiles";
+
+  let out = renderHeader(options);
+  out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/contact`, subtitle)}\n\n`;
+  out += renderContact(options);
+  out += `\n\n${renderCommands(options)}`;
   return out;
 }
 
@@ -350,7 +594,7 @@ export function renderCommands(options: CliRenderOptions = {}): string {
 
   const commands = [
     [`curl ${domain}/projects`, lang === "de" ? "Alle Projekte durchsuchen" : "Explore all projects"],
-    [`curl ${domain}/nexus-cli`, lang === "de" ? "Projektdetails anzeigen" : "View single project deep dive"],
+    [`curl ${domain}/${projects[0]?.slug || "nexus-cli"}`, lang === "de" ? "Projektdetails anzeigen" : "View single project deep dive"],
     [`curl ${domain}/skills`, lang === "de" ? "Fähigkeiten-Matrix anzeigen" : "View full skill matrix"],
     [`curl ${domain}/resume`, lang === "de" ? "Vollständigen Lebenslauf ansehen" : "View full CV & career timeline"],
     [`curl ${domain}/contact`, lang === "de" ? "Kontaktdaten abrufen" : "Get direct contact details"],
@@ -402,6 +646,7 @@ export function renderJsonSummary(options: CliRenderOptions = {}): string {
     summary: resume.sections.summary?.content || "",
     featuredProjects: projects.map((proj) => ({
       id: proj.id,
+      slug: proj.slug,
       title: proj.title,
       description: proj.description,
       tags: proj.tags,

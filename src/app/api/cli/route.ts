@@ -1,13 +1,11 @@
 import { NextRequest } from "next/server";
 import {
-  renderHeader,
   renderFullPortfolio,
-  renderProjects,
+  renderProjectsSubroute,
   renderProjectDetail,
-  renderSkills,
-  renderResume,
-  renderContact,
-  renderCommands,
+  renderSkillsSubroute,
+  renderResumeSubroute,
+  renderContactSubroute,
   renderJsonSummary,
   CliRenderOptions,
 } from "@/lib/cli/formatter";
@@ -85,13 +83,13 @@ export async function GET(request: NextRequest) {
   if (cleanPath === "/" || cleanPath === "/cli" || cleanPath === "/api/cli") {
     output = renderFullPortfolio(options);
   } else if (cleanPath === "/projects") {
-    output = `${renderHeader(options)}${renderProjects(options)}\n${renderCommands(options)}`;
+    output = renderProjectsSubroute(options);
   } else if (cleanPath === "/skills") {
-    output = `${renderHeader(options)}${renderSkills(options)}\n${renderCommands(options)}`;
+    output = renderSkillsSubroute(options);
   } else if (cleanPath === "/resume" || cleanPath === "/cv") {
-    output = `${renderHeader(options)}${renderResume(options)}\n${renderCommands(options)}`;
+    output = renderResumeSubroute(options);
   } else if (cleanPath === "/contact") {
-    output = `${renderHeader(options)}${renderContact(options)}\n${renderCommands(options)}`;
+    output = renderContactSubroute(options);
   } else if (projectSlugs.includes(potentialSlug)) {
     output = renderProjectDetail(potentialSlug, options);
   } else {
