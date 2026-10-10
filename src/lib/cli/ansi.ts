@@ -44,6 +44,66 @@ export function stripAnsi(text: string): string {
 }
 
 /**
+ * Strips HTML tags and decodes common HTML entities for terminal rendering.
+ */
+export function stripHtml(input: string): string {
+  if (!input) return "";
+
+  return input
+    // Convert line breaks and paragraph ends
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "  • ")
+    // Convert anchor tags with href to label (url) or label
+    .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/gi, "$2 ($1)")
+    // Strip all remaining HTML tags
+    .replace(/<[^>]+>/g, "")
+    // Decode HTML entities
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    // Normalize consecutive newlines and whitespace
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s+\n/g, "\n\n")
+    .trim();
+}
+
+/**
+ * Strips markdown links [text](url) to clean display text.
+ */
+export function cleanMarkdownLinks(input: string): string {
+  if (!input) return "";
+  return input.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
+    if (text === url || url === `mailto:${text}`) {
+      return text;
+    }
+    return text;
+  });
+}
+
+/**
+ * Truncates text so its visible (non-ANSI) character length does not exceed maxLen.
+ * If truncated, appends '…'. Preserves leading ANSI color sequences if present.
+ */
+export function truncateVisible(text: string, maxLen: number): string {
+  const visible = stripAnsi(text);
+  if (visible.length <= maxLen) return text;
+  const truncated = visible.slice(0, Math.max(0, maxLen - 1)) + "…";
+  const ansiMatch = text.match(/^(\x1b\[[0-9;]*m)+/);
+  if (ansiMatch) {
+    return `${ansiMatch[0]}${truncated}${c.reset}`;
+  }
+  return truncated;
+}
+
+/**
  * Creates an OSC 8 terminal hyperlink for terminals that support it.
  */
 export function terminalLink(text: string, url: string): string {
@@ -94,6 +154,39 @@ export function wrapText(text: string, maxWidth: number): string[] {
 }
 
 /**
+ * Wraps an array of badges into lines not exceeding maxWidth,
+ * keeping each badge token atomic so multi-word badges are never split across lines.
+ */
+export function wrapBadges(badges: string[], maxWidth: number): string[] {
+  if (!badges || badges.length === 0) return [];
+  const lines: string[] = [];
+  let currentLine: string[] = [];
+  let currentLen = 0;
+
+  for (const item of badges) {
+    const itemLen = stripAnsi(item).length;
+    if (currentLine.length > 0 && currentLen + 1 + itemLen > maxWidth) {
+      lines.push(currentLine.join(" "));
+      currentLine = [item];
+      currentLen = itemLen;
+    } else {
+      if (currentLine.length > 0) {
+        currentLen += 1 + itemLen;
+      } else {
+        currentLen = itemLen;
+      }
+      currentLine.push(item);
+    }
+  }
+
+  if (currentLine.length > 0) {
+    lines.push(currentLine.join(" "));
+  }
+
+  return lines;
+}
+
+/**
  * Renders a section divider with an optional label.
  */
 export function divider(label?: string, width = 74): string {
@@ -119,6 +212,7 @@ export interface CardOptions {
  * │  line 1                                              │
  * │  line 2                                              │
  * ╰──────────────────────────────────────────────────────╯
+ * Guarantees that visible top, body, and bottom lines strictly equal width.
  */
 export function renderCard({
   title,
@@ -127,34 +221,63 @@ export function renderCard({
   width = 74,
   borderColor = c.gray,
 }: CardOptions): string {
-  let top = `${borderColor}╭─${c.reset}`;
-  let usedWidth = 2; // "╭─"
+  const innerWidth = width - 4;
+  const finalLines: string[] = [];
 
-  if (title) {
-    const titleVisible = stripAnsi(title);
-    top += ` ${title} ${borderColor}`;
-    usedWidth += titleVisible.length + 2;
+  // Enforce innerWidth on all card lines to prevent border breakout
+  for (const line of lines) {
+    const visibleLen = stripAnsi(line).length;
+    if (visibleLen <= innerWidth) {
+      finalLines.push(line);
+    } else {
+      const wrapped = wrapText(line, innerWidth);
+      finalLines.push(...wrapped);
+    }
   }
 
-  const finalLines = [...lines];
+  let top = "";
+  const titleClean = title ? stripAnsi(title) : "";
+  const badgeClean = rightBadge ? stripAnsi(rightBadge) : "";
 
-  if (rightBadge) {
-    const badgeVisible = stripAnsi(rightBadge);
-    const available = width - usedWidth - badgeVisible.length - 4; // " ...  [badge] ─╮"
-    if (available >= 2) {
-      top += `${"─".repeat(available)} ${rightBadge} ${borderColor}─╮${c.reset}`;
+  // Check if title + badge both fit on the top line with at least 2 dashes separating them
+  const canFitBoth = Boolean(
+    titleClean &&
+    badgeClean &&
+    width - 8 - titleClean.length - badgeClean.length >= 2
+  );
+
+  if (canFitBoth) {
+    const dashes = width - 8 - titleClean.length - badgeClean.length;
+    top = `${borderColor}╭─${c.reset} ${title} ${borderColor}${"─".repeat(dashes)} ${rightBadge} ${borderColor}─╮${c.reset}`;
+  } else if (titleClean) {
+    // If right badge exists but didn't fit on the top line, insert it into the card body
+    if (rightBadge) {
+      if (finalLines.length > 0 && finalLines[0] === "") {
+        finalLines.splice(1, 0, `  ${rightBadge}`);
+      } else {
+        finalLines.unshift(`  ${rightBadge}`);
+      }
+    }
+
+    // Top format with title only: ╭─ title ─────╮
+    const maxTitleLen = width - 7;
+    const safeTitle = truncateVisible(title!, maxTitleLen);
+    const safeTitleLen = stripAnsi(safeTitle).length;
+    const dashes = width - 5 - safeTitleLen;
+    top = `${borderColor}╭─${c.reset} ${safeTitle} ${borderColor}${"─".repeat(dashes)}╮${c.reset}`;
+  } else if (badgeClean) {
+    // Badge only, no title: ╭────── badge ─╮
+    if (width - 6 - badgeClean.length >= 1) {
+      const dashes = width - 6 - badgeClean.length;
+      top = `${borderColor}╭─${"─".repeat(dashes)} ${rightBadge} ${borderColor}─╮${c.reset}`;
     } else {
-      // Not enough space on top border for right badge, put plain top and insert badge into body
-      const remainingDashes = Math.max(1, width - usedWidth - 1);
-      top += `${"─".repeat(remainingDashes)}╮${c.reset}`;
       finalLines.unshift(`  ${rightBadge}`);
+      top = `${borderColor}╭${"─".repeat(width - 2)}╮${c.reset}`;
     }
   } else {
-    const dashes = Math.max(1, width - usedWidth - 1);
-    top += `${"─".repeat(dashes)}╮${c.reset}`;
+    top = `${borderColor}╭${"─".repeat(width - 2)}╮${c.reset}`;
   }
 
-  const innerWidth = width - 4;
   const body = finalLines.map((line) => {
     const visibleLen = stripAnsi(line).length;
     const pad = Math.max(0, innerWidth - visibleLen);
