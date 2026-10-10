@@ -167,6 +167,15 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       ? statusIconParam
       : "dot-green";
 
+  const alignmentParam =
+    body?.layoutAlignment ||
+    searchParams.get("layoutAlignment") ||
+    searchParams.get("alignment");
+  const layoutAlignment =
+    alignmentParam === "center" || alignmentParam === "desktop-left"
+      ? alignmentParam
+      : "mobile-safe";
+
   return {
     jobTitle,
     showJobTitle,
@@ -190,6 +199,7 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     statusIcon,
     theme,
     template,
+    layoutAlignment,
   };
 }
 

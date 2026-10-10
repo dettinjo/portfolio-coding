@@ -10,16 +10,50 @@ export const LINKEDIN_BANNER_WIDTH = 1584;
 export const LINKEDIN_BANNER_HEIGHT = 396;
 export const LINKEDIN_ASPECT_RATIO = 4; // 1584 / 396 = 4:1
 
-// LinkedIn Safe Area Specifications (2025/2026 guidelines)
+// LinkedIn Safe Area Specifications (2025/2026 accurate multi-device guidelines)
 export const LINKEDIN_SAFE_AREAS = {
-  // Desktop avatar overlay (circle)
+  // 1. Universal Safe Zone: Guaranteed 100% visible across Mobile Browser, Mobile App, & Desktop
+  universalSafeZone: {
+    minX: 700,
+    maxX: 1360,
+    minY: 40,
+    maxY: 356,
+    width: 660,
+    height: 316,
+    label: "Universal Safe Zone (Mobile & Desktop)",
+  },
+  // 2. Mobile Web Browser Avatar: Measured collision danger zone on mobile Chrome/Safari
+  mobileWebAvatar: {
+    centerX: 368,
+    centerY: 344,
+    radius: 318,
+    label: "Mobile Web Profile Picture",
+  },
+  // 3. Mobile Native App Avatar: Measured collision danger zone on LinkedIn iOS/Android app
+  mobileAppAvatar: {
+    centerX: 274,
+    centerY: 438,
+    radius: 240,
+    label: "Mobile App Profile Picture",
+  },
+  // 4. Desktop Avatar: Profile photo circle on desktop LinkedIn
   desktopAvatar: {
     centerX: 165,
     centerY: 310,
-    radius: 95, // ~190px diameter
-    label: "Desktop Profile Picture Zone",
+    radius: 95,
+    label: "Desktop Profile Picture",
   },
-  // Mobile horizontal safe area (crops left and right margins)
+  // 5. Mobile Controls Danger Zone: Settings gear & Edit pencil on mobile
+  mobileActions: {
+    minX: 1380,
+    maxX: 1560,
+    minY: 20,
+    maxY: 120,
+    width: 180,
+    height: 100,
+    label: "Mobile Controls (Edit / Settings)",
+  },
+  // Legacy / Horizontal crop bounds
   mobileSafeZone: {
     minX: 162,
     maxX: 1422,
@@ -29,14 +63,34 @@ export const LINKEDIN_SAFE_AREAS = {
     height: 316,
     label: "Mobile Safe Zone (1260 × 316 px)",
   },
-  // Content safe zone (guaranteed no avatar collision & no mobile cropping)
   contentSafeZone: {
-    minX: 380,
-    maxX: 1420,
+    minX: 700,
+    maxX: 1360,
     minY: 45,
     maxY: 350,
   },
 };
+
+export const LAYOUT_ALIGNMENT_OPTIONS = [
+  {
+    id: "mobile-safe" as const,
+    label: "Mobile Safe",
+    description: "Universal safe zone (100% visible on Mobile Browser, App & Desktop)",
+    startX: 700,
+  },
+  {
+    id: "center" as const,
+    label: "Centered",
+    description: "Centered horizontally inside the safe zone",
+    startX: 1030,
+  },
+  {
+    id: "desktop-left" as const,
+    label: "Desktop Wide",
+    description: "Left-aligned for desktop (note: avatar collides on mobile)",
+    startX: 380,
+  },
+];
 
 export const STATUS_ICON_OPTIONS: {
   id: StatusIcon;
@@ -208,4 +262,5 @@ export const DEFAULT_BANNER_DATA: BannerData = {
 
   theme: "dark",
   template: "terminal",
+  layoutAlignment: "mobile-safe",
 };

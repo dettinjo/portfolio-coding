@@ -11,6 +11,7 @@ export type TerminalPrompt = ">" | "$" | "❯" | "none";
 export type LinkPosition = "below" | "corner";
 export type NameStyle = "path" | "plain";
 export type TaglineStyle = "plain" | "comment";
+export type LayoutAlignment = "mobile-safe" | "center" | "desktop-left";
 export type StatusIcon =
   | "dot-green"
   | "dot-amber"
@@ -51,6 +52,7 @@ export interface BannerData {
 
   theme: BannerTheme;
   template: BannerTemplateId;
+  layoutAlignment?: LayoutAlignment;
 }
 
 export interface BannerTemplateMeta {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import NextImage from "next/image";
 import {
   BannerData,
   TerminalPrompt,
@@ -12,9 +13,11 @@ import {
   STATUS_ICON_OPTIONS,
   LINK_STYLE_OPTIONS,
   TAG_STYLE_OPTIONS,
+  LAYOUT_ALIGNMENT_OPTIONS,
 } from "@/lib/banner/constants";
 import { renderBannerSvg } from "@/lib/banner/svg-renderer";
 import { siteConfig } from "@/lib/config";
+import { withBasePath } from "@/lib/basePath";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
@@ -39,6 +42,11 @@ import {
   Hash,
   Activity,
   Layers,
+  Settings,
+  Pencil,
+  Smartphone,
+  Monitor,
+  ShieldCheck,
 } from "lucide-react";
 
 interface LinkedInBannerGeneratorProps {
@@ -69,6 +77,8 @@ export function LinkedInBannerGenerator({
   });
 
   const [showSafeAreas, setShowSafeAreas] = useState<boolean>(true);
+  const [deviceView, setDeviceView] = useState<"full" | "mobile-web" | "mobile-app" | "desktop">("full");
+  const avatarSrc = withBasePath("/images/profile.webp");
   const [newSkillInput, setNewSkillInput] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -169,6 +179,7 @@ export function LinkedInBannerGenerator({
 
         theme: data.theme,
         template: data.template,
+        layoutAlignment: data.layoutAlignment || "mobile-safe",
         scale: String(scale),
         format: "png",
         _t: String(Date.now()),
@@ -357,12 +368,174 @@ export function LinkedInBannerGenerator({
       <div className="flex-1 min-h-0 w-full min-w-0 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden">
         {/* ─── ARTBOARD / CANVAS STAGE ───────────────────────────────────── */}
         <section className="sticky top-0 xl:static z-20 bg-background/95 xl:bg-zinc-950/20 backdrop-blur-md xl:backdrop-blur-none border-b xl:border-b-0 border-border/80 xl:flex-1 min-w-0 xl:min-w-0 xl:min-h-0 xl:h-full flex flex-col items-center justify-center p-3 sm:p-4 xl:p-6 shadow-xs xl:shadow-none">
-          {/* Banner Box: Pure minimal canvas with zero window parts */}
-          <div className="w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md xl:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
+          {/* Device Simulation Switcher */}
+          <div className="w-full max-w-4xl flex items-center justify-between pb-2">
+            <div className="flex items-center gap-1 bg-muted/70 p-0.5 rounded-lg border border-border/60">
+              <button
+                type="button"
+                onClick={() => setDeviceView("full")}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all flex items-center gap-1 ${
+                  deviceView === "full"
+                    ? "bg-background text-foreground font-semibold shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Canvas (4:1)
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeviceView("mobile-web")}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all flex items-center gap-1 ${
+                  deviceView === "mobile-web"
+                    ? "bg-background text-foreground font-semibold shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Simulate Chrome / Safari on Mobile view"
+              >
+                <Smartphone className="h-3 w-3 text-purple-400" />
+                Mobile Web
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeviceView("mobile-app")}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all flex items-center gap-1 ${
+                  deviceView === "mobile-app"
+                    ? "bg-background text-foreground font-semibold shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Simulate LinkedIn native app on iOS / Android"
+              >
+                <Smartphone className="h-3 w-3 text-amber-400" />
+                Mobile App
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeviceView("desktop")}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all flex items-center gap-1 ${
+                  deviceView === "desktop"
+                    ? "bg-background text-foreground font-semibold shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Simulate Desktop LinkedIn profile"
+              >
+                <Monitor className="h-3 w-3 text-blue-400" />
+                Desktop
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+              {deviceView === "mobile-web" && (
+                <span className="text-purple-400 flex items-center gap-1">
+                  ● Mobile Web Mockup (Large Avatar Collision Zone)
+                </span>
+              )}
+              {deviceView === "mobile-app" && (
+                <span className="text-amber-400 flex items-center gap-1">
+                  ● Mobile Native App Mockup
+                </span>
+              )}
+              {deviceView === "desktop" && (
+                <span className="text-blue-400 flex items-center gap-1">
+                  ● Desktop Layout Mockup
+                </span>
+              )}
+              {deviceView === "full" && <span>1584 × 396 px</span>}
+            </div>
+          </div>
+
+          {/* Banner Box: Pure minimal canvas with simulated LinkedIn device overlays */}
+          <div className="relative w-full max-w-4xl aspect-[4/1] rounded-lg sm:rounded-xl overflow-hidden border border-border/80 shadow-md xl:shadow-2xl bg-zinc-950 flex items-center justify-center ring-1 ring-border/20 select-none">
             <div
               className="w-full h-full flex items-center justify-center select-none [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
               dangerouslySetInnerHTML={{ __html: previewSvg }}
             />
+
+            {/* Simulated Mobile Web Overlays (Chrome/Safari) */}
+            {deviceView === "mobile-web" && (
+              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+                <div
+                  className="absolute rounded-full border-[3px] sm:border-4 border-background shadow-2xl overflow-hidden bg-zinc-900"
+                  style={{
+                    width: "40.15%",
+                    height: "160.6%",
+                    left: "23.23%",
+                    top: "6.56%",
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  <NextImage
+                    src={avatarSrc}
+                    alt="Profile Avatar"
+                    width={320}
+                    height={320}
+                    unoptimized
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div
+                  className="absolute bg-background/95 text-foreground rounded-full p-1.5 sm:p-2 border border-border/80 shadow-lg flex items-center justify-center"
+                  style={{ top: "8%", right: "3.5%" }}
+                >
+                  <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </div>
+              </div>
+            )}
+
+            {/* Simulated Mobile Native App Overlays */}
+            {deviceView === "mobile-app" && (
+              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+                <div
+                  className="absolute rounded-full border-[3px] sm:border-4 border-background shadow-2xl overflow-hidden bg-zinc-900"
+                  style={{
+                    width: "30.3%",
+                    height: "121.2%",
+                    left: "17.3%",
+                    top: "50%",
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  <NextImage
+                    src={avatarSrc}
+                    alt="Profile Avatar"
+                    width={260}
+                    height={260}
+                    unoptimized
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div
+                  className="absolute bg-background/95 text-foreground rounded-full p-1.5 sm:p-2 border border-border/80 shadow-lg flex items-center justify-center"
+                  style={{ top: "8%", right: "3.5%" }}
+                >
+                  <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </div>
+              </div>
+            )}
+
+            {/* Simulated Desktop Overlays */}
+            {deviceView === "desktop" && (
+              <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+                <div
+                  className="absolute rounded-full border-[3px] sm:border-4 border-background shadow-2xl overflow-hidden bg-zinc-900"
+                  style={{
+                    width: "12%",
+                    height: "48%",
+                    left: "10.4%",
+                    top: "54.3%",
+                    transform: "translateX(-50%)",
+                  }}
+                >
+                  <NextImage
+                    src={avatarSrc}
+                    alt="Profile Avatar"
+                    width={120}
+                    height={120}
+                    unoptimized
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Presets Row: Smooth horizontal swipe row on mobile, centered on desktop */}
@@ -405,6 +578,44 @@ export function LinkedInBannerGenerator({
               <span className="text-[10px] font-mono text-muted-foreground">
                 Terminal Blocks
               </span>
+            </div>
+
+            {/* ─── BLOCK 0: LAYOUT / SAFE ZONE ALIGNMENT ────────────────── */}
+            <div className="space-y-1.5 p-2 rounded-lg bg-background/50 border border-border/70">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  <span>Layout Safe Zone</span>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400 font-medium">
+                  {(data.layoutAlignment || "mobile-safe") === "mobile-safe"
+                    ? "✓ 100% Mobile Safe"
+                    : data.layoutAlignment === "center"
+                    ? "Centered"
+                    : "Desktop Wide"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1 pt-0.5">
+                {LAYOUT_ALIGNMENT_OPTIONS.map((opt) => {
+                  const isSelected =
+                    (data.layoutAlignment || "mobile-safe") === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleUpdate("layoutAlignment", opt.id)}
+                      className={`text-[10px] font-mono py-1.5 px-1 rounded border transition-all text-center flex flex-col items-center gap-0.5 ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-primary font-bold shadow-xs"
+                          : "text-muted-foreground border-border/60 hover:text-foreground hover:border-foreground/30"
+                      }`}
+                      title={opt.description}
+                    >
+                      <span>{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* ─── BLOCK 1: NAME (IDENTITY) ─────────────────────────────── */}
