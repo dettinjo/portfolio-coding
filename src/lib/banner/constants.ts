@@ -178,7 +178,7 @@ export const DEFAULT_BANNER_DATA: BannerData = {
 
   jobTitle: "AI Engineer",
   showJobTitle: true,
-  promptSymbol: ">",
+  promptSymbol: "❯",
   showCursor: true,
 
   contactUrl: "alexrivera.dev",

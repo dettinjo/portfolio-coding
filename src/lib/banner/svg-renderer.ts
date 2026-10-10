@@ -72,7 +72,10 @@ export function renderBannerSvg(
   const tagStyle = data.tagStyle || "block";
 
   const showContact = Boolean(data.showContact !== false && data.contactUrl?.trim());
-  const rawContactUrl = (data.contactUrl || "").replace(/^https?:\/\//i, "").trim();
+  const rawContactUrl = (data.contactUrl || "")
+    .replace(/^https?:\/\//i, "")
+    .replace(/^curl\s+(-sL\s+)?/i, "")
+    .trim();
   const safeContactUrl = escapeXml(rawContactUrl);
   const linkPosition = data.linkPosition || "below";
   const linkStyle = data.linkStyle || "arrow";
@@ -121,13 +124,11 @@ export function renderBannerSvg(
   if (showJobTitle) {
     let promptStr = "";
     if (data.template === "terminal") {
-      const symbol = data.promptSymbol || ">";
-      if (symbol === ">") {
-        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&gt;&#160;</tspan>`;
+      const symbol = data.promptSymbol || "❯";
+      if (symbol === "❯" || symbol === ">") {
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&#10095;&#160;</tspan>`;
       } else if (symbol === "$") {
         promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">$&#160;</tspan>`;
-      } else if (symbol === "❯") {
-        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&#10095;&#160;</tspan>`;
       }
     }
 

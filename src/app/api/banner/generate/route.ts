@@ -50,7 +50,10 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
     siteConfig.site.serverUrl ||
     DEFAULT_BANNER_DATA.contactUrl ||
     "";
-  const contactUrl = rawContactUrl.replace(/^https?:\/\//i, "").trim();
+  const contactUrl = rawContactUrl
+    .replace(/^https?:\/\//i, "")
+    .replace(/^curl\s+(-sL\s+)?/i, "")
+    .trim();
 
   const showContact =
     body?.showContact !== undefined
@@ -97,9 +100,9 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
 
   const promptParam = body?.promptSymbol || searchParams.get("promptSymbol");
   const promptSymbol =
-    promptParam === "$" || promptParam === "❯" || promptParam === "none"
+    promptParam === "$" || promptParam === "none"
       ? promptParam
-      : ">";
+      : "❯";
 
   const showCursor =
     body?.showCursor !== undefined
@@ -190,6 +193,12 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
   };
 }
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const searchParams = req.nextUrl.searchParams;
   const bannerData = parseBannerParams(searchParams);
@@ -204,7 +213,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         status: 200,
         headers: {
           "Content-Type": "image/svg+xml",
-          "Cache-Control": "public, max-age=3600, s-maxage=3600",
+          ...NO_CACHE_HEADERS,
         },
       });
     }
@@ -225,7 +234,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       headers: {
         "Content-Type": "image/png",
         "Content-Disposition": `inline; filename="${filename}"`,
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        ...NO_CACHE_HEADERS,
       },
     });
   } catch (err) {
@@ -251,6 +260,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         status: 200,
         headers: {
           "Content-Type": "image/svg+xml",
+          ...NO_CACHE_HEADERS,
         },
       });
     }
