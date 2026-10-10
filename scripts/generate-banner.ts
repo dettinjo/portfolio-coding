@@ -30,6 +30,7 @@ interface BannerCliConfig {
   linkStyle?: "arrow" | "curl" | "kv" | "plain";
   showCursor: boolean;
   statusText?: string;
+  layoutAlignment?: "mobile-safe" | "center" | "desktop-left";
   outDir: string;
   withGuides: boolean;
 }
@@ -98,6 +99,11 @@ function parseArgs(): BannerCliConfig {
 
   const showCursor = !flags.has("no-cursor");
   const statusText = options.status || options["status-text"];
+  const layoutRaw = (options.layout || options.align || "mobile-safe").toLowerCase();
+  const layoutAlignment =
+    layoutRaw === "center" || layoutRaw === "desktop-left"
+      ? layoutRaw
+      : "mobile-safe";
 
   const outDir = path.resolve(
     process.cwd(),
@@ -114,6 +120,7 @@ function parseArgs(): BannerCliConfig {
     linkStyle,
     showCursor,
     statusText,
+    layoutAlignment,
     outDir,
     withGuides: flags.has("guides") || flags.has("safe-guides"),
   };
@@ -187,6 +194,7 @@ async function main() {
         tagStyle: config.tagStyle,
         theme,
         template: variant.template,
+        layoutAlignment: config.layoutAlignment,
       };
 
       const baseFilename = `linkedin_banner_${safeRole}_${theme}_${variant.label}`;
