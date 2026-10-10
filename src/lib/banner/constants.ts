@@ -60,7 +60,7 @@ export const LINK_STYLE_OPTIONS: {
   format: string;
 }[] = [
   { id: "arrow", label: "↗ Arrow", format: "↗ url" },
-  { id: "curl", label: "curl", format: "curl url" },
+  { id: "curl", label: "curl -sL", format: "curl -sL url" },
   { id: "kv", label: "web:", format: "web: url" },
   { id: "plain", label: "Plain", format: "url" },
 ];

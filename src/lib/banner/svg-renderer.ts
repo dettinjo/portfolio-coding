@@ -72,7 +72,8 @@ export function renderBannerSvg(
   const tagStyle = data.tagStyle || "block";
 
   const showContact = Boolean(data.showContact !== false && data.contactUrl?.trim());
-  const safeContactUrl = escapeXml(data.contactUrl || "");
+  const rawContactUrl = (data.contactUrl || "").replace(/^https?:\/\//i, "").trim();
+  const safeContactUrl = escapeXml(rawContactUrl);
   const linkPosition = data.linkPosition || "below";
   const linkStyle = data.linkStyle || "arrow";
   const hasInlineLink = showContact && linkPosition === "below";
@@ -220,7 +221,7 @@ export function renderBannerSvg(
   // Helper to format link text according to linkStyle
   const renderLinkText = () => {
     if (linkStyle === "curl") {
-      return `<tspan fill="${colors.promptSymbol}" font-weight="700">curl&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+      return `<tspan fill="${colors.promptSymbol}" font-weight="700">curl -sL&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
     }
     if (linkStyle === "kv") {
       return `<tspan fill="${colors.prompt}">web:&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;

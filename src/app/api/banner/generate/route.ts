@@ -44,11 +44,13 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       .filter(Boolean);
   }
 
-  const contactUrl =
+  const rawContactUrl =
     body?.contactUrl ||
     searchParams.get("contactUrl") ||
-    siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
-    DEFAULT_BANNER_DATA.contactUrl;
+    siteConfig.site.serverUrl ||
+    DEFAULT_BANNER_DATA.contactUrl ||
+    "";
+  const contactUrl = rawContactUrl.replace(/^https?:\/\//i, "").trim();
 
   const showContact =
     body?.showContact !== undefined
