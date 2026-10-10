@@ -87,13 +87,13 @@ export function renderBannerSvg(
 
   // Dynamic vertical centering of the main content stack with terminal line rhythms
   let totalStackHeight = 0;
-  if (showTagline) totalStackHeight += 24;
-  if (showName) totalStackHeight += 38;
-  if (showJobTitle) totalStackHeight += isTitleOnly ? 64 : 58;
-  if (showSkills) totalStackHeight += 40;
-  if (hasInlineLink) totalStackHeight += 24;
+  if (showTagline) totalStackHeight += 26;
+  if (showName) totalStackHeight += 46;
+  if (showJobTitle) totalStackHeight += isTitleOnly ? 64 : 44;
+  if (showSkills) totalStackHeight += tagStyle === "block" ? 34 : 28;
+  if (hasInlineLink) totalStackHeight += 28;
 
-  let currentY = Math.round((LINKEDIN_BANNER_HEIGHT - totalStackHeight) / 2) + (showTagline ? 18 : 28);
+  let currentY = Math.round((LINKEDIN_BANNER_HEIGHT - totalStackHeight) / 2) + (showTagline ? 16 : 24);
 
   // 1. Tagline Building Block (initial plain text or optional # comment)
   let taglineSvg = "";
@@ -101,9 +101,7 @@ export function renderBannerSvg(
     const prefix = taglineStyle === "comment" && !safeTagline.startsWith("#") ? "#&#160;" : "";
     taglineSvg = `
     <!-- Building Block: Tagline -->
-    <g id="block-tagline">
-      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500" fill="${colors.prompt}">${prefix}${safeTagline}</text>
-    </g>`;
+    <g id="block-tagline"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500" fill="${colors.prompt}">${prefix}${safeTagline}</text></g>`;
     currentY += 26;
   }
 
@@ -113,9 +111,7 @@ export function renderBannerSvg(
     const prefix = nameStyle === "path" ? `<tspan fill="${colors.prompt}">~/&#160;</tspan>` : "";
     nameSvg = `
     <!-- Building Block: Name / Identity -->
-    <g id="block-name">
-      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="22" font-weight="600" letter-spacing="-0.01em">${prefix}<tspan fill="${colors.fg}">${safeName}</tspan></text>
-    </g>`;
+    <g id="block-name"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="22" font-weight="600" letter-spacing="-0.01em">${prefix}<tspan fill="${colors.fg}">${safeName}</tspan></text></g>`;
     currentY += 46;
   }
 
@@ -139,10 +135,8 @@ export function renderBannerSvg(
 
     titleSvg = `
     <!-- Building Block: Job Title / Role -->
-    <g id="block-title">
-      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="${titleFontSize}" font-weight="700" letter-spacing="-0.02em">${promptStr}<tspan fill="${colors.fg}">${safeJobTitle}</tspan>${cursorSvg}</text>
-    </g>`;
-    currentY += 34;
+    <g id="block-title"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="${titleFontSize}" font-weight="700" letter-spacing="-0.02em">${promptStr}<tspan fill="${colors.fg}">${safeJobTitle}</tspan>${cursorSvg}</text></g>`;
+    currentY += 44;
   }
 
   // 4. Skills & Tech Stack Building Block (blocks, brackets, inline, pipe, kv)
@@ -154,97 +148,72 @@ export function renderBannerSvg(
       const rendered = skills
         .map((skill) => {
           const text = escapeXml(skill);
-          const itemWidth = Math.round(text.length * 8.2) + 20;
+          const rawLength = (skill || "").length;
+          const itemWidth = Math.round(rawLength * 8.2) + 20;
           const x = curX;
           curX += itemWidth + 8;
-          return `
-      <g transform="translate(${x}, ${currentY})">
-        <rect width="${itemWidth}" height="28" rx="3" fill="${colors.badgeBg}" stroke="${colors.border}" stroke-width="1" />
-        <text x="${itemWidth / 2}" y="18" text-anchor="middle" xml:space="preserve" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">
-          ${text}
-        </text>
-      </g>`;
+          return `<g transform="translate(${x}, ${currentY - 20})"><rect width="${itemWidth}" height="28" rx="3" fill="${colors.badgeBg}" stroke="${colors.border}" stroke-width="1" /><text x="${itemWidth / 2}" y="18" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">${text}</text></g>`;
         })
         .join("");
-      badgesSvg = `\n    <!-- Building Block: Skills (Blocks) -->\n    <g id="block-skills">${rendered}\n    </g>`;
-      currentY += 42;
+      badgesSvg = `\n    <!-- Building Block: Skills (Blocks) -->\n    <g id="block-skills">${rendered}</g>`;
+      currentY += 34;
     } else if (tagStyle === "bracket") {
       // Bracketed code array tokens: [ Python ] [ PyTorch ]
       let curX = startX;
       const rendered = skills
         .map((skill) => {
           const text = escapeXml(skill);
-          const textLen = Math.round((text.length + 4) * 8.5);
+          const rawLength = (skill || "").length;
+          const textLen = Math.round((rawLength + 4) * 8.5);
           const x = curX;
           curX += textLen + 10;
-          return `
-      <g transform="translate(${x}, ${currentY + 18})">
-        <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
-          <tspan fill="${colors.prompt}">[&#160;</tspan><tspan fill="${colors.fg}">${text}</tspan><tspan fill="${colors.prompt}">&#160;]</tspan>
-        </text>
-      </g>`;
+          return `<text x="${x}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500"><tspan fill="${colors.prompt}">[&#160;</tspan><tspan fill="${colors.fg}">${text}</tspan><tspan fill="${colors.prompt}">&#160;]</tspan></text>`;
         })
         .join("");
-      badgesSvg = `\n    <!-- Building Block: Skills (Brackets) -->\n    <g id="block-skills">${rendered}\n    </g>`;
-      currentY += 40;
+      badgesSvg = `\n    <!-- Building Block: Skills (Brackets) -->\n    <g id="block-skills">${rendered}</g>`;
+      currentY += 28;
     } else if (tagStyle === "pipe") {
       // Unix pipeline stream: Python | PyTorch | Docker
-      badgesSvg = `
-    <!-- Building Block: Skills (Pipe Stream) -->
-    <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
-        ${skills
-          .map(
-            (s, idx) =>
-              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
-                idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">&#160;&#160;|&#160;&#160;</tspan>`
-                  : ""
-              }`
-          )
-          .join("")}
-      </text>
-    </g>`;
-      currentY += 40;
+      const rendered = skills
+        .map(
+          (s, idx) =>
+            `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+              idx < skills.length - 1
+                ? `<tspan fill="${colors.prompt}">&#160;&#160;|&#160;&#160;</tspan>`
+                : ""
+            }`
+        )
+        .join("");
+      badgesSvg = `\n    <!-- Building Block: Skills (Pipe Stream) -->\n    <g id="block-skills"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">${rendered}</text></g>`;
+      currentY += 28;
     } else if (tagStyle === "kv") {
       // Neofetch / Fastfetch key-value info: stack: Python · PyTorch · Docker
-      badgesSvg = `
-    <!-- Building Block: Skills (Key-Value) -->
-    <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
-        <tspan fill="${colors.prompt}">stack:&#160;</tspan>
-        ${skills
-          .map(
-            (s, idx) =>
-              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
-                idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
-                  : ""
-              }`
-          )
-          .join("")}
-      </text>
-    </g>`;
-      currentY += 40;
+      const rendered = skills
+        .map(
+          (s, idx) =>
+            `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+              idx < skills.length - 1
+                ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
+                : ""
+            }`
+        )
+        .join("");
+      badgesSvg = `\n    <!-- Building Block: Skills (Key-Value) -->\n    <g id="block-skills"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500"><tspan fill="${colors.prompt}">stack:&#160;</tspan>${rendered}</text></g>`;
+      currentY += 28;
     } else {
       // Minimalist terminal pipeline: Python · PyTorch · Docker
-      badgesSvg = `
-    <!-- Building Block: Skills (Inline Pipeline) -->
-    <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
-        ${skills
-          .map(
-            (s, idx) =>
-              `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
-                idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
-                  : ""
-              }`
-          )
-          .join("")}
-      </text>
-    </g>`;
-      currentY += 40;
+      const rendered = skills
+        .map(
+          (s, idx) =>
+            `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
+              idx < skills.length - 1
+                ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
+                : ""
+            }`
+        )
+        .join("");
+      badgesSvg = `\n    <!-- Building Block: Skills (Inline Pipeline) -->\n    <g id="block-skills"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">${rendered}</text></g>`;
+      currentY += 28;
     }
   }
 
@@ -267,21 +236,9 @@ export function renderBannerSvg(
   let linkSvg = "";
   if (showContact) {
     if (linkPosition === "below") {
-      linkSvg = `
-    <!-- Building Block: Portfolio Link (Below Stack) -->
-    <g id="block-link" transform="translate(${startX}, ${currentY + 4})">
-      <text xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500">
-        ${renderLinkText()}
-      </text>
-    </g>`;
+      linkSvg = `\n    <!-- Building Block: Portfolio Link (Below Stack) -->\n    <g id="block-link"><text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500">${renderLinkText()}</text></g>`;
     } else {
-      linkSvg = `
-    <!-- Building Block: Portfolio Link (Safe Corner) -->
-    <g id="block-link" transform="translate(${safeRightX}, 345)" text-anchor="end">
-      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
-        ${renderLinkText()}
-      </text>
-    </g>`;
+      linkSvg = `\n    <!-- Building Block: Portfolio Link (Safe Corner) -->\n    <g id="block-link"><text x="${safeRightX}" y="345" text-anchor="end" xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">${renderLinkText()}</text></g>`;
     }
   }
 
