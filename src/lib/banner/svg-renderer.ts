@@ -47,9 +47,9 @@ export function renderBannerSvg(
         statusDot: "#16a34a", // emerald-600
       };
 
-  // Exact monospace font stack
+  // Exact monospace font stack (Menlo / DejaVu Sans Mono / JetBrains Mono)
   const fontMono =
-    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    "'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace";
 
   // Left clearance: x = 380px guarantees 40px margin past LinkedIn's 340px circular avatar boundary
   const startX = 380;
@@ -71,7 +71,7 @@ export function renderBannerSvg(
   const skills = showSkills ? data.skills.slice(0, 8) : [];
   const tagStyle = data.tagStyle || "block";
 
-  const showContact = Boolean(data.showContact && data.contactUrl?.trim());
+  const showContact = Boolean(data.showContact !== false && data.contactUrl?.trim());
   const safeContactUrl = escapeXml(data.contactUrl || "");
   const linkPosition = data.linkPosition || "below";
   const linkStyle = data.linkStyle || "arrow";
@@ -98,11 +98,11 @@ export function renderBannerSvg(
   // 1. Tagline Building Block (initial plain text or optional # comment)
   let taglineSvg = "";
   if (showTagline) {
-    const prefix = taglineStyle === "comment" && !safeTagline.startsWith("#") ? "# " : "";
+    const prefix = taglineStyle === "comment" && !safeTagline.startsWith("#") ? "#&#160;" : "";
     taglineSvg = `
     <!-- Building Block: Tagline -->
     <g id="block-tagline">
-      <text x="${startX}" y="${currentY}" font-family="${fontMono}" font-size="15" font-weight="500" fill="${colors.prompt}">${prefix}${safeTagline}</text>
+      <text x="${startX}" y="${currentY}" xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500" fill="${colors.prompt}">${prefix}${safeTagline}</text>
     </g>`;
     currentY += 26;
   }
@@ -110,7 +110,7 @@ export function renderBannerSvg(
   // 2. Name Building Block (terminal identity: ~/ Name)
   let nameSvg = "";
   if (showName) {
-    const prefix = nameStyle === "path" ? `<tspan fill="${colors.prompt}">~/ </tspan>` : "";
+    const prefix = nameStyle === "path" ? `<tspan fill="${colors.prompt}">~/&#160;</tspan>` : "";
     nameSvg = `
     <!-- Building Block: Name / Identity -->
     <g id="block-name">
@@ -126,11 +126,11 @@ export function renderBannerSvg(
     if (data.template === "terminal") {
       const symbol = data.promptSymbol || ">";
       if (symbol === ">") {
-        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&gt; </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&gt;&#160;</tspan>`;
       } else if (symbol === "$") {
-        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">$ </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">$&#160;</tspan>`;
       } else if (symbol === "❯") {
-        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&#10095; </tspan>`;
+        promptStr = `<tspan fill="${colors.promptSymbol}" font-weight="700">&#10095;&#160;</tspan>`;
       }
     }
 
@@ -160,7 +160,7 @@ export function renderBannerSvg(
           return `
       <g transform="translate(${x}, ${currentY})">
         <rect width="${itemWidth}" height="28" rx="3" fill="${colors.badgeBg}" stroke="${colors.border}" stroke-width="1" />
-        <text x="${itemWidth / 2}" y="18" text-anchor="middle" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">
+        <text x="${itemWidth / 2}" y="18" text-anchor="middle" xml:space="preserve" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.badgeFg}">
           ${text}
         </text>
       </g>`;
@@ -179,8 +179,8 @@ export function renderBannerSvg(
           curX += textLen + 10;
           return `
       <g transform="translate(${x}, ${currentY + 18})">
-        <text font-family="${fontMono}" font-size="14" font-weight="500">
-          <tspan fill="${colors.prompt}">[ </tspan><tspan fill="${colors.fg}">${text}</tspan><tspan fill="${colors.prompt}"> ]</tspan>
+        <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
+          <tspan fill="${colors.prompt}">[&#160;</tspan><tspan fill="${colors.fg}">${text}</tspan><tspan fill="${colors.prompt}">&#160;]</tspan>
         </text>
       </g>`;
         })
@@ -192,13 +192,13 @@ export function renderBannerSvg(
       badgesSvg = `
     <!-- Building Block: Skills (Pipe Stream) -->
     <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text font-family="${fontMono}" font-size="14" font-weight="500">
+      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
         ${skills
           .map(
             (s, idx) =>
               `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
                 idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">  |  </tspan>`
+                  ? `<tspan fill="${colors.prompt}">&#160;&#160;|&#160;&#160;</tspan>`
                   : ""
               }`
           )
@@ -211,14 +211,14 @@ export function renderBannerSvg(
       badgesSvg = `
     <!-- Building Block: Skills (Key-Value) -->
     <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text font-family="${fontMono}" font-size="14" font-weight="500">
-        <tspan fill="${colors.prompt}">stack: </tspan>
+      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
+        <tspan fill="${colors.prompt}">stack:&#160;</tspan>
         ${skills
           .map(
             (s, idx) =>
               `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
                 idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">  &#183;  </tspan>`
+                  ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
                   : ""
               }`
           )
@@ -231,13 +231,13 @@ export function renderBannerSvg(
       badgesSvg = `
     <!-- Building Block: Skills (Inline Pipeline) -->
     <g id="block-skills" transform="translate(${startX}, ${currentY + 18})">
-      <text font-family="${fontMono}" font-size="14" font-weight="500">
+      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
         ${skills
           .map(
             (s, idx) =>
               `<tspan fill="${colors.fg}">${escapeXml(s)}</tspan>${
                 idx < skills.length - 1
-                  ? `<tspan fill="${colors.prompt}">  &#183;  </tspan>`
+                  ? `<tspan fill="${colors.prompt}">&#160;&#183;&#160;</tspan>`
                   : ""
               }`
           )
@@ -251,16 +251,16 @@ export function renderBannerSvg(
   // Helper to format link text according to linkStyle
   const renderLinkText = () => {
     if (linkStyle === "curl") {
-      return `<tspan fill="${colors.promptSymbol}" font-weight="700">curl </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+      return `<tspan fill="${colors.promptSymbol}" font-weight="700">curl&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
     }
     if (linkStyle === "kv") {
-      return `<tspan fill="${colors.prompt}">web: </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+      return `<tspan fill="${colors.prompt}">web:&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
     }
     if (linkStyle === "plain") {
       return `<tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
     }
     // Default: arrow
-    return `<tspan fill="${colors.prompt}">&#8599; </tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
+    return `<tspan fill="${colors.prompt}">&#8599;&#160;</tspan><tspan fill="${colors.fg}">${safeContactUrl}</tspan>`;
   };
 
   // 5. Portfolio Website / Link Building Block (below stack or corner)
@@ -270,7 +270,7 @@ export function renderBannerSvg(
       linkSvg = `
     <!-- Building Block: Portfolio Link (Below Stack) -->
     <g id="block-link" transform="translate(${startX}, ${currentY + 4})">
-      <text font-family="${fontMono}" font-size="15" font-weight="500">
+      <text xml:space="preserve" font-family="${fontMono}" font-size="15" font-weight="500">
         ${renderLinkText()}
       </text>
     </g>`;
@@ -278,7 +278,7 @@ export function renderBannerSvg(
       linkSvg = `
     <!-- Building Block: Portfolio Link (Safe Corner) -->
     <g id="block-link" transform="translate(${safeRightX}, 345)" text-anchor="end">
-      <text font-family="${fontMono}" font-size="14" font-weight="500">
+      <text xml:space="preserve" font-family="${fontMono}" font-size="14" font-weight="500">
         ${renderLinkText()}
       </text>
     </g>`;
@@ -312,7 +312,7 @@ export function renderBannerSvg(
     <!-- Building Block: Statusline Indicator (Safe Zone Top Right) -->
     <g id="block-status" transform="translate(${safeRightX}, 65)" text-anchor="end">
       ${iconElement}
-      <text font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.prompt}">${safeStatusText}</text>
+      <text xml:space="preserve" font-family="${fontMono}" font-size="13" font-weight="500" fill="${colors.prompt}">${safeStatusText}</text>
     </g>`;
   }
 
@@ -329,7 +329,18 @@ export function renderBannerSvg(
     </g>`
     : "";
 
+  const fontStyles = `
+    <defs>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap');
+        text, tspan {
+          font-family: ${fontMono};
+        }
+      </style>
+    </defs>`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LINKEDIN_BANNER_WIDTH} ${LINKEDIN_BANNER_HEIGHT}" width="${LINKEDIN_BANNER_WIDTH}" height="${LINKEDIN_BANNER_HEIGHT}">
+    ${fontStyles}
     <!-- Background: exact portfolio color -->
     <rect width="${LINKEDIN_BANNER_WIDTH}" height="${LINKEDIN_BANNER_HEIGHT}" fill="${colors.bg}" />
     ${statusSvg}

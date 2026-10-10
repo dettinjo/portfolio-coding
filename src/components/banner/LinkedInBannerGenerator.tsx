@@ -338,12 +338,12 @@ export function LinkedInBannerGenerator({
             type="button"
             size="sm"
             className="h-8 px-2.5 sm:px-3 text-xs font-semibold shadow-xs"
-            onClick={() => downloadPng(1)}
+            onClick={() => downloadPng(2)}
             disabled={downloading !== null}
           >
             <Download className="h-3.5 w-3.5 sm:mr-1.5" />
             <span className="hidden xs:inline">
-              {downloading === "png" ? "Rendering..." : "Export"}
+              {downloading === "retina" ? "Rendering..." : "Export (HD)"}
             </span>
           </Button>
         </div>
@@ -888,13 +888,13 @@ export function LinkedInBannerGenerator({
             <Button
               type="button"
               className="w-full xl:hidden h-10 font-semibold text-xs shadow-xs"
-              onClick={() => downloadPng(1)}
+              onClick={() => downloadPng(2)}
               disabled={downloading !== null}
             >
               <Download className="h-4 w-4 mr-2" />
-              {downloading === "png"
-                ? "Rendering PNG..."
-                : "Download Banner PNG (1584×396)"}
+              {downloading === "retina"
+                ? "Rendering High-Res PNG..."
+                : "Download Banner (3168×792 HD)"}
             </Button>
 
             <div className="grid grid-cols-2 gap-1.5">
@@ -905,8 +905,9 @@ export function LinkedInBannerGenerator({
                 className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
                 onClick={() => downloadPng(2)}
                 disabled={downloading !== null}
+                title="Download 2x Retina resolution (3168×792) - recommended by LinkedIn"
               >
-                {downloading === "retina" ? "Rendering..." : "Retina 2x"}
+                {downloading === "retina" ? "Rendering..." : "Retina 2x (HD)"}
               </Button>
 
               <Button
@@ -914,30 +915,48 @@ export function LinkedInBannerGenerator({
                 variant="outline"
                 size="sm"
                 className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
+                onClick={() => downloadPng(1)}
+                disabled={downloading !== null}
+                title="Download 1x standard resolution (1584×396)"
+              >
+                {downloading === "png" ? "Rendering..." : "Standard 1x"}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
                 onClick={downloadSvg}
+                title="Download raw scalable SVG file"
               >
                 <FileCode className="h-3.5 w-3.5 mr-1" />
                 Vector SVG
               </Button>
-            </div>
 
-            <button
-              type="button"
-              onClick={copySvg}
-              className="w-full text-center text-xs xl:text-[11px] text-muted-foreground hover:text-foreground transition-colors py-0.5 inline-flex items-center justify-center gap-1.5"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-3.5 w-3.5 text-emerald-500" />
-                  <span className="text-emerald-500 font-medium">SVG Copied to Clipboard</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3.5 w-3.5" />
-                  <span>Copy raw SVG</span>
-                </>
-              )}
-            </button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 xl:h-7 text-xs xl:text-[11px] font-mono px-2"
+                onClick={copySvg}
+                title="Copy raw SVG code to clipboard"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 mr-1 text-emerald-500" />
+                    <span className="text-emerald-500">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5 mr-1" />
+                    Copy SVG
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </aside>
       </div>
