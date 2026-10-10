@@ -42,7 +42,6 @@ import {
   Hash,
   Activity,
   Layers,
-  Settings,
   Pencil,
   Smartphone,
   Monitor,
@@ -450,24 +449,24 @@ export function LinkedInBannerGenerator({
               dangerouslySetInnerHTML={{ __html: previewSvg }}
             />
 
-            {/* Simulated Mobile Web Overlays (Chrome/Safari) */}
+            {/* Simulated Mobile Web Overlays (iPhone SE / Chrome / Safari) */}
             {deviceView === "mobile-web" && (
               <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
                 <div
                   className="absolute rounded-full border-[3px] sm:border-4 border-background shadow-2xl overflow-hidden bg-zinc-900"
                   style={{
-                    width: "40.15%",
-                    height: "160.6%",
-                    left: "23.23%",
-                    top: "6.56%",
+                    width: "52.4%",
+                    height: "209.6%",
+                    left: "26.83%",
+                    top: "16.4%",
                     transform: "translateX(-50%)",
                   }}
                 >
                   <NextImage
                     src={avatarSrc}
                     alt="Profile Avatar"
-                    width={320}
-                    height={320}
+                    width={380}
+                    height={380}
                     unoptimized
                     className="w-full h-full object-cover"
                   />
@@ -476,7 +475,7 @@ export function LinkedInBannerGenerator({
                   className="absolute bg-background/95 text-foreground rounded-full p-1.5 sm:p-2 border border-border/80 shadow-lg flex items-center justify-center"
                   style={{ top: "8%", right: "3.5%" }}
                 >
-                  <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </div>
               </div>
             )}

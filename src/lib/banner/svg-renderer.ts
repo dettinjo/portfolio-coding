@@ -52,7 +52,7 @@ export function renderBannerSvg(
     "'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace";
 
   // Universal safe zone alignment (2025/2026 multi-device geometry)
-  // Mobile web avatar extends to x=685px; x=700px guarantees 100% clearance across mobile browser, app, and desktop.
+  // On compact mobile (iPhone SE), avatar extends to x=766px; x=825px guarantees 100% clearance across all devices.
   const alignment = data.layoutAlignment || "mobile-safe";
   const isTitleOnly = data.template === "title-only";
   const isCentered = alignment === "center" || isTitleOnly;
@@ -60,9 +60,9 @@ export function renderBannerSvg(
     alignment === "desktop-left"
       ? 380
       : isCentered
-      ? 1030
-      : 700;
-  // Right boundary: x=1350 ensures a 30px buffer to the left of the mobile edit/settings button (x=1380)
+      ? 1090
+      : 825;
+  // Right boundary: x=1350 ensures a generous buffer to the left of the mobile edit/settings button (x=1360)
   const safeRightX = 1350;
 
   const showName = Boolean(data.showName !== false && data.name?.trim());
@@ -73,7 +73,7 @@ export function renderBannerSvg(
   const safeJobTitle = escapeXml(data.jobTitle || "AI Engineer");
   const showCursor = data.showCursor !== false;
 
-  const maxSkills = alignment === "desktop-left" ? 8 : 5;
+  const maxSkills = alignment === "desktop-left" ? 8 : 4;
   const showSkills = !isTitleOnly && Boolean(data.showSkills !== false && data.skills && data.skills.length > 0);
   const skills = showSkills ? data.skills.slice(0, maxSkills) : [];
   const tagStyle = data.tagStyle || "block";
@@ -145,11 +145,11 @@ export function renderBannerSvg(
       if (isTitleOnly) return 56;
       const len = title.length;
       if (alignment === "desktop-left") return len > 26 ? 42 : 50;
-      if (len <= 14) return 46;
-      if (len <= 20) return 42;
-      if (len <= 26) return 38;
-      if (len <= 32) return 34;
-      return 30;
+      if (len <= 14) return 42;
+      if (len <= 20) return 38;
+      if (len <= 26) return 34;
+      if (len <= 32) return 30;
+      return 28;
     };
     const titleFontSize = getJobTitleFontSize(safeJobTitle);
     const cursorSvg = showCursor ? `<tspan dx="8" fill="${colors.fg}">&#9608;</tspan>` : "";
@@ -302,29 +302,33 @@ export function renderBannerSvg(
     ? `
     <!-- LinkedIn Safe Area Overlay Guide -->
     <g id="safe-area-guides" opacity="0.9">
-      <!-- 1. Universal Safe Zone: 100% visible on Mobile Browser, Mobile App & Desktop -->
+      <!-- 1. Universal Safe Zone: 100% visible on iPhone SE, Android Browser, App & Desktop -->
       <rect x="${LINKEDIN_SAFE_AREAS.universalSafeZone.minX}" y="${LINKEDIN_SAFE_AREAS.universalSafeZone.minY}" 
             width="${LINKEDIN_SAFE_AREAS.universalSafeZone.width}" height="${LINKEDIN_SAFE_AREAS.universalSafeZone.height}" 
             rx="6" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="2" stroke-dasharray="6 4" />
       <text x="${LINKEDIN_SAFE_AREAS.universalSafeZone.minX + 12}" y="${LINKEDIN_SAFE_AREAS.universalSafeZone.minY + 22}" 
-            font-family="${fontMono}" font-size="11" font-weight="700" fill="#10b981">✓ UNIVERSAL SAFE ZONE (Mobile Browser, App &amp; Desktop)</text>
+            font-family="${fontMono}" font-size="11" font-weight="700" fill="#10b981">✓ UNIVERSAL SAFE ZONE (iPhone SE, Android &amp; Desktop)</text>
 
-      <!-- 2. Mobile Web Browser Avatar: Chrome/Safari danger circle -->
+      <!-- 2. Compact Mobile Web Avatar: iPhone SE danger circle -->
       <circle cx="${LINKEDIN_SAFE_AREAS.mobileWebAvatar.centerX}" cy="${LINKEDIN_SAFE_AREAS.mobileWebAvatar.centerY}" 
               r="${LINKEDIN_SAFE_AREAS.mobileWebAvatar.radius}" fill="rgba(168, 85, 247, 0.08)" stroke="#a855f7" stroke-width="2" stroke-dasharray="6 3" />
-      <text x="360" y="140" text-anchor="middle" font-family="${fontMono}" font-size="11" font-weight="600" fill="#c084fc">Mobile Web Avatar (Chrome/Safari)</text>
+      <text x="425" y="110" text-anchor="middle" font-family="${fontMono}" font-size="11" font-weight="600" fill="#c084fc">Compact Mobile Web Avatar (iPhone SE)</text>
 
-      <!-- 3. Mobile Native App Avatar: App danger circle -->
+      <!-- 3. Standard Mobile Web Avatar: Pixel / Android Chrome danger circle -->
+      <circle cx="${LINKEDIN_SAFE_AREAS.mobileWebAvatarStandard.centerX}" cy="${LINKEDIN_SAFE_AREAS.mobileWebAvatarStandard.centerY}" 
+              r="${LINKEDIN_SAFE_AREAS.mobileWebAvatarStandard.radius}" fill="rgba(147, 51, 234, 0.04)" stroke="#9333ea" stroke-width="1" stroke-dasharray="4 2" />
+
+      <!-- 4. Mobile Native App Avatar: App danger circle -->
       <circle cx="${LINKEDIN_SAFE_AREAS.mobileAppAvatar.centerX}" cy="${LINKEDIN_SAFE_AREAS.mobileAppAvatar.centerY}" 
               r="${LINKEDIN_SAFE_AREAS.mobileAppAvatar.radius}" fill="rgba(245, 158, 11, 0.06)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 3" />
       <text x="274" y="220" text-anchor="middle" font-family="${fontMono}" font-size="10" font-weight="600" fill="#fbbf24">Mobile App Avatar</text>
 
-      <!-- 4. Desktop Avatar: Classic desktop photo circle -->
+      <!-- 5. Desktop Avatar: Classic desktop photo circle -->
       <circle cx="${LINKEDIN_SAFE_AREAS.desktopAvatar.centerX}" cy="${LINKEDIN_SAFE_AREAS.desktopAvatar.centerY}" 
               r="${LINKEDIN_SAFE_AREAS.desktopAvatar.radius}" fill="rgba(239, 68, 68, 0.10)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2" />
       <text x="165" y="320" text-anchor="middle" font-family="${fontMono}" font-size="10" font-weight="600" fill="#f87171">Desktop Avatar</text>
 
-      <!-- 5. Mobile Action Buttons: Edit pencil / Settings gear danger zone -->
+      <!-- 6. Mobile Action Buttons: Edit pencil / Settings gear danger zone -->
       <rect x="${LINKEDIN_SAFE_AREAS.mobileActions.minX}" y="${LINKEDIN_SAFE_AREAS.mobileActions.minY}" 
             width="${LINKEDIN_SAFE_AREAS.mobileActions.width}" height="${LINKEDIN_SAFE_AREAS.mobileActions.height}" 
             rx="4" fill="rgba(239, 68, 68, 0.08)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3" />
