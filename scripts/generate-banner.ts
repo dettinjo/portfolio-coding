@@ -148,7 +148,7 @@ async function main() {
   console.log(`  Typography       : Monospace (font-mono, font-bold 700, tracking-tight)`);
   console.log(`  Cursor Style     : Block cursor (█ matching AnimatedGreeting.tsx)`);
   console.log(`  Dimensions       : ${LINKEDIN_BANNER_WIDTH} × ${LINKEDIN_BANNER_HEIGHT} px (4:1 Aspect Ratio)`);
-  console.log(`  Safe Clearance   : 380px left margin (guarantees zero avatar collision)`);
+  console.log(`  Safe Clearance   : 825px left margin (guarantees zero avatar collision across iPhone SE, Android & Desktop)`);
   console.log(`  Output Directory : ${config.outDir}`);
   console.log("--------------------------------------------------------------------------------\n");
 

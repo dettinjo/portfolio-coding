@@ -12,46 +12,53 @@ export const LINKEDIN_ASPECT_RATIO = 4; // 1584 / 396 = 4:1
 
 // LinkedIn Safe Area Specifications (2025/2026 accurate multi-device guidelines)
 export const LINKEDIN_SAFE_AREAS = {
-  // 1. Universal Safe Zone: Guaranteed 100% visible across Mobile Browser, Mobile App, & Desktop
+  // 1. Universal Safe Zone: Guaranteed 100% visible across Compact Mobile (iPhone SE), Android, App, & Desktop
   universalSafeZone: {
-    minX: 700,
-    maxX: 1360,
+    minX: 825,
+    maxX: 1350,
     minY: 40,
     maxY: 356,
-    width: 660,
+    width: 525,
     height: 316,
-    label: "Universal Safe Zone (Mobile & Desktop)",
+    label: "Universal Safe Zone (All Mobile Screens & Desktop)",
   },
-  // 2. Mobile Web Browser Avatar: Measured collision danger zone on mobile Chrome/Safari
+  // 2. Compact Mobile Web Avatar: Measured collision danger zone on compact mobile (iPhone SE / Chrome / Safari)
   mobileWebAvatar: {
+    centerX: 425,
+    centerY: 480,
+    radius: 415,
+    label: "Compact Mobile Web Profile Picture (iPhone SE)",
+  },
+  // 3. Standard Mobile Web Avatar: Measured collision danger zone on Pixel / Android Chrome
+  mobileWebAvatarStandard: {
     centerX: 368,
     centerY: 344,
     radius: 318,
-    label: "Mobile Web Profile Picture",
+    label: "Standard Mobile Web Profile Picture",
   },
-  // 3. Mobile Native App Avatar: Measured collision danger zone on LinkedIn iOS/Android app
+  // 4. Mobile Native App Avatar: Measured collision danger zone on LinkedIn iOS/Android app
   mobileAppAvatar: {
     centerX: 274,
     centerY: 438,
     radius: 240,
     label: "Mobile App Profile Picture",
   },
-  // 4. Desktop Avatar: Profile photo circle on desktop LinkedIn
+  // 5. Desktop Avatar: Profile photo circle on desktop LinkedIn
   desktopAvatar: {
     centerX: 165,
     centerY: 310,
     radius: 95,
     label: "Desktop Profile Picture",
   },
-  // 5. Mobile Controls Danger Zone: Settings gear & Edit pencil on mobile
+  // 6. Mobile Controls Danger Zone: Settings gear & Edit pencil on mobile
   mobileActions: {
-    minX: 1380,
+    minX: 1360,
     maxX: 1560,
     minY: 20,
-    maxY: 120,
-    width: 180,
-    height: 100,
-    label: "Mobile Controls (Edit / Settings)",
+    maxY: 130,
+    width: 200,
+    height: 110,
+    label: "Mobile Controls (Edit Pencil / Settings)",
   },
   // Legacy / Horizontal crop bounds
   mobileSafeZone: {
@@ -64,8 +71,8 @@ export const LINKEDIN_SAFE_AREAS = {
     label: "Mobile Safe Zone (1260 × 316 px)",
   },
   contentSafeZone: {
-    minX: 700,
-    maxX: 1360,
+    minX: 825,
+    maxX: 1350,
     minY: 45,
     maxY: 350,
   },
@@ -75,14 +82,14 @@ export const LAYOUT_ALIGNMENT_OPTIONS = [
   {
     id: "mobile-safe" as const,
     label: "Mobile Safe",
-    description: "Universal safe zone (100% visible on Mobile Browser, App & Desktop)",
-    startX: 700,
+    description: "Universal safe zone (100% visible on iPhone SE, Android, Mobile App & Desktop)",
+    startX: 825,
   },
   {
     id: "center" as const,
     label: "Centered",
     description: "Centered horizontally inside the safe zone",
-    startX: 1030,
+    startX: 1090,
   },
   {
     id: "desktop-left" as const,
