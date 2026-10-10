@@ -147,7 +147,7 @@ export function LinkedInBannerGenerator({
 
         jobTitle: data.jobTitle || "",
         showJobTitle: String(Boolean(data.showJobTitle)),
-        promptSymbol: data.promptSymbol || ">",
+        promptSymbol: data.promptSymbol || "❯",
         showCursor: String(data.showCursor !== false),
 
         contactUrl: data.contactUrl || "",
@@ -171,9 +171,12 @@ export function LinkedInBannerGenerator({
         template: data.template,
         scale: String(scale),
         format: "png",
+        _t: String(Date.now()),
       });
 
-      const response = await fetch(`/api/banner/generate?${params}`);
+      const response = await fetch(`/api/banner/generate?${params.toString()}`, {
+        cache: "no-store",
+      });
       if (response.ok) {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -213,6 +216,7 @@ export function LinkedInBannerGenerator({
         if (!blob) return;
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
+        a.href = blobUrl;
         a.download = filename;
         a.click();
         URL.revokeObjectURL(blobUrl);
@@ -486,13 +490,14 @@ export function LinkedInBannerGenerator({
                   <div className="flex items-center gap-1">
                     {(
                       [
-                        { id: ">", label: "> " },
                         { id: "❯", label: "❯ " },
                         { id: "$", label: "$ " },
                         { id: "none", label: "None" },
                       ] as const
                     ).map((p) => {
-                      const isSel = (data.promptSymbol || ">") === p.id;
+                      const isSel =
+                        (data.promptSymbol || "❯") === p.id ||
+                        (p.id === "❯" && data.promptSymbol === ">");
                       return (
                         <button
                           key={p.id}
