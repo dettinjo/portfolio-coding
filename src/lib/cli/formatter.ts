@@ -10,7 +10,10 @@ import {
   skillBar,
   divider,
   stripAnsi,
+  stripHtml,
+  cleanMarkdownLinks,
   wrapText,
+  wrapBadges,
   renderCard,
 } from "./ansi";
 
@@ -48,12 +51,9 @@ function formatProjectDate(isoDate?: string, lang: "en" | "de" = "en"): string {
 export function formatMarkdownForTerminal(md: string): string {
   if (!md) return "";
 
-  return md
-    // Strip image tags & markdown image links
-    .replace(/<img[^>]*>/gi, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "")
-    // Strip HTML tags like <p align="...">
-    .replace(/<\/?[^>]+(>|$)/g, "")
+  const stripped = stripHtml(md);
+
+  return stripped
     // Convert headings
     .replace(/^### (.*$)/gim, `\n${c.bold}${c.brightYellow}▸ $1${c.reset}`)
     .replace(/^## (.*$)/gim, `\n${c.bold}${c.brightCyan}◆ $1${c.reset}\n`)
@@ -130,7 +130,7 @@ ${c.gray}╰─${c.reset} ${c.brightCyan}❯${c.reset} ${c.bold}${name}${c.reset
 
   const metaPill = `${c.gray}📍 ${location}  ${c.gray}│${c.reset}  ${statusBadge}  ${c.gray}│${c.reset}  🌐 ${c.brightBlue}${webLink}${c.reset}`;
 
-  return `${asciiArt}\n\n${promptLine}\n${metaPill}\n${divider()}`;
+  return `${asciiArt}\n\n${promptLine}\n${metaPill}`;
 }
 
 /**
@@ -165,16 +165,16 @@ export function renderProjectCard(proj: SoftwareProject, options: CliRenderOptio
   const projectUrl = `${origin}/${proj.slug}`;
   const clickUrl = terminalLink(projectUrl, projectUrl);
 
-  const tags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`).join(" ");
+  const rawTags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`);
 
   const lines: string[] = [""];
 
-  // Date & Tech stack with safe line wrapping
+  // Date & Tech stack with safe atomic badge wrapping
   if (dateStr) {
     lines.push(`  ${c.gray}Date:${c.reset}   ${c.dim}${dateStr}${c.reset}`);
   }
-  if (tags) {
-    const wrappedTags = wrapText(tags, 58);
+  if (rawTags.length > 0) {
+    const wrappedTags = wrapBadges(rawTags, 56);
     if (wrappedTags.length > 0) {
       lines.push(`  ${c.gray}Stack:${c.reset}  ${wrappedTags[0]}`);
       for (let j = 1; j < wrappedTags.length; j++) {
@@ -183,8 +183,9 @@ export function renderProjectCard(proj: SoftwareProject, options: CliRenderOptio
     }
   }
 
-  // Description with word-wrap
-  const wrappedDesc = wrapText(desc, 58);
+  // Description with word-wrap (stripped of HTML and markdown links)
+  const cleanDesc = cleanMarkdownLinks(stripHtml(desc));
+  const wrappedDesc = wrapText(cleanDesc, 57);
   if (wrappedDesc.length > 0) {
     lines.push(`  ${c.gray}About:${c.reset} ${wrappedDesc[0]}`);
     for (let j = 1; j < wrappedDesc.length; j++) {
@@ -213,28 +214,29 @@ export function renderProjectCard(proj: SoftwareProject, options: CliRenderOptio
  */
 export function renderAbout(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
-  const summary = resume.sections.summary?.content || "";
+  const rawSummary = resume.sections.summary?.content || "";
+  const cleanSummary = cleanMarkdownLinks(stripHtml(rawSummary));
   const rotations = siteConfig.person.bioRotations?.[lang] || siteConfig.person.bioRotations?.en || [];
 
   const sectionTitle = lang === "de" ? "ÜBERBLICK & FOKUS" : "ABOUT & FOCUS";
-  let out = `\n${divider(sectionTitle)}\n`;
+  let out = `${divider(sectionTitle)}\n\n`;
 
-  if (summary) {
-    const wrappedSummary = wrapText(summary, 70);
-    out += `\n${wrappedSummary.join("\n")}\n`;
+  if (cleanSummary) {
+    const wrappedSummary = wrapText(cleanSummary, 70);
+    out += `${wrappedSummary.join("\n")}\n\n`;
   }
 
   if (rotations.length > 0) {
-    out += `\n${c.bold}${c.brightCyan}Core Focus Areas:${c.reset}\n`;
+    out += `${c.bold}${c.brightCyan}Core Focus Areas:${c.reset}\n`;
     for (const item of rotations) {
-      const roleStr = `${c.brightYellow}${item.role.padEnd(22)}${c.reset}`;
+      const roleStr = `${c.brightYellow}${item.role.padEnd(24)}${c.reset}`;
       const adjectives = item.adjectives?.length ? item.adjectives.join(", ") : "";
       const desc = adjectives ? `${adjectives} ${item.artifacts || ""}` : item.artifacts || "";
       out += `  ${c.cyan}▸${c.reset} ${roleStr} ${c.dim}${desc}${c.reset}\n`;
     }
   }
 
-  return out;
+  return out.trimEnd();
 }
 
 /**
@@ -255,7 +257,7 @@ export function renderProjects(options: CliRenderOptions = {}): string {
       ? "FEATURED PROJECTS"
       : "ALL PROJECTS";
 
-  let out = `\n${divider(sectionTitle)}\n\n`;
+  let out = `${divider(sectionTitle)}\n\n`;
 
   for (let i = 0; i < list.length; i++) {
     out += renderProjectCard(list[i], options);
@@ -273,7 +275,7 @@ export function renderProjects(options: CliRenderOptions = {}): string {
     out += `\n\n  ${c.dim}${moreText} Run: ${c.brightCyan}curl ${origin}/projects${c.reset}${c.dim} to see all.${c.reset}\n`;
   }
 
-  return out;
+  return out.trimEnd();
 }
 
 /**
@@ -327,19 +329,29 @@ export function renderProjectDetail(slug: string, options: CliRenderOptions = {}
   const projectType =
     lang === "de" && proj.projectTypeDe ? proj.projectTypeDe : proj.projectType || "Software Project";
   const dateStr = formatProjectDate(proj.developedAt, lang);
-  const tags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`).join(" ");
+  const rawTags = proj.tags.map((t) => `${c.gray}[${c.brightCyan}${t}${c.gray}]${c.reset}`);
   const projectUrl = `${origin}/${proj.slug}`;
 
   let out = renderHeader(options);
   out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/${proj.slug}`, `Project Deep Dive: ${title}`)}\n\n`;
 
   // Top summary card
-  const summaryLines = [
-    "",
-    `  ${c.gray}Stack:${c.reset}  ${tags}${dateStr ? `  ${c.gray}•${c.reset} ${c.dim}${dateStr}${c.reset}` : ""}`,
-    `  ${c.gray}URL:${c.reset}    ${c.brightBlue}${terminalLink(projectUrl, projectUrl)}${c.reset}`,
-    "",
-  ];
+  const summaryLines: string[] = [""];
+  if (rawTags.length > 0) {
+    const wrappedTags = wrapBadges(rawTags, 56);
+    if (wrappedTags.length > 0) {
+      summaryLines.push(`  ${c.gray}Stack:${c.reset}  ${wrappedTags[0]}`);
+      for (let j = 1; j < wrappedTags.length; j++) {
+        summaryLines.push(`          ${wrappedTags[j]}`);
+      }
+    }
+  }
+  if (dateStr) {
+    summaryLines.push(`  ${c.gray}Date:${c.reset}   ${c.dim}${dateStr}${c.reset}`);
+  }
+  summaryLines.push(`  ${c.gray}URL:${c.reset}    ${c.brightBlue}${terminalLink(projectUrl, projectUrl)}${c.reset}`);
+  summaryLines.push("");
+
   out += renderCard({
     title: `${c.bold}${c.brightWhite}${title}${c.reset}`,
     rightBadge: `${c.dim}[${c.brightYellow}${projectType}${c.reset}${c.dim}]${c.reset}`,
@@ -368,12 +380,19 @@ export function renderSkills(options: CliRenderOptions = {}): string {
   const lang = options.lang || "en";
   const sectionTitle = lang === "de" ? "FÄHIGKEITEN & TECHNOLOGIEN" : "SKILLS & TECHNOLOGIES";
 
-  let out = `\n${divider(sectionTitle)}\n\n`;
+  let out = `${divider(sectionTitle)}\n\n`;
 
-  for (const cat of skills) {
+  const formatSkillName = (name: string, maxLen = 19): string => {
+    if (name.length > maxLen) {
+      return (name.slice(0, maxLen - 1) + "…").padEnd(maxLen);
+    }
+    return name.padEnd(maxLen);
+  };
+
+  for (let cIdx = 0; cIdx < skills.length; cIdx++) {
+    const cat = skills[cIdx];
     const lines: string[] = [""];
 
-    // Format skills in clean 2-column layout inside the card
     const items = cat.skills.map((s) => ({
       name: s.name,
       bar: skillBar(s.level),
@@ -384,9 +403,9 @@ export function renderSkills(options: CliRenderOptions = {}): string {
       const left = items[i];
       const right = items[i + 1];
 
-      const leftCol = `  ${c.brightWhite}${left.name.padEnd(14)}${c.reset} ${left.bar}`;
+      const leftCol = `  ${c.brightWhite}${formatSkillName(left.name, 19)}${c.reset} ${left.bar}`;
       if (right) {
-        const rightCol = `    ${c.brightWhite}${right.name.padEnd(14)}${c.reset} ${right.bar}`;
+        const rightCol = `    ${c.brightWhite}${formatSkillName(right.name, 19)}${c.reset} ${right.bar}`;
         lines.push(`${leftCol}${rightCol}`);
       } else {
         lines.push(`${leftCol}`);
@@ -406,9 +425,9 @@ export function renderSkills(options: CliRenderOptions = {}): string {
 
   // Legend
   const legend = `${c.dim}Legend: ${c.brightCyan}■■■■■${c.reset} Expert  ${c.brightCyan}■■■■□${c.reset} Advanced  ${c.brightCyan}■■■□□${c.reset} Proficient  ${c.brightCyan}■■□□□${c.reset} Familiar`;
-  out += `  ${legend}\n`;
+  out += `  ${legend}`;
 
-  return out;
+  return out.trimEnd();
 }
 
 /**
@@ -425,7 +444,7 @@ export function renderSkillsSubroute(options: CliRenderOptions = {}): string {
   let out = renderHeader(options);
   out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/skills`, subtitle)}\n\n`;
   out += renderSkills(options);
-  out += `\n${renderCommands(options)}`;
+  out += `\n\n${renderCommands(options)}\n`;
   return out;
 }
 
@@ -437,7 +456,7 @@ export function renderResume(options: CliRenderOptions = {}): string {
   const expTitle = lang === "de" ? "BERUFSERFAHRUNG" : "WORK EXPERIENCE";
   const eduTitle = lang === "de" ? "AUSBILDUNG" : "EDUCATION";
 
-  let out = `\n${divider(expTitle)}\n\n`;
+  let out = `${divider(expTitle)}\n\n`;
 
   const items = resume.sections.experience?.items || [];
   for (let i = 0; i < items.length; i++) {
@@ -447,21 +466,28 @@ export function renderResume(options: CliRenderOptions = {}): string {
     const loc = (exp as { location?: string }).location;
     const lines: string[] = [""];
 
+    if (exp.company) {
+      lines.push(`  ${c.gray}Company:${c.reset}  ${c.brightWhite}${exp.company}${c.reset}`);
+    }
+
     if (loc) {
       lines.push(`  ${c.gray}Location:${c.reset} ${loc}`);
     }
 
     if (exp.summary) {
-      const wrapped = wrapText(exp.summary, 62);
-      lines.push(`  ${c.gray}Summary:${c.reset}  ${wrapped[0]}`);
-      for (let j = 1; j < wrapped.length; j++) {
-        lines.push(`            ${wrapped[j]}`);
+      const cleanSummary = cleanMarkdownLinks(stripHtml(exp.summary));
+      const wrapped = wrapText(cleanSummary, 58);
+      if (wrapped.length > 0) {
+        lines.push(`  ${c.gray}Summary:${c.reset}  ${wrapped[0]}`);
+        for (let j = 1; j < wrapped.length; j++) {
+          lines.push(`            ${wrapped[j]}`);
+        }
       }
     }
     lines.push("");
 
     out += renderCard({
-      title: `${c.bold}${c.brightWhite}${exp.position}${c.reset} ${c.yellow}@ ${exp.company}${c.reset}`,
+      title: `${c.bold}${c.brightWhite}${exp.position}${c.reset}`,
       rightBadge: `${c.dim}[${exp.date}]${c.reset}`,
       lines,
       width: 74,
@@ -481,7 +507,13 @@ export function renderResume(options: CliRenderOptions = {}): string {
 
       const lines: string[] = [""];
       const degree = `${edu.studyType ? `${edu.studyType} in ` : ""}${edu.area}`;
-      lines.push(`  ${c.brightWhite}${degree}${c.reset}`);
+      if (degree) {
+        const cleanDegree = cleanMarkdownLinks(stripHtml(degree));
+        lines.push(`  ${c.brightWhite}${cleanDegree}${c.reset}`);
+      }
+      if (edu.score) {
+        lines.push(`  ${c.gray}Grade:${c.reset}    ${edu.score}`);
+      }
       lines.push("");
 
       out += renderCard({
@@ -497,7 +529,7 @@ export function renderResume(options: CliRenderOptions = {}): string {
     }
   }
 
-  return out;
+  return out.trimEnd();
 }
 
 /**
@@ -515,7 +547,7 @@ export function renderResumeSubroute(options: CliRenderOptions = {}): string {
   let out = renderHeader(options);
   out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/resume`, subtitle)}\n\n`;
   out += renderResume(options);
-  out += `\n\n${renderCommands(options)}`;
+  out += `\n\n${renderCommands(options)}\n`;
   return out;
 }
 
@@ -528,12 +560,13 @@ export function renderContact(options: CliRenderOptions = {}): string {
   const origin = options.origin || siteConfig.site.serverUrl || "https://example.com";
   const sectionTitle = lang === "de" ? "KONTAKT & LINKS" : "CONTACT & SOCIALS";
 
-  let out = `\n${divider(sectionTitle)}\n\n`;
+  let out = `${divider(sectionTitle)}\n\n`;
 
   const contactItems: [string, string, string][] = [];
 
   if (p.email) {
-    contactItems.push(["Email", p.email, `mailto:${p.email}`]);
+    const cleanEmail = cleanMarkdownLinks(stripHtml(p.email)).replace(/^mailto:/i, "");
+    contactItems.push(["Email", cleanEmail, `mailto:${cleanEmail}`]);
   }
   if (p.socials?.github) {
     const ghUrl = `https://github.com/${p.socials.github}`;
@@ -559,7 +592,7 @@ export function renderContact(options: CliRenderOptions = {}): string {
     width: 74,
   });
 
-  return out;
+  return out.trimEnd();
 }
 
 /**
@@ -576,7 +609,7 @@ export function renderContactSubroute(options: CliRenderOptions = {}): string {
   let out = renderHeader(options);
   out += `\n\n${renderRoutePill(`${origin.replace(/^https?:\/\//, "")}/contact`, subtitle)}\n\n`;
   out += renderContact(options);
-  out += `\n\n${renderCommands(options)}`;
+  out += `\n\n${renderCommands(options)}\n`;
   return out;
 }
 
@@ -590,7 +623,7 @@ export function renderCommands(options: CliRenderOptions = {}): string {
 
   const sectionTitle = lang === "de" ? "TERMINAL BEFEHLE" : "TERMINAL COMMANDS";
 
-  let out = `\n${divider(sectionTitle)}\n\n`;
+  let out = `${divider(sectionTitle)}\n\n`;
 
   const commands = [
     [`curl ${domain}/projects`, lang === "de" ? "Alle Projekte durchsuchen" : "Explore all projects"],
@@ -603,27 +636,30 @@ export function renderCommands(options: CliRenderOptions = {}): string {
     [`curl ${domain}?json=1`, lang === "de" ? "Maschinenlesbare JSON-Zusammenfassung" : "Structured JSON payload"],
   ];
 
+  const maxCmdLen = Math.max(...commands.map(([cmd]) => cmd.length), 38);
+
   for (const [cmd, desc] of commands) {
-    out += `  ${c.brightCyan}${cmd.padEnd(42)}${c.reset} ${c.dim}# ${desc}${c.reset}\n`;
+    out += `  ${c.brightCyan}${cmd.padEnd(maxCmdLen + 2)}${c.reset} ${c.dim}# ${desc}${c.reset}\n`;
   }
 
-  out += `\n${divider()}\n`;
-  return out;
+  out += `\n${divider()}`;
+  return out.trimEnd();
 }
 
 /**
  * Render full portfolio terminal view (default root view).
  */
 export function renderFullPortfolio(options: CliRenderOptions = {}): string {
-  let out = "";
-  out += renderHeader(options);
-  out += renderAbout(options);
-  out += renderProjects({ ...options, projectLimit: 3 });
-  out += renderSkills(options);
-  out += renderResume(options);
-  out += renderContact(options);
-  out += renderCommands(options);
-  return out;
+  const parts = [
+    renderHeader(options),
+    renderAbout(options),
+    renderProjects({ ...options, projectLimit: 3 }),
+    renderSkills(options),
+    renderResume(options),
+    renderContact(options),
+    renderCommands(options),
+  ];
+  return parts.join("\n\n") + "\n";
 }
 
 /**
@@ -638,17 +674,17 @@ export function renderJsonSummary(options: CliRenderOptions = {}): string {
     headline: p.headline,
     location: `${p.address.city}, ${p.address.country}`,
     website: origin,
-    email: p.email,
+    email: p.email ? cleanMarkdownLinks(stripHtml(p.email)).replace(/^mailto:/i, "") : null,
     socials: {
       github: p.socials.github ? `https://github.com/${p.socials.github}` : null,
       linkedin: p.socials.linkedin ? `https://linkedin.com/in/${p.socials.linkedin}` : null,
     },
-    summary: resume.sections.summary?.content || "",
+    summary: cleanMarkdownLinks(stripHtml(resume.sections.summary?.content || "")),
     featuredProjects: projects.map((proj) => ({
       id: proj.id,
       slug: proj.slug,
       title: proj.title,
-      description: proj.description,
+      description: cleanMarkdownLinks(stripHtml(proj.description)),
       tags: proj.tags,
       categories: proj.categories,
       url: `${origin}/${proj.slug}`,
@@ -663,7 +699,7 @@ export function renderJsonSummary(options: CliRenderOptions = {}): string {
         company: e.company,
         position: e.position,
         date: e.date,
-        summary: e.summary,
+        summary: cleanMarkdownLinks(stripHtml(e.summary || "")),
       })),
   };
 
