@@ -29,7 +29,9 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
   const showTagline =
     body?.showTagline !== undefined
       ? body.showTagline
-      : searchParams.get("showTagline") === "true";
+      : searchParams.get("showTagline") !== null
+      ? searchParams.get("showTagline") === "true"
+      : DEFAULT_BANNER_DATA.showTagline;
 
   let skills: string[] = DEFAULT_BANNER_DATA.skills;
   if (body?.skills && Array.isArray(body.skills)) {
@@ -42,16 +44,20 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
       .filter(Boolean);
   }
 
-  const contactUrl =
+  const rawContactUrl =
     body?.contactUrl ||
     searchParams.get("contactUrl") ||
-    siteConfig.site.serverUrl?.replace(/^https?:\/\//, "") ||
-    DEFAULT_BANNER_DATA.contactUrl;
+    siteConfig.site.serverUrl ||
+    DEFAULT_BANNER_DATA.contactUrl ||
+    "";
+  const contactUrl = rawContactUrl.replace(/^https?:\/\//i, "").trim();
 
   const showContact =
     body?.showContact !== undefined
       ? body.showContact
-      : searchParams.get("showContact") === "true";
+      : searchParams.get("showContact") !== null
+      ? searchParams.get("showContact") === "true"
+      : DEFAULT_BANNER_DATA.showContact;
 
   const statusText =
     body?.statusText ||
@@ -61,7 +67,9 @@ function parseBannerParams(searchParams: URLSearchParams, body?: Partial<BannerD
   const showStatus =
     body?.showStatus !== undefined
       ? body.showStatus
-      : searchParams.get("showStatus") === "true";
+      : searchParams.get("showStatus") !== null
+      ? searchParams.get("showStatus") === "true"
+      : DEFAULT_BANNER_DATA.showStatus;
 
   const theme: BannerTheme =
     (body?.theme || searchParams.get("theme") || DEFAULT_BANNER_DATA.theme) === "light"
@@ -207,7 +215,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       svgOptions: { showSafeAreas },
     });
 
-    const safeRole = bannerData.jobTitle.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safeRole = (bannerData.jobTitle || "AI_Engineer").replace(/[^a-zA-Z0-9_-]/g, "_");
     const filename = `LinkedIn_Banner_${safeRole}_${bannerData.theme}${
       scale === 2 ? "@2x" : ""
     }.png`;

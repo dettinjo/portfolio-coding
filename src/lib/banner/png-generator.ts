@@ -47,9 +47,12 @@ export async function generateBannerPng(
   const svgString = renderBannerSvg(data, options.svgOptions);
   const svgBuffer = Buffer.from(svgString, "utf-8");
 
-  // Render high-fidelity PNG using sharp
-  const pngBuffer = await sharp(svgBuffer, { density: scale === 2 ? 144 : 72 })
-    .resize(width, height, { fit: "contain" })
+  // Render high-fidelity PNG using sharp with supersampling and crisp antialiasing
+  // density: 144 renders SVG at 2x vector resolution (3168x792)
+  // For scale 1 (1584x396), lanczos3 downsampling yields supersampled crisp text
+  // For scale 2 (3168x792), native 2x density yields pixel-perfect Retina output
+  const pngBuffer = await sharp(svgBuffer, { density: 144 })
+    .resize(width, height, { fit: "contain", kernel: "lanczos3" })
     .png({ compressionLevel: 9, quality: 100 })
     .toBuffer();
 
