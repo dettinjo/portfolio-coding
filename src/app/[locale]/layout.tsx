@@ -112,10 +112,12 @@ export default async function RootLocaleLayout({
 
   const messages = await getMessages();
 
-  // Umami analytics — website ID is the only runtime var needed.
-  // The script is served through /api/umami (proxied to the internal Umami
-  // instance) so no public Umami domain is required.
-  const umamiWebsiteId = process.env.UMAMI_WEBSITE_ID;
+  // Umami analytics. The script is served through /api/sys-client (proxied to
+  // the internal Umami instance), so no public Umami domain is required.
+  // This layout is prerendered at build time, where the runtime-only
+  // UMAMI_WEBSITE_ID is not set — so the tag is always rendered and the route
+  // injects the website ID at request time. The static demo has no API routes.
+  const analyticsEnabled = process.env.STATIC_EXPORT !== "1";
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -141,12 +143,8 @@ export default async function RootLocaleLayout({
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>
-        {umamiWebsiteId && (
-          <Script
-            src="/api/sys-client"
-            data-website-id={umamiWebsiteId}
-            strategy="afterInteractive"
-          />
+        {analyticsEnabled && (
+          <Script src="/api/sys-client" strategy="afterInteractive" />
         )}
       </body>
     </html>
