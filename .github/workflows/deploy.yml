@@ -48,23 +48,15 @@ jobs:
           secrets: |
             GITHUB_TOKEN=${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
 
-      # Runtime secrets (SMTP_PASS, UMAMI_WEBSITE_ID, etc.) are injected at
-      # container startup via Coolify — they must never appear as build args.
-
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: root
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          known_hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-          envs: COOLIFY_TOKEN
-          script: |
-            # Pull the new image (built by GitHub Actions, never built on server)
-            docker pull ghcr.io/${{ github.repository }}:latest
-            # Trigger Coolify to redeploy (Coolify will pull latest compose, see the new image, and recreate container)
-            curl -s -X POST \
-              "http://localhost:18000/api/v1/deploy?uuid=ikws0k0oc440k0cs08csws08&force=false" \
-              -H "Authorization: Bearer $COOLIFY_TOKEN"
+      - name: Deploy via Komodo (signed webhook → pull + redeploy stack "portfolio-coding")
         env:
-          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+        run: |
+          body=$(printf '{"ref":"refs/heads/main","after":"%s","repository":{"full_name":"%s"}}' "$GITHUB_SHA" "$GITHUB_REPOSITORY")
+          sig="sha256=$(printf '%s' "$body" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $NF}')"
+          code=$(curl -s -o /tmp/resp -w '%{http_code}' --max-time 30 -X POST \
+            "https://hooks.joeldettinger.de/listener/github/stack/portfolio-coding/deploy" \
+            -H 'Content-Type: application/json' -H 'X-GitHub-Event: push' \
+            -H "X-Hub-Signature-256: $sig" --data "$body")
+          cat /tmp/resp; echo; echo "HTTP $code"
+          [ "$code" -lt 300 ]
