@@ -42,10 +42,14 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
+    // Implicit TLS only on 465; 587 uses STARTTLS. Hetzner blocks outgoing 465,
+    // so production runs on 587 (set SMTP_PORT in the homelab stack).
+    const smtpPort = Number(process.env.SMTP_PORT || 465);
     const transporter = nodemailer.createTransport({
       host: smtpHost,
-      port: Number(process.env.SMTP_PORT || 465),
-      secure: true,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      requireTLS: smtpPort !== 465,
       auth: {
         user: smtpUser,
         pass: smtpPass,
