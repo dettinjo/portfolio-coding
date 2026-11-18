@@ -521,5 +521,16 @@
     "category": "frontend",
     "iconClassName": null,
     "url": "https://www.framer.com/motion/"
-  }
+  },
+  "github actions": { "name": "GitHub Actions", "category": "devops", "iconClassName": null, "url": "https://github.com/features/actions" },
+  "gitops": { "name": "GitOps", "category": "devops", "iconClassName": null, "url": "https://opengitops.dev/" },
+  "infrastructure as code": { "name": "Infrastructure as Code", "category": "devops", "iconClassName": null, "url": null },
+  "self-hosting": { "name": "Self-Hosting", "category": "devops", "iconClassName": null, "url": null },
+  "homelab": { "name": "Homelab", "category": "devops", "iconClassName": null, "url": null },
+  "komodo": { "name": "Komodo", "category": "devops", "iconClassName": null, "url": "https://komo.do/" },
+  "renovate": { "name": "Renovate", "category": "devops", "iconClassName": null, "url": "https://docs.renovatebot.com/" },
+  "caddy": { "name": "Caddy", "category": "devops", "iconClassName": null, "url": "https://caddyserver.com/" },
+  "tailscale": { "name": "Tailscale", "category": "devops", "iconClassName": null, "url": "https://tailscale.com/" },
+  "gatus": { "name": "Gatus", "category": "devops", "iconClassName": null, "url": "https://gatus.io/" },
+  "infisical": { "name": "Infisical", "category": "devops", "iconClassName": null, "url": "https://infisical.com/" }
 }
