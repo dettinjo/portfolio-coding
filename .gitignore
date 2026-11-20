@@ -81,3 +81,12 @@ next-env.d.ts
 /public/downloads/cover-letters/
 /public/downloads/banners/
 /banners/
+
+# career-hub data staged at build time (personal — lives in the private config
+# repo; config/*.example.json are the committed fallbacks)
+/src/data/coursework.json
+/src/data/extra-projects.json
+/src/data/role-profiles.json
+/config/coursework.json
+/config/extra-projects.json
+/config/role-profiles.json

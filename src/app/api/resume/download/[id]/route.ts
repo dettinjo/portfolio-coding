@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs";
+import { suggestedPdfFileName } from "@/lib/filenames";
 import { getVariant } from "@/lib/resume/variants";
 import {
   generateResumePdf,
@@ -45,16 +46,12 @@ export async function GET(
     }
   }
 
-  const safeName = (variant.data.basics.name || "Resume")
-    .replace(/[^a-zA-Z0-9\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "_");
-  const safeCompany = variant.company
-    .replace(/[^a-zA-Z0-9\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "_");
-
-  const filename = `Resume_${safeName}_${safeCompany}.pdf`;
+  const filename = suggestedPdfFileName({
+    kind: "cv",
+    name: variant.data.basics?.name,
+    company: variant.company,
+    role: variant.role,
+  });
 
   return new NextResponse(new Uint8Array(pdfBuffer), {
     status: 200,

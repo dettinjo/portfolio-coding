@@ -1,0 +1,44 @@
+{
+  "roles": [
+    {
+      "roleId": "fullstack_engineer",
+      "title": "Full-Stack Software Engineer",
+      "headline": "Full-Stack Software Engineer",
+      "positioning": "Full-stack engineer building TypeScript web apps and Python/Go APIs end to end, from database schema to deployment.",
+      "tracks": ["fullstack_engineer", "backend_distributed"],
+      "keywords": ["React", "Next.js", "TypeScript", "Node.js", "REST", "GraphQL", "PostgreSQL"],
+      "featuredProjects": ["aurora-dashboard"],
+      "featuredCourses": ["Web Engineering"],
+      "skills": [
+        { "name": "TypeScript" },
+        { "name": "React & Next.js" },
+        { "name": "Node.js" },
+        { "name": "PostgreSQL" },
+        { "name": "REST & GraphQL APIs" },
+        { "name": "Docker" }
+      ],
+      "experienceOrder": ["e1", "e2", "e3"],
+      "experienceSummaries": {
+        "e1": "Built the customer dashboard in Next.js and the GraphQL gateway in Node.js."
+      },
+      "education": ["ed1", "ed2"]
+    },
+    {
+      "roleId": "cloud_devops_engineer",
+      "title": "Cloud & DevOps Engineer",
+      "headline": "Cloud & DevOps Engineer",
+      "positioning": "Platform engineer automating cloud infrastructure with Terraform and Kubernetes, with a focus on reliable CI/CD.",
+      "tracks": ["cloud_devops_engineer", "backend_distributed"],
+      "keywords": ["Terraform", "Kubernetes", "Helm", "Docker", "CI/CD", "AWS"],
+      "featuredProjects": ["helmforge-platform", "client-migration"],
+      "skills": [
+        { "name": "Terraform" },
+        { "name": "Kubernetes & Helm" },
+        { "name": "Docker" },
+        { "name": "AWS" },
+        { "name": "CI/CD" },
+        { "name": "Go" }
+      ]
+    }
+  ]
+}

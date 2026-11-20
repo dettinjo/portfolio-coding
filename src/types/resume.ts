@@ -56,6 +56,8 @@ export interface ResumeData {
     skills: ResumeSection;
     languages: ResumeSection;
     profiles: ResumeSection;
+    /** Project pool (GitHub + manual). Carried as data; not drawn by the CV template. */
+    projects?: ResumeSection;
     // Add others if needed (awards, etc.)
   };
 }

@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "nimbus-api": {
+      "context": "Overrides a GitHub/local project by its slug: any field (name, url, technologies, date, summary, highlights, tracks, extraTracks, context) or hidden: true."
+    },
+    "client-migration": {
+      "name": "Cloud Migration for a Logistics Client",
+      "context": "Client project (no public repository)",
+      "date": "2023-05-01",
+      "technologies": ["Terraform", "AWS", "GitLab CI/CD"],
+      "summary": "Moved a monolithic logistics platform to AWS with Terraform-managed infrastructure and blue/green deployments.",
+      "highlights": [
+        "Codified 40+ AWS resources in Terraform modules with per-environment state.",
+        "Cut release time from a day to 20 minutes with GitLab CI/CD blue/green deploys."
+      ],
+      "tracks": ["cloud_devops_engineer"]
+    }
+  }
+}

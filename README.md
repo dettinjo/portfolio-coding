@@ -208,13 +208,17 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | Tool / Prompt | Description |
 |---|---|
 | `get_official_resume` | **Always call first.** Fetches the authoritative candidate CV JSON currently published on the live site. |
-| `get_master_resume` | Returns the extended master pool of all experiences, projects, and skills. |
+| `get_master_resume` | Returns the extended master pool of all experiences, projects, and skills. `sections.projects` is filled from the `portfolio` / `portfolio-private` GitHub repos (README summary + highlights, topics, language, inferred role tracks) merged with `extra-projects.json`. |
+| `sync_github_projects` | Re-reads the GitHub project repos on demand (otherwise the build-time snapshot is used; no GitHub call per request). Rate-limited to once a minute. |
+| `get_coursework` | Courses with grades, programs and theses from `coursework.json`; optional `track` (role id) and `minGrade` filters. |
+| `list_role_profiles` | Role-specific profiles from `role-profiles.json` with positioning, top skills and match counts. |
+| `get_role_profile` | One role, pre-ranked: a single-page-safe `resumeData`, relevant coursework, theses and every matching project with README highlights. |
 | `get_layout_guidelines` | Outlines the strict single-page A4 constraints (character budgets, max items per section). |
 | `validate_resume_layout` | Verifies proposed CV data against vertical height budgets before rendering. |
-| `generate_tailored_resume` | Validates layout and renders a pixel-perfect single-page A4 PDF via headless Chromium, saving the variant with a 60-day retention period, and returning download & preview URLs. |
+| `generate_tailored_resume` | Validates layout and renders a pixel-perfect single-page A4 PDF via headless Chromium, saving the variant with a 60-day retention period. Returns `variantId`, absolute `downloadUrl` (serves `application/pdf`), `previewUrl` and `suggestedFileName` (`<First>_<Last>_CV_<Company>_<Role>.pdf`). |
 | `get_cover_letter_template` | Pre-populates a structured cover letter template with verified personal details, identical contact links matching the CV, recipient, position card, and avatar. |
 | `validate_cover_letter_layout`| Checks cover letter text length against single-page vertical budgets. |
-| `generate_tailored_cover_letter` | Renders an exact single-page A4 PDF cover letter matching the portfolio's visual styling (sidebar links, subtle position information card, signature, embedded avatar) with 60-day retention. |
+| `generate_tailored_cover_letter` | Renders an exact single-page A4 PDF cover letter matching the portfolio's visual styling (sidebar links, subtle position information card, signature, embedded avatar) with 60-day retention. Same response fields as the CV, with `suggestedFileName` = `<First>_<Last>_Cover_Letter_<Company>_<Role>.pdf`. |
 | `recall_application_materials` | **Interview Recall:** Recalls submitted CV achievements, tailored work history, highlighted skills, and cover letter arguments for any company or role to prepare for interviews. |
 | `list_all_applications` | Lists all active saved CV and Cover Letter applications, creation dates, 60-day expiration dates, days remaining, preview URLs, and download links. |
 | `prune_expired_materials` | Manually triggers the cleanup engine to delete materials and PDFs older than 60 days. |
