@@ -46,6 +46,7 @@ import {
   syncGithubProjects,
   KNOWN_TRACKS,
 } from "@/lib/career/projects";
+import { auditPortfolioRepo, getRepoGuidelines } from "@/lib/career/repo-guidelines";
 import {
   buildRoleProfile,
   listRoleConfigs,
@@ -58,7 +59,7 @@ let lastSyncAt = 0;
 export function createResumeMcpServer(): McpServer {
   const server = new McpServer({
     name: "portfolio-resume-tailor",
-    version: "1.1.0",
+    version: "1.2.0",
   });
 
   // ─── TOOL 1: GET OFFICIAL RESUME (PRIMARY ENTRYPOINT) ─────────────────────
@@ -1287,6 +1288,63 @@ Instructions:
         content: [{ type: "text", text: JSON.stringify(profile, null, 2) }],
       };
     }
+  );
+
+  // ─── PORTFOLIO REPO GUIDELINES & AUDIT ────────────────────────────────────
+  server.tool(
+    "get_portfolio_repo_guidelines",
+    "Returns the requirements for a GitHub repository to appear on the portfolio website and in the CV/MCP project data: control topics (portfolio / portfolio-private), technology topics, About description/website, README structure (title, intro paragraph = card text, first two bullets = highlights, date override), screenshots (relative paths, first image = cover), a README template, recognised technology topic names and the publish steps. Call this from a session working inside a project repository before adapting it.",
+    {},
+    async () => ({
+      content: [{ type: "text", text: JSON.stringify(getRepoGuidelines(), null, 2) }],
+    })
+  );
+
+  server.tool(
+    "audit_portfolio_repo",
+    "Checks one GitHub repository live against the portfolio requirements and returns findings (error / warning / info, each with a fix), ready-to-run `gh repo edit` commands, and a preview of what the website card and CV project entry will show (title, card text, summary, highlights, technologies, inferred role tracks, cover image). Read-only.",
+    {
+      repo: z
+        .string()
+        .min(1)
+        .describe("Repository name ('routepass'), 'owner/name', or a github.com URL"),
+    },
+    async ({ repo }) => {
+      try {
+        const result = await auditPortfolioRepo(repo);
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return { isError: true, content: [{ type: "text", text: `Audit failed: ${message}` }] };
+      }
+    }
+  );
+
+  server.prompt(
+    "prepare_repo_for_portfolio",
+    "Guides a coding session inside a project repository to make it portfolio-ready: README, screenshots and GitHub settings.",
+    {
+      repo: z.string().describe("Repository name or owner/name"),
+    },
+    async ({ repo }) => ({
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Make the repository "${repo}" ready for my portfolio website and CV data.
+
+1. Call 'get_portfolio_repo_guidelines' and read the requirements.
+2. Call 'audit_portfolio_repo' with repo: "${repo}" and go through every error and warning.
+3. Rewrite README.md from the actual code (never invent features): '# Title', a 1–2 sentence intro (≤ 260 chars), then '- **Lead** — fact' bullets with the two strongest engineering points first, screenshots, architecture, stack. Remove internal IPs, hostnames and secret names. Mirror it in README.de.md if one exists.
+4. Screenshots: if the app can run locally, capture 2–4 screenshots into docs/screenshots/ and put the best one first (before any badges). Otherwise list which screenshots I should take.
+5. Show me the proposed GitHub settings changes (topics, description, website) and the 'gh repo edit' command; run it only after I confirm.
+6. Commit the README changes on a branch and open a PR.
+7. After merge: call 'audit_portfolio_repo' again, then 'sync_github_projects'. Tell me the website updates on the next portfolio-coding build.`,
+          },
+        },
+      ],
+    })
   );
 
   // ─── MCP PROMPT: PREP FOR INTERVIEW ───────────────────────────────────────

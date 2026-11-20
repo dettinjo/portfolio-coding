@@ -27,7 +27,7 @@ import type { ResumeItem } from "@/types/resume";
 // extra-projects.json (private config repo) then overrides fields or adds
 // non-GitHub projects.
 
-interface RawProject {
+export interface RawProject {
   id: string;
   title: string;
   description: string;
@@ -97,7 +97,7 @@ function currentSource(): GithubSyncState {
 
 // ─── Runtime GitHub sync ─────────────────────────────────────────────────────
 
-const CONTROL_TOPICS = new Set(["portfolio", "portfolio-private", "portfolio-config"]);
+export const CONTROL_TOPICS = new Set(["portfolio", "portfolio-private", "portfolio-config"]);
 const normalizeTech = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 const registryByNorm: Record<string, string> = {};
 for (const [key, detail] of Object.entries(techRegistry as Record<string, { name?: string }>)) {
@@ -105,12 +105,19 @@ for (const [key, detail] of Object.entries(techRegistry as Record<string, { name
   registryByNorm[normalizeTech(key)] = name;
   registryByNorm[normalizeTech(name)] = name;
 }
-const displayTag = (topic: string): string =>
+/** True when the topic matches a curated tech-registry entry (icon + skill scoring). */
+export const isRegisteredTech = (topic: string): boolean => normalizeTech(topic) in registryByNorm;
+
+/** Display names of every curated tech-registry entry. */
+export const registeredTechNames = (): string[] =>
+  Array.from(new Set(Object.values(registryByNorm))).sort((a, b) => a.localeCompare(b));
+
+export const displayTag = (topic: string): string =>
   registryByNorm[normalizeTech(topic)] ??
   topic.replace(/[-_]+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase());
 
 /** Drops the language switcher, portfolio comments and the first H1 (→ title). */
-function stripReadme(markdown: string): { title: string; body: string } {
+export function stripReadme(markdown: string): { title: string; body: string } {
   let title = "";
   const kept: string[] = [];
   for (const line of markdown.replace(/\r\n/g, "\n").split("\n")) {
@@ -278,7 +285,7 @@ function inferTracks(technologies: string[], text: string): TrackId[] {
 
 const unique = <T,>(xs: T[]) => Array.from(new Set(xs));
 
-function buildProject(raw: RawProject | null, id: string, o: ProjectOverride = {}): CareerProject {
+export function buildProject(raw: RawProject | null, id: string, o: ProjectOverride = {}): CareerProject {
   const technologies =
     o.technologies ??
     unique([...(raw?.language ? [raw.language] : []), ...(raw?.tags ?? [])]).slice(0, 12);

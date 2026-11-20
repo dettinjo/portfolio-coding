@@ -211,6 +211,9 @@ Add the server to your client configuration (e.g., `claude_desktop_config.json` 
 | `get_master_resume` | Returns the extended master pool of all experiences, projects, and skills. `sections.projects` is filled from the `portfolio` / `portfolio-private` GitHub repos (README summary + highlights, topics, language, inferred role tracks) merged with `extra-projects.json`. |
 | `sync_github_projects` | Re-reads the GitHub project repos on demand (otherwise the build-time snapshot is used; no GitHub call per request). Rate-limited to once a minute. |
 | `get_coursework` | Courses with grades, programs and theses from `coursework.json`; optional `track` (role id) and `minGrade` filters. |
+| `get_portfolio_repo_guidelines` | Requirements for a repo to appear on the site and in the CV data: control topics, tech topics, About box, README structure, screenshots, README template, recognised topic names, publish steps. |
+| `audit_portfolio_repo` | Live, read-only check of one repo against those requirements: findings with fixes, `gh repo edit` commands, and a preview of the card / CV entry. |
+| `prompt: prepare_repo_for_portfolio` | Guided workflow for a coding session inside a project repo: audit → README + screenshots → GitHub settings → PR → re-audit → sync. |
 | `list_role_profiles` | Role-specific profiles from `role-profiles.json` with positioning, top skills and match counts. |
 | `get_role_profile` | One role, pre-ranked: a single-page-safe `resumeData`, relevant coursework, theses and every matching project with README highlights. |
 | `get_layout_guidelines` | Outlines the strict single-page A4 constraints (character budgets, max items per section). |

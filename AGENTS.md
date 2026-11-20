@@ -33,6 +33,12 @@ build instead serves the committed **demo dataset** under `demo/` (see below).
 
 ## Setting up a project repository (GitHub-native, README-based)
 
+> **From any coding session:** the portfolio MCP server (`/api/mcp`) exposes these
+> rules as `get_portfolio_repo_guidelines`, checks a repo live with
+> `audit_portfolio_repo` (findings, `gh repo edit` commands, preview of the card),
+> and offers the guided prompt `prepare_repo_for_portfolio`. Project repos never
+> need a `.portfolio/` folder — that exists only in the private config repo.
+
 ### 1. Add a topic
 
 On GitHub → **About → Topics**:
