@@ -1,0 +1,42 @@
+{
+  "gradingScale": "German 1.0–5.0 scale converted to 10-point (example data)",
+  "programs": [
+    {
+      "id": "msc-cs",
+      "institution": "TU Berlin",
+      "degree": "MSc Computer Science",
+      "gpa": "8.2/10",
+      "ects": 120,
+      "courses": [
+        {
+          "name": "Distributed Systems", "grade": 8.5, "ects": 6,
+          "summary": "Consensus, replication and fault tolerance; project on a Raft-based key-value store.",
+          "tracks": ["backend_distributed", "cloud_devops_engineer"],
+          "keywords": ["distributed systems", "Raft", "replication", "Go"]
+        },
+        {
+          "name": "Machine Learning", "grade": 9.0, "ects": 6,
+          "summary": "Supervised and unsupervised learning, neural networks and model evaluation.",
+          "tracks": ["ai_engineer", "data_analyst_engineer"],
+          "keywords": ["machine learning", "PyTorch", "evaluation"]
+        },
+        {
+          "name": "Web Engineering", "grade": 8.0, "ects": 6,
+          "summary": "Modern web architecture, SPAs, REST and GraphQL APIs.",
+          "tracks": ["fullstack_engineer"],
+          "keywords": ["React", "REST", "GraphQL"]
+        }
+      ]
+    }
+  ],
+  "theses": [
+    {
+      "id": "msc-thesis", "level": "MSc",
+      "title": "Adaptive autoscaling for serverless workloads",
+      "institution": "TU Berlin",
+      "summary": "Predictive autoscaler for function-as-a-service platforms evaluated on production traces.",
+      "tracks": ["cloud_devops_engineer", "backend_distributed"],
+      "keywords": ["Kubernetes", "autoscaling", "serverless"]
+    }
+  ]
+}

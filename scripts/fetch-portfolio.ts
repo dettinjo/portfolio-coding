@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
+import { extractFirstParagraph, parseDateOverride } from "../src/lib/projects/readme";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -16,6 +17,11 @@ const exampleSiteConfigPath = path.join(rootDir, "config", "site.config.example.
 const outputAvatarPath = path.join(rootDir, "public", "images", "profile.webp");
 const placeholderAvatarPath = path.join(rootDir, "public", "images", "avatar.placeholder.webp");
 const outputPdfPath = path.join(rootDir, "public", "media", "resume.pdf");
+
+// Career-hub data for the MCP server (coursework, project overrides, role
+// profiles). Personal → lives in the private config repo's .portfolio/ folder;
+// the committed config/*.example.json files are the clean-clone fallback.
+const CAREER_DATA_FILES = ["coursework.json", "extra-projects.json", "role-profiles.json"];
 
 // Username may be empty — when a token is present we list repos via /user/repos
 // (no username needed) and derive the owner from the results. Falls back to the
@@ -380,78 +386,6 @@ const main = async () => {
     return { title, body, coverUrl };
   };
 
-  // Extract the first prose paragraph from a processed README body (title,
-  // language-switcher line, and portfolio:date comment already stripped by
-  // processReadme) for use as the project card preview / meta description.
-  // Skips headings, HTML blocks, blockquotes, badge chains, and image-only
-  // lines to find the first paragraph of real text, then flattens markdown
-  // formatting down to plain prose.
-  const extractFirstParagraph = (body: string): string => {
-    const lines = body.replace(/\r\n/g, "\n").split("\n");
-    const switcherLinkRe = /\[[^\]]*\]\(README(\.[a-z]{2})?\.md\)/gi;
-    const isSwitcherLine = (s: string): boolean => {
-      if (!switcherLinkRe.test(s)) return false;
-      switcherLinkRe.lastIndex = 0;
-      // Line is "just" the switcher if nothing but the links plus bold
-      // markers, separators, and emoji/flag decoration remains.
-      const rest = s
-        .replace(switcherLinkRe, "")
-        .replace(/[\s*·|]/g, "")
-        .replace(/\p{Extended_Pictographic}/gu, "");
-      return rest === "";
-    };
-    const isBadgeLine = (s: string): boolean =>
-      /^(\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)\s*)+$/.test(s);
-    const isImageOnlyLine = (s: string): boolean =>
-      /^(!\[[^\]]*\]\([^)]*\)\s*)+$/.test(s);
-
-    const paraLines: string[] = [];
-    let collecting = false;
-    for (const raw of lines) {
-      const s = raw.trim();
-      if (!collecting) {
-        if (s === "") continue;
-        if (s.startsWith("#") || s.startsWith("<") || s.startsWith(">")) continue;
-        if (isSwitcherLine(s) || isBadgeLine(s) || isImageOnlyLine(s)) continue;
-        collecting = true;
-        paraLines.push(s);
-      } else {
-        if (s === "" || s.startsWith("#") || s.startsWith("<") || s.startsWith(">")) break;
-        paraLines.push(s);
-      }
-    }
-
-    let text = paraLines.join(" ");
-    text = text
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links → text
-      .replace(/`([^`]+)`/g, "$1") // inline code
-      .replace(/\*\*([^*]+)\*\*/g, "$1") // bold
-      .replace(/__([^_]+)__/g, "$1") // bold (underscore)
-      .replace(/\*([^*]+)\*/g, "$1") // italic
-      .replace(/\s+/g, " ")
-      .trim();
-
-    // Safety net only — curated READMEs should already land well under this.
-    // Prevents an unusually structured README from blowing out the card /
-    // meta-description length; cuts on a word boundary.
-    const MAX_LEN = 260;
-    if (text.length > MAX_LEN) {
-      const cut = text.slice(0, MAX_LEN);
-      const lastSpace = cut.lastIndexOf(" ");
-      text = cut.slice(0, lastSpace > 0 ? lastSpace : MAX_LEN).trim() + "…";
-    }
-
-    return text;
-  };
-
-  // Optional development-date override embedded in the README as an HTML comment:
-  // "<!-- portfolio:date=2022-07-01 -->". Lets a repo created later than the
-  // project was actually built report the real date.
-  const parseDateOverride = (markdown: string): string | null => {
-    const m = markdown.match(/<!--\s*portfolio:date=([0-9]{4}-[0-9]{2}-[0-9]{2})\s*-->/i);
-    return m ? m[1] : null;
-  };
-
   // Generate a branded title-card cover for projects whose README has no image,
   // so every card has a consistent visual. Returns the local cover URL.
   const esc = (s: string) =>
@@ -679,6 +613,42 @@ const main = async () => {
     } catch (err: any) {
       console.warn("  Failed to fetch configuration from GitHub. Checking local fallbacks...", err.message);
     }
+  }
+
+  // Career-hub data files: config repo → local config/ → demo/ → example.
+  for (const fileName of CAREER_DATA_FILES) {
+    const outPath = path.join(rootDir, "src", "data", fileName);
+    let source = "";
+    if (configRepoName && !DEMO_MODE) {
+      const remote = await fetchRepoText(GITHUB_USERNAME, configRepoName, `.portfolio/${fileName}`);
+      if (remote) {
+        try {
+          JSON.parse(remote);
+          fs.writeFileSync(outPath, remote, "utf8");
+          source = `config repo .portfolio/${fileName}`;
+        } catch {
+          console.warn(`  Remote ${fileName} is not valid JSON — ignoring.`);
+        }
+      }
+    }
+    const exampleName = fileName.replace(/\.json$/, ".example.json");
+    const candidates = [
+      path.join(localConfigDir, fileName),
+      ...(DEMO_MODE ? [path.join(demoDir, fileName)] : []),
+      path.join(localConfigDir, exampleName),
+    ];
+    for (const candidate of source ? [] : candidates) {
+      if (fs.existsSync(candidate)) {
+        fs.copyFileSync(candidate, outPath);
+        source = path.relative(rootDir, candidate);
+        break;
+      }
+    }
+    if (!source) {
+      fs.writeFileSync(outPath, "{}\n", "utf8");
+      source = "empty default";
+    }
+    console.log(`  ✓ ${fileName} ← ${source}`);
   }
 
   if (!resumeConfigFetched && fs.existsSync(localConfigDir)) {

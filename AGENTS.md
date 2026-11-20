@@ -98,7 +98,14 @@ pipeline auto-detects it (or set `PORTFOLIO_CONFIG_REPO`).
   resume.json        ← CV data for the /resume page
   profile.png        ← avatar (.jpg / .webp also accepted)
   resume.pdf         ← downloadable CV (optional)
+  coursework.json    ← courses, grades, theses for the MCP career hub (optional)
+  extra-projects.json← per-project overrides + non-GitHub projects (optional)
+  role-profiles.json ← role-specific CV profiles for get_role_profile (optional)
 ```
+
+The three career-hub files are staged into `src/data/` at build time (config
+repo → local `config/` → `config/*.example.json`). Shapes are in
+`src/types/career.ts`; the example files show every field.
 
 `site.config.json` is the single source of personalization — name, headline,
 email, address, socials, serverUrl, SEO descriptions, and the legal hosting /

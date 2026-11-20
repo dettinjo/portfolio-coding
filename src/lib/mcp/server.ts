@@ -39,11 +39,26 @@ import {
 } from "@/lib/banner/constants";
 import { BannerData } from "@/types/banner";
 import { siteConfig } from "@/lib/config";
+import { suggestedPdfFileName } from "@/lib/filenames";
+import { getCourseworkPayload } from "@/lib/career/coursework";
+import {
+  getProjectSourceInfo,
+  syncGithubProjects,
+  KNOWN_TRACKS,
+} from "@/lib/career/projects";
+import {
+  buildRoleProfile,
+  listRoleConfigs,
+  listRoleProfiles,
+} from "@/lib/career/role-profiles";
+
+const SYNC_COOLDOWN_MS = 60_000;
+let lastSyncAt = 0;
 
 export function createResumeMcpServer(): McpServer {
   const server = new McpServer({
     name: "portfolio-resume-tailor",
-    version: "1.0.0",
+    version: "1.1.0",
   });
 
   // ─── TOOL 1: GET OFFICIAL RESUME (PRIMARY ENTRYPOINT) ─────────────────────
@@ -77,7 +92,7 @@ export function createResumeMcpServer(): McpServer {
   // ─── TOOL 2: GET MASTER RESUME POOL ────────────────────────────────────────
   server.tool(
     "get_master_resume",
-    "Returns the extended master resume pool (with all experiences, projects, and skills), if configured, or falls back to the canonical resume.",
+    "Returns the extended master resume pool (with all experiences, projects, and skills), if configured, or falls back to the canonical resume. sections.projects is filled from the GitHub portfolio repos plus manual overrides (name, url unless private, technologies, date, summary, README highlights, inferred role tracks).",
     {},
     async () => {
       const resume = getMasterResume();
@@ -233,13 +248,21 @@ export function createResumeMcpServer(): McpServer {
 
         const responsePayload = {
           success: true,
+          documentType: "resume",
           variantId: result.variant.id,
+          downloadUrl: fullDownloadUrl,
+          previewUrl: fullPreviewUrl,
+          suggestedFileName: suggestedPdfFileName({
+            kind: "cv",
+            name: result.variant.data.basics?.name,
+            company,
+            role,
+          }),
+          contentType: "application/pdf",
           company,
           role,
           locale,
           pageCount: result.pageCount,
-          downloadUrl: fullDownloadUrl,
-          previewUrl: fullPreviewUrl,
           pdfPath: result.pdfPath,
           pdfBase64: result.pdfBuffer.toString("base64"),
           budgetMetrics: result.variant.validation,
@@ -421,13 +444,24 @@ export function createResumeMcpServer(): McpServer {
 
         const responsePayload = {
           success: true,
+          documentType: "cover-letter",
           variantId: result.variant.id,
+          downloadUrl: fullDownloadUrl,
+          previewUrl: fullPreviewUrl,
+          suggestedFileName: suggestedPdfFileName({
+            kind: "cover-letter",
+            name:
+              result.variant.data.basics?.name ||
+              result.variant.data.content?.signOffName ||
+              siteConfig.person.fullName,
+            company,
+            role,
+          }),
+          contentType: "application/pdf",
           company,
           role,
           locale,
           pageCount: result.pageCount,
-          downloadUrl: fullDownloadUrl,
-          previewUrl: fullPreviewUrl,
           pdfPath: result.pdfPath,
           pdfBase64: result.pdfBuffer.toString("base64"),
           budgetMetrics: result.variant.validation,
@@ -570,6 +604,14 @@ export function createResumeMcpServer(): McpServer {
                   documentType: "cover-letter",
                   company: cl?.company,
                   role: cl?.role,
+                  suggestedFileName: cl
+                    ? suggestedPdfFileName({
+                        kind: "cover-letter",
+                        name: cl.data.basics?.name || siteConfig.person.fullName,
+                        company: cl.company,
+                        role: cl.role,
+                      })
+                    : undefined,
                   downloadUrl: `${baseUrl}/api/cover-letter/download/${variantId}`,
                   previewUrl: `${baseUrl}/${cl?.locale || "en"}/cover-letter/preview/${variantId}`,
                   exists: Boolean(cl),
@@ -593,6 +635,14 @@ export function createResumeMcpServer(): McpServer {
                 documentType: "resume",
                 company: res?.company,
                 role: res?.role,
+                suggestedFileName: res
+                  ? suggestedPdfFileName({
+                      kind: "cv",
+                      name: res.data.basics?.name,
+                      company: res.company,
+                      role: res.role,
+                    })
+                  : undefined,
                 downloadUrl: `${baseUrl}/api/resume/download/${variantId}`,
                 previewUrl: `${baseUrl}/${res?.locale || "en"}/resume/preview/${variantId}`,
                 exists: Boolean(res),
@@ -1104,6 +1154,137 @@ Instructions:
             ),
           },
         ],
+      };
+    }
+  );
+
+  // ─── CAREER HUB: SYNC GITHUB PROJECTS ─────────────────────────────────────
+  server.tool(
+    "sync_github_projects",
+    "Refreshes the project pool behind get_master_resume and the role profiles by re-reading every GitHub repo tagged 'portfolio' or 'portfolio-private' (README, topics, primary language). Normally projects come from the build-time snapshot; call this after updating a README to use the change before the next deploy. Rate-limited to once per minute.",
+    {},
+    async () => {
+      if (process.env.NODE_ENV === "production" && !process.env.RESUME_MCP_API_KEY) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: "sync_github_projects is disabled: the server has no RESUME_MCP_API_KEY, so the MCP endpoint is unauthenticated.",
+            },
+          ],
+        };
+      }
+      const wait = lastSyncAt + SYNC_COOLDOWN_MS - Date.now();
+      if (wait > 0) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Synced less than a minute ago — retry in ${Math.ceil(wait / 1000)}s. Current source: ${JSON.stringify(getProjectSourceInfo())}`,
+            },
+          ],
+        };
+      }
+      lastSyncAt = Date.now();
+      try {
+        const result = await syncGithubProjects();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({ success: true, ...result, source: getProjectSourceInfo() }, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          isError: true,
+          content: [{ type: "text", text: `GitHub sync failed: ${message}` }],
+        };
+      }
+    }
+  );
+
+  // ─── CAREER HUB: COURSEWORK ───────────────────────────────────────────────
+  server.tool(
+    "get_coursework",
+    `Returns verified academic coursework with grades (Dutch 10-point scale), study programs and thesis summaries. Filter by track (a role id: ${KNOWN_TRACKS.join(", ")}) and/or minimum grade. With a track, courses are sorted by relevance, otherwise by grade. Ungraded modules (e.g. exchange courses) are excluded when minGrade is set.`,
+    {
+      track: z
+        .string()
+        .optional()
+        .describe("Track / role id, e.g. 'ai_engineer' or 'cloud_devops_engineer'"),
+      minGrade: z
+        .number()
+        .min(0)
+        .max(10)
+        .optional()
+        .describe("Only courses graded at or above this value, e.g. 8"),
+    },
+    async ({ track, minGrade }) => {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(getCourseworkPayload({ track, minGrade }), null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ─── CAREER HUB: ROLE PROFILES ────────────────────────────────────────────
+  server.tool(
+    "list_role_profiles",
+    "Lists the role-specific CS profiles (e.g. AI engineer, cloud/DevOps) with their positioning, top skills and how many projects and courses match each. Use a roleId with get_role_profile.",
+    {},
+    async () => {
+      return {
+        content: [{ type: "text", text: JSON.stringify(listRoleProfiles(), null, 2) }],
+      };
+    }
+  );
+
+  server.tool(
+    "get_role_profile",
+    "Returns a pre-ranked, role-tailored profile: positioning, a ResumeData object already trimmed to pass validate_resume_layout on one A4 page (role headline, reordered skills, top experience/education, top projects), the most relevant coursework with grades, and every matching project with README highlights for cover-letter grounding. Tailor resumeData further for the job, then pass it to generate_tailored_resume.",
+    {
+      roleId: z.string().min(1).describe("Role id from list_role_profiles, e.g. 'ai_engineer'"),
+      maxProjects: z
+        .number()
+        .int()
+        .min(1)
+        .max(4)
+        .optional()
+        .describe("Projects to put in resumeData.sections.projects (default 4, max 4)"),
+      maxCourses: z
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .optional()
+        .describe("Courses to return in relevantCoursework (default 6)"),
+    },
+    async ({ roleId, maxProjects, maxCourses }) => {
+      const profile = buildRoleProfile(roleId, { maxProjects, maxCourses });
+      if (!profile) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Unknown roleId '${roleId}'. Available: ${listRoleConfigs()
+                .map((r) => r.roleId)
+                .join(", ") || "(none configured)"}`,
+            },
+          ],
+        };
+      }
+      return {
+        content: [{ type: "text", text: JSON.stringify(profile, null, 2) }],
       };
     }
   );

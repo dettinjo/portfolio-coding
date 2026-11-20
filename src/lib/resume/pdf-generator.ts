@@ -127,6 +127,13 @@ export async function generateResumePdf(params: {
     // Emulate print media for exact CSS print rules
     await page.emulateMediaType("print");
 
+    // The preview URL carries ?print=true, which makes the page call
+    // window.print() after mount (for browser users). In headless Chromium that
+    // print job collides with page.pdf() ("Page is already being printed").
+    await page.evaluateOnNewDocument(() => {
+      window.print = () => undefined;
+    });
+
     await page.goto(previewUrl, {
       waitUntil: "networkidle0",
       timeout: 30_000,

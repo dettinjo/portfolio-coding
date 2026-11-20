@@ -4,6 +4,7 @@ import crypto from "crypto";
 import canonicalResumeData from "@/data/resume.json";
 import { ResumeData } from "@/types/resume";
 import { validateResumeLayout, LayoutValidationResult } from "./validator";
+import { getCareerProjects, toResumeItem } from "@/lib/career/projects";
 
 export const RETENTION_DAYS = 60; // 2 months retention
 export const RETENTION_MS = RETENTION_DAYS * 24 * 60 * 60 * 1000;
@@ -155,16 +156,39 @@ export function getCanonicalResume(): ResumeData {
  * or demo/resume.json), falling back to the canonical resume.
  */
 export function getMasterResume(): ResumeData {
+  let resume: ResumeData | null = null;
   const masterPath = path.join(process.cwd(), "config", "resume.master.json");
   if (fs.existsSync(masterPath)) {
     try {
       const content = fs.readFileSync(masterPath, "utf8");
-      return JSON.parse(content) as ResumeData;
+      resume = JSON.parse(content) as ResumeData;
     } catch {
       // Fall through to canonical
     }
   }
-  return getCanonicalResume();
+  return withProjects(resume ?? getCanonicalResume());
+}
+
+/**
+ * Fills sections.projects from the GitHub project pool (+ extra-projects.json
+ * overrides) unless the resume source already lists projects by hand.
+ */
+function withProjects(resume: ResumeData): ResumeData {
+  const existing = resume.sections.projects;
+  if (existing?.items?.length) return resume;
+  const items = getCareerProjects().map(toResumeItem);
+  return {
+    ...resume,
+    sections: {
+      ...resume.sections,
+      projects: {
+        ...(existing ?? {}),
+        name: existing?.name ?? "Projects",
+        visible: existing?.visible ?? true,
+        items,
+      },
+    },
+  };
 }
 
 /**
