@@ -99,6 +99,16 @@ function currentSource(): GithubSyncState {
 // ─── Runtime GitHub sync ─────────────────────────────────────────────────────
 
 export const CONTROL_TOPICS = new Set(["portfolio", "portfolio-private", "portfolio-config"]);
+const AUX_LANGUAGES = new Set([
+  "HTML",
+  "CSS",
+  "Jupyter Notebook",
+  "Makefile",
+  "Dockerfile",
+  "Shell",
+  "Roff",
+  "TeX",
+]);
 const normalizeTech = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 const registryByNorm: Record<string, string> = {};
 for (const [key, detail] of Object.entries(techRegistry as Record<string, { name?: string }>)) {
@@ -205,13 +215,27 @@ export async function syncGithubProjects(): Promise<{
       }
       const { title, body } = stripReadme(readmeRaw);
       const tags = (repo.topics || []).filter((t) => !CONTROL_TOPICS.has(t)).map(displayTag);
+      let language: string | undefined = repo.language || undefined;
+      if (language && AUX_LANGUAGES.has(language)) {
+        try {
+          const langs = await gh<Record<string, number>>(
+            `https://api.github.com/repos/${owner}/${repo.name}/languages`
+          );
+          const topCodeLang = Object.entries(langs)
+            .sort((a, b) => b[1] - a[1])
+            .find(([lang]) => !AUX_LANGUAGES.has(lang));
+          if (topCodeLang) language = topCodeLang[0];
+        } catch {
+          // Keep repo.language as fallback when /languages fetch fails
+        }
+      }
       return {
         id: repo.name.toLowerCase(),
         title: title || repo.name.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
         description: extractFirstParagraph(body) || repo.description || "",
         readme: body,
         url: linked ? repo.html_url : undefined,
-        language: repo.language || undefined,
+        language,
         tags,
         date: parseDateOverride(readmeRaw) || repo.created_at,
       };

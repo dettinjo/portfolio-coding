@@ -40,6 +40,31 @@ const CATEGORIES: Record<string, { name: string; order: number }> = {
   ai: { name: "AI", order: 5 },
 };
 
+const MARKUP_OR_AUX_LANGUAGES = new Set([
+  "HTML",
+  "CSS",
+  "Jupyter Notebook",
+  "Makefile",
+  "Dockerfile",
+  "Shell",
+  "Roff",
+  "TeX",
+]);
+
+/** Pick the primary non-markup/non-auxiliary language when GitHub reports one (e.g. cached HTML mockups). */
+function resolvePrimaryLanguage(
+  repoLanguage: string | null | undefined,
+  languages: Record<string, number>
+): string {
+  if (repoLanguage && !MARKUP_OR_AUX_LANGUAGES.has(repoLanguage)) {
+    return repoLanguage;
+  }
+  const topCodeLang = Object.entries(languages)
+    .sort((a, b) => b[1] - a[1])
+    .find(([lang]) => !MARKUP_OR_AUX_LANGUAGES.has(lang));
+  return topCodeLang?.[0] || repoLanguage || "Software Project";
+}
+
 interface TechDetail {
   name: string;
   category: string;
@@ -947,6 +972,16 @@ const main = async () => {
         const descriptionEn = extractFirstParagraph(en.body) || repo.description || "";
         const descriptionDe = extractFirstParagraph(de.body) || descriptionEn;
 
+        const primaryLanguage = resolvePrimaryLanguage(repo.language, languages);
+        const effectiveLanguages =
+          repo.language &&
+          primaryLanguage !== repo.language &&
+          !topicTags.some((t: string) => t.toLowerCase() === repo.language.toLowerCase())
+            ? Object.fromEntries(
+                Object.entries(languages).filter(([lang]) => lang !== repo.language)
+              )
+            : languages;
+
         projectsMap[slug] = {
           id: slug,
           slug,
@@ -956,7 +991,7 @@ const main = async () => {
           descriptionDe: descriptionDe,
           longDescription: en.body,
           longDescriptionDe: de.body,
-          projectType: repo.language || "Software Project",
+          projectType: primaryLanguage,
           developedAt: parseDateOverride(enReadme || "") || repo.created_at,
           liveUrl: repo.homepage || undefined,
           // The control topic — not repo visibility — decides whether to link.
@@ -965,7 +1000,7 @@ const main = async () => {
           coverImage: null,
           gallery: null,
           _weight: computeEffectiveWeight(1, repo),
-          _languages: languages,
+          _languages: effectiveLanguages,
           _coverUrl: en.coverUrl || de.coverUrl || undefined,
           _topicTags: topicTags,
         };
