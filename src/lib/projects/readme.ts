@@ -34,6 +34,34 @@ export function truncateWords(text: string, max: number): string {
   return cut.slice(0, lastSpace > 0 ? lastSpace : max - 1).replace(/[\s,;:—–-]+$/, "") + "…";
 }
 
+const SWITCHER_LINK_RE = /\[[^\]]*\]\(README(\.[a-z]{2})?\.md\)/gi;
+
+/**
+ * True when a line is purely a Markdown or HTML README language switcher, e.g.
+ * `**[English](README.md) · [Deutsch](README.de.md)**`.
+ */
+export function isLanguageSwitcherLine(line: string): boolean {
+  const s = line.trim();
+  if (!s) return false;
+  if (/<a[^>]+href=["']README(\.[a-z]{2})?\.md["']/i.test(s)) {
+    const restHtml = s
+      .replace(/<a\b[^>]*href=["']README(\.[a-z]{2})?\.md["'][^>]*>[\s\S]*?<\/a>/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/[\s*_·|/\\•—–-]+/g, "")
+      .replace(/[\uFE00-\uFE0F\u200D]/g, "")
+      .replace(/\p{Extended_Pictographic}/gu, "");
+    return restHtml === "";
+  }
+  if (!SWITCHER_LINK_RE.test(s)) return false;
+  SWITCHER_LINK_RE.lastIndex = 0;
+  const rest = s
+    .replace(SWITCHER_LINK_RE, "")
+    .replace(/[\s*_·|/\\•—–-]+/g, "")
+    .replace(/[\uFE00-\uFE0F\u200D]/g, "")
+    .replace(/\p{Extended_Pictographic}/gu, "");
+  return rest === "";
+}
+
 /**
  * Extracts the first prose paragraph from a README body (title, language
  * switcher and portfolio:date comment already stripped) for use as a card
@@ -42,16 +70,6 @@ export function truncateWords(text: string, max: number): string {
  */
 export function extractFirstParagraph(body: string, maxLen = 260): string {
   const lines = body.replace(/\r\n/g, "\n").split("\n");
-  const switcherLinkRe = /\[[^\]]*\]\(README(\.[a-z]{2})?\.md\)/gi;
-  const isSwitcherLine = (s: string): boolean => {
-    if (!switcherLinkRe.test(s)) return false;
-    switcherLinkRe.lastIndex = 0;
-    const rest = s
-      .replace(switcherLinkRe, "")
-      .replace(/[\s*·|]/g, "")
-      .replace(/\p{Extended_Pictographic}/gu, "");
-    return rest === "";
-  };
   const isBadgeLine = (s: string): boolean => /^(\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)\s*)+$/.test(s);
   const isImageOnlyLine = (s: string): boolean => /^(!\[[^\]]*\]\([^)]*\)\s*)+$/.test(s);
 
@@ -62,7 +80,7 @@ export function extractFirstParagraph(body: string, maxLen = 260): string {
     if (!collecting) {
       if (s === "") continue;
       if (s.startsWith("#") || s.startsWith("<") || s.startsWith(">")) continue;
-      if (isSwitcherLine(s) || isBadgeLine(s) || isImageOnlyLine(s)) continue;
+      if (isLanguageSwitcherLine(s) || isBadgeLine(s) || isImageOnlyLine(s)) continue;
       collecting = true;
       paraLines.push(s);
     } else {

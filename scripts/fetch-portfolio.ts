@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
-import { extractFirstParagraph, parseDateOverride } from "../src/lib/projects/readme";
+import { extractFirstParagraph, isLanguageSwitcherLine, parseDateOverride } from "../src/lib/projects/readme";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
@@ -319,8 +319,8 @@ const main = async () => {
     const lines = markdown.replace(/\r\n/g, "\n").split("\n");
     const kept: string[] = [];
     for (const line of lines) {
-      // Drop the language-switcher line, e.g. "[English](README.md) · [Deutsch](README.de.md)"
-      if (/\]\(README(\.[a-z]{2})?\.md\)/i.test(line) && /^\s*\[/.test(line)) continue;
+      // Drop the language-switcher line, e.g. "**[English](README.md) · [Deutsch](README.de.md)**"
+      if (isLanguageSwitcherLine(line)) continue;
       // Drop portfolio metadata comments, e.g. "<!-- portfolio:date=2022-07-01 -->"
       if (/^\s*<!--\s*portfolio:/i.test(line)) continue;
       // Capture & drop the first top-level H1 as the title

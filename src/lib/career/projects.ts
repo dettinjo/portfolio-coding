@@ -6,6 +6,7 @@ import { loadExtraProjects } from "./data";
 import {
   extractFirstParagraph,
   extractHighlights,
+  isLanguageSwitcherLine,
   parseDateOverride,
   summarize,
 } from "@/lib/projects/readme";
@@ -121,7 +122,7 @@ export function stripReadme(markdown: string): { title: string; body: string } {
   let title = "";
   const kept: string[] = [];
   for (const line of markdown.replace(/\r\n/g, "\n").split("\n")) {
-    if (/\]\(README(\.[a-z]{2})?\.md\)/i.test(line) && /^\s*[[<]/.test(line)) continue;
+    if (isLanguageSwitcherLine(line)) continue;
     if (/^\s*<!--\s*portfolio:/i.test(line)) continue;
     const h1 = line.match(/^#\s+(.+?)\s*$/);
     if (h1 && !title) {
@@ -243,27 +244,27 @@ export function getProjectSourceInfo(): { source: string; syncedAt: string | nul
  */
 const TRACK_SIGNALS: Record<TrackId, { tech: string[]; text: RegExp[] }> = {
   ai_engineer: {
-    tech: ["PyTorch", "Hugging Face", "Transformers", "spaCy", "Stanza", "LLM", "NLP", "TensorFlow", "scikit-learn", "Meta Llama", "Machine Learning", "OpenAI", "MCP"],
+    tech: ["PyTorch", "Hugging Face", "Transformers", "spaCy", "Stanza", "LLM", "NLP", "TensorFlow", "scikit-learn", "Meta Llama", "Machine Learning", "OpenAI", "MCP", "vLLM", "DSPy", "BERTopic", "Sentence-Transformers"],
     text: [/\bLLMs?\b/i, /machine learning/i, /\bNLP\b/i, /\bXAI\b|explainab/i, /neural|deep learning/i, /\bAI\b/],
   },
   fullstack_engineer: {
-    tech: ["Next.js", "React", "TypeScript", "Node.js", "Express.js", "GraphQL", "Laravel", "Tailwind CSS", "Strapi", "Vue.js", "Angular", "Full-Stack", "PHP", "JavaScript"],
+    tech: ["Next.js", "React", "TypeScript", "Node.js", "Express.js", "GraphQL", "Laravel", "Tailwind CSS", "Strapi", "Vue.js", "Angular", "Full-Stack", "PHP", "JavaScript", "Payload CMS", "PWA", "Leaflet"],
     text: [/full[- ]stack/i, /frontend|front-end/i, /\bweb app/i, /dashboard/i],
   },
   backend_distributed: {
-    tech: ["FastAPI", "Fastapi", "PostgreSQL", "Redis", "MongoDB", "MySQL", "Flask", "Express.js", "GraphQL", "REST API", "Microservices", "Python", "Node.js", "SQLite", "Kubernetes"],
+    tech: ["FastAPI", "Fastapi", "PostgreSQL", "Redis", "MongoDB", "MySQL", "Flask", "Express.js", "GraphQL", "REST API", "Microservices", "Python", "Node.js", "SQLite", "Kubernetes", "Payload CMS", "SQLAlchemy", "Typst"],
     text: [/\bAPI\b/, /background (sync|worker|job)/i, /rate limit/i, /distributed/i, /microservice/i, /queue/i],
   },
   data_analyst_engineer: {
-    tech: ["Pandas", "R", "SQL", "PostgreSQL", "Wikidata", "Data Processing", "Jupyter", "NumPy"],
+    tech: ["Pandas", "R", "SQL", "PostgreSQL", "Wikidata", "Data Processing", "Jupyter", "NumPy", "Matplotlib"],
     text: [/\bdata\b/i, /\bSPARQL\b/i, /analys(is|e)/i, /statistic/i, /dataset/i, /knowledge graph/i],
   },
   cloud_devops_engineer: {
-    tech: ["Docker", "Kubernetes", "Terraform", "Terragrunt", "Ansible", "GitLab CI/CD", "GitHub Actions", "NGINX", "cert-manager", "Prometheus", "Grafana", "Tailscale", "Coolify", "Komodo", "Microsoft Azure", "AWS", "Caddy", "GitOps", "Infrastructure as Code", "Infrastructure as Code (IaC)", "DevOps", "Cloud Infrastructure", "Shell Scripting", "Ingress"],
+    tech: ["Docker", "Docker Compose", "Kubernetes", "Terraform", "Terragrunt", "Ansible", "GitLab CI/CD", "GitHub Actions", "NGINX", "cert-manager", "Prometheus", "Grafana", "Tailscale", "Coolify", "Komodo", "Microsoft Azure", "AWS", "Caddy", "GitOps", "Infrastructure as Code", "Infrastructure as Code (IaC)", "DevOps", "Cloud Infrastructure", "Shell Scripting", "Ingress", "Playwright", "WireGuard", "Nextcloud", "SLURM"],
     text: [/\bIaC\b|infrastructure as code/i, /\bCI\/CD\b/i, /deploy/i, /kubernetes|\bk8s\b/i, /disaster recovery/i, /observability|monitor/i],
   },
   security_ml_engineer: {
-    tech: ["JWT", "SSL/TLS", "SOPS", "age", "OAuth"],
+    tech: ["JWT", "SSL/TLS", "SOPS", "age", "OAuth", "WireGuard"],
     text: [/encrypt/i, /\bAES/i, /\bJWT\b/i, /secret/i, /\bGDPR\b/i, /security|secure/i, /authenticat/i, /privacy/i, /adversarial/i],
   },
 };

@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import { type ExtraProps } from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { withBasePath } from "@/lib/basePath";
 
 interface LongTextRendererProps {
@@ -95,6 +96,17 @@ const ParagraphComponent = ({
   return <p {...props}>{children}</p>;
 };
 
+// Responsive wrapper so wide GFM Markdown tables scroll horizontally on mobile.
+const TableComponent = ({
+  node: _node,
+  children,
+  ...props
+}: React.TableHTMLAttributes<HTMLTableElement> & ExtraProps) => (
+  <div className="my-6 w-full overflow-x-auto">
+    <table {...props}>{children}</table>
+  </div>
+);
+
 export function LongTextRenderer({ content }: LongTextRendererProps) {
   if (!content) {
     return null;
@@ -103,11 +115,13 @@ export function LongTextRenderer({ content }: LongTextRendererProps) {
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none text-muted-foreground">
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
           code: CodeComponent,
           img: ImgComponent,
           p: ParagraphComponent,
+          table: TableComponent,
         }}
       >
         {content}
