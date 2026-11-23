@@ -17,11 +17,11 @@ const CodeComponent = ({
 }: React.ClassAttributes<HTMLElement> &
   React.HTMLAttributes<HTMLElement> &
   ExtraProps) => {
-  const isInlineCode = !className;
+  const isInlineCode = !className && !String(children).includes("\n");
   if (isInlineCode) {
     return (
       <code
-        className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
+        className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold text-foreground break-words"
         {...props}
       >
         {children}
@@ -34,6 +34,21 @@ const CodeComponent = ({
     </code>
   );
 };
+
+// Keep fenced code blocks (including unlabeled ASCII architecture diagrams) legible across light and dark modes.
+const PreComponent = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  node,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLPreElement> & ExtraProps) => (
+  <pre
+    className="my-6 overflow-x-auto rounded-lg border border-border/60 bg-zinc-950 p-4 font-mono text-xs sm:text-sm leading-relaxed text-zinc-100 [&>code]:rounded-none [&>code]:bg-transparent [&>code]:p-0 [&>code]:font-normal [&>code]:text-inherit [&>code]:break-normal"
+    {...props}
+  >
+    {children}
+  </pre>
+);
 
 // Inline images. Screenshots get a rounded, shadowed frame; technology SVG
 // icons render as a plain centered glyph (no frame).
@@ -58,7 +73,7 @@ const ImgComponent = ({
       className={
         isIcon
           ? "m-0 mx-auto h-auto max-h-40 w-auto object-contain"
-          : "m-0 h-auto max-h-[460px] w-auto rounded-xl border border-border object-contain shadow-md"
+          : "m-0 h-auto max-h-[460px] max-w-full w-auto rounded-xl border border-border object-contain shadow-md"
       }
     />
   );
@@ -119,6 +134,7 @@ export function LongTextRenderer({ content }: LongTextRendererProps) {
         rehypePlugins={[rehypeRaw]}
         components={{
           code: CodeComponent,
+          pre: PreComponent,
           img: ImgComponent,
           p: ParagraphComponent,
           table: TableComponent,

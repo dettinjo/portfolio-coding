@@ -67,7 +67,7 @@
     "socials_text": "Oder finde mich hier:",
     "success_title": "Vielen Dank!",
     "success_message": "Ihre Nachricht wurde erfolgreich gesendet. Ich melde mich in Kürze.",
-    "error_message": "Etwas ist schiefgelaufen. Bitte versuchen es erneut."
+    "error_message": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
   },
   "ProjectDetailsPage": {
     "back_button": "Zurück zu den Projekten",
@@ -82,6 +82,6 @@
   },
   "SoftwarePageSEO": {
     "siteName": "Code von {name}",
-    "description": "Entdecken eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
+    "description": "Entdecke eine Sammlung meiner Softwareentwicklungsprojekte, die meine Fähigkeiten in modernen Web-Technologien demonstrieren."
   }
 }

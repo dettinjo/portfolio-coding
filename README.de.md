@@ -1,5 +1,5 @@
 <!-- portfolio:date=2025-06-01 -->
-# Codebase — Konfigurationsgesteuertes GitHub-Portfolio
+# Codebase — Config-Driven GitHub Portfolio
 
 **[English](README.md) · [Deutsch](README.de.md)**
 

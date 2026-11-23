@@ -105,8 +105,10 @@ export function AnimatedProjectCard({
         {/* The rest of the component remains the same */}
         <div
           className={cn(
-            "h-64 md:h-auto md:w-1/2 flex items-center justify-center",
-            isIconCover ? "p-10 md:p-20" : "p-6 md:p-12",
+            "flex items-center justify-center",
+            isIconCover
+              ? "h-64 md:h-auto md:w-1/2 p-10 md:p-20"
+              : "h-auto md:w-1/2 px-6 pt-6 pb-2 md:p-12",
             index % 2 === 1 ? "md:order-last" : ""
           )}
         >
@@ -133,7 +135,7 @@ export function AnimatedProjectCard({
                 priority={index < 2}
                 placeholder={coverImage?.blurDataUrl ? "blur" : "empty"}
                 blurDataURL={coverImage?.blurDataUrl}
-                className="max-h-[320px] w-auto h-auto rounded-2xl object-contain shadow-lg"
+                className="max-h-[260px] md:max-h-[320px] max-w-full w-auto h-auto rounded-2xl object-contain shadow-lg"
               />
             )
           ) : (
@@ -148,7 +150,7 @@ export function AnimatedProjectCard({
             </div>
           )}
         </div>
-        <div className="flex flex-col md:w-1/2 p-10 md:p-16">
+        <div className="flex flex-col md:w-1/2 p-6 sm:p-10 md:p-16 gap-6">
           <div className="flex-grow">
             <p className="text-sm font-semibold text-muted-foreground tracking-wider uppercase transition-colors duration-500 group-data-[active=true]:text-background/70">
               {projectType}

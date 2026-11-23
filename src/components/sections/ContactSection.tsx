@@ -75,7 +75,7 @@ export function ContactSection() {
       <motion.div
         data-active={isActive}
         className={cn(
-          "group rounded-xl p-8 md:p-12 transition-all duration-300",
+          "group rounded-xl overflow-hidden p-8 md:p-12 transition-all duration-300",
           "data-[active=true]:bg-foreground data-[active=true]:shadow-2xl"
         )}
         animate={{ scale: isActive ? 1.02 : 1 }}

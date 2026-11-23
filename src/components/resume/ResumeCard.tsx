@@ -129,13 +129,13 @@ export function ResumeCard({
             <h1 className="text-5xl font-extrabold tracking-tight mb-2 mt-0 leading-none">
               {basics.name}
             </h1>
-            <p className="text-xl font-medium opacity-80 whitespace-nowrap">
+            <p className="text-xl font-medium opacity-80">
               {basics.headline}
             </p>
           </div>
 
           {/* LEFT COLUMN: Sidebar Container */}
-          <aside className="p-4 pr-0 print:p-4 print:pr-0 print:h-full bg-white dark:bg-zinc-950">
+          <aside className="p-4 md:pr-0 print:p-4 print:pr-0 print:h-full bg-white dark:bg-zinc-950">
             <div className="bg-zinc-900 text-zinc-100 p-6 md:p-8 flex flex-col gap-6 print:!flex print:p-6 print:h-full dark:bg-white dark:text-zinc-900 h-full rounded-2xl">
               {/* 1. Personal Details (Avatar & Contact) */}
               <div className="flex flex-col items-center gap-6">

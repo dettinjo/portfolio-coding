@@ -220,13 +220,13 @@ export default async function ProjectDetailPage({ params }: Props) {
               <p className="text-sm font-semibold text-muted-foreground tracking-wider uppercase">
                 {projectType}
               </p>
-              <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">
+              <h1 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight break-words">
                 {title}
               </h1>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-16">
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 min-w-0">
                 <h2 className="text-2xl font-semibold border-b-2 border-foreground pb-2">
                   {t("about_title")}
                 </h2>
