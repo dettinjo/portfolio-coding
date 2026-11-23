@@ -111,10 +111,37 @@ const AUX_LANGUAGES = new Set([
 ]);
 const normalizeTech = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 const registryByNorm: Record<string, string> = {};
-for (const [key, detail] of Object.entries(techRegistry as Record<string, { name?: string }>)) {
+const CATEGORY_GROUP_NAMES: Record<string, string> = {
+  frontend: "Frontend",
+  mobile: "Mobile",
+  backend: "Backend",
+  devops: "DevOps",
+  ai: "AI & Data Science",
+};
+const NON_SKILL_TAGS = new Set([
+  "full-stack",
+  "mobile app",
+  "automation",
+  "self-hosting",
+  "data processing",
+  "cloud infrastructure",
+  "entity linking",
+  "fact-checking",
+  "komoot",
+  "strava",
+]);
+const categoryByNorm: Record<string, string> = {};
+for (const [key, detail] of Object.entries(
+  techRegistry as Record<string, { name?: string; category?: string }>
+)) {
   const name = detail.name || key;
   registryByNorm[normalizeTech(key)] = name;
   registryByNorm[normalizeTech(name)] = name;
+  const cat = detail.category?.toLowerCase();
+  if (cat && CATEGORY_GROUP_NAMES[cat]) {
+    categoryByNorm[normalizeTech(key)] = CATEGORY_GROUP_NAMES[cat];
+    categoryByNorm[normalizeTech(name)] = CATEGORY_GROUP_NAMES[cat];
+  }
 }
 /** True when the topic matches a curated tech-registry entry (icon + skill scoring). */
 export const isRegisteredTech = (topic: string): boolean => normalizeTech(topic) in registryByNorm;
@@ -272,7 +299,7 @@ const TRACK_SIGNALS: Record<TrackId, { tech: string[]; text: RegExp[] }> = {
     text: [/\bLLMs?\b/i, /machine learning/i, /\bNLP\b/i, /\bXAI\b|explainab/i, /neural|deep learning/i, /\bAI\b/],
   },
   fullstack_engineer: {
-    tech: ["Next.js", "React", "TypeScript", "Node.js", "Express.js", "GraphQL", "Laravel", "Tailwind CSS", "Strapi", "Vue.js", "Angular", "Full-Stack", "PHP", "JavaScript", "Payload CMS", "PWA", "Leaflet"],
+    tech: ["Next.js", "React", "TypeScript", "Node.js", "Express.js", "GraphQL", "Laravel", "Tailwind CSS", "Strapi", "Vue.js", "Angular", "Full-Stack", "PHP", "JavaScript", "Payload CMS", "PWA", "Leaflet", "Flutter", "Dart", "Stripe"],
     text: [/full[- ]stack/i, /frontend|front-end/i, /\bweb app/i, /dashboard/i],
   },
   backend_distributed: {
@@ -284,7 +311,7 @@ const TRACK_SIGNALS: Record<TrackId, { tech: string[]; text: RegExp[] }> = {
     text: [/\bdata\b/i, /\bSPARQL\b/i, /analys(is|e)/i, /statistic/i, /dataset/i, /knowledge graph/i],
   },
   cloud_devops_engineer: {
-    tech: ["Docker", "Docker Compose", "Kubernetes", "Terraform", "Terragrunt", "Ansible", "GitLab CI/CD", "GitHub Actions", "NGINX", "cert-manager", "Prometheus", "Grafana", "Tailscale", "Coolify", "Komodo", "Microsoft Azure", "AWS", "Caddy", "GitOps", "Infrastructure as Code", "Infrastructure as Code (IaC)", "DevOps", "Cloud Infrastructure", "Shell Scripting", "Ingress", "Playwright", "WireGuard", "Nextcloud", "SLURM"],
+    tech: ["Docker", "Docker Compose", "Kubernetes", "Terraform", "Terragrunt", "Ansible", "GitLab CI/CD", "GitHub Actions", "NGINX", "cert-manager", "Prometheus", "Grafana", "Tailscale", "Coolify", "Komodo", "Microsoft Azure", "AWS", "Caddy", "GitOps", "Infrastructure as Code", "Infrastructure as Code (IaC)", "DevOps", "Cloud Infrastructure", "Shell Scripting", "Ingress", "Playwright", "WireGuard", "Nextcloud", "SLURM", "Selenium", "Gatus", "Infisical", "Renovate"],
     text: [/\bIaC\b|infrastructure as code/i, /\bCI\/CD\b/i, /deploy/i, /kubernetes|\bk8s\b/i, /disaster recovery/i, /observability|monitor/i],
   },
   security_ml_engineer: {
@@ -382,4 +409,26 @@ export function toResumeItem(p: CareerProject): ResumeItem & Record<string, unkn
     highlights: p.highlights,
     tracks: p.tracks,
   };
+}
+
+/** Aggregates registry-backed technologies from all portfolio projects into resume skill groups. */
+export function getPortfolioSkillsByCategory(): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  const seenPerGroup: Record<string, Set<string>> = {};
+
+  for (const project of getCareerProjects()) {
+    for (const rawTech of project.technologies) {
+      const clean = rawTech.trim();
+      if (!clean || NON_SKILL_TAGS.has(clean.toLowerCase())) continue;
+      const normKey = normalizeTech(clean);
+      const groupName = categoryByNorm[normKey];
+      const canonicalName = registryByNorm[normKey];
+      if (!groupName || !canonicalName) continue;
+      const seen = (seenPerGroup[groupName] ??= new Set());
+      if (seen.has(canonicalName.toLowerCase())) continue;
+      seen.add(canonicalName.toLowerCase());
+      (out[groupName] ??= []).push(canonicalName);
+    }
+  }
+  return out;
 }

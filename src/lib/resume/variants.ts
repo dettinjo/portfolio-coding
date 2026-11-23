@@ -4,7 +4,7 @@ import crypto from "crypto";
 import canonicalResumeData from "@/data/resume.json";
 import { ResumeData } from "@/types/resume";
 import { validateResumeLayout, LayoutValidationResult } from "./validator";
-import { getCareerProjects, toResumeItem } from "@/lib/career/projects";
+import { getCareerProjects, getPortfolioSkillsByCategory, toResumeItem } from "@/lib/career/projects";
 
 export const RETENTION_DAYS = 60; // 2 months retention
 export const RETENTION_MS = RETENTION_DAYS * 24 * 60 * 60 * 1000;
@@ -166,7 +166,38 @@ export function getMasterResume(): ResumeData {
       // Fall through to canonical
     }
   }
-  return withProjects(resume ?? getCanonicalResume());
+  return withPortfolioSkills(withProjects(resume ?? getCanonicalResume()));
+}
+
+/**
+ * Merges technologies discovered across portfolio repos into matching resume skill categories.
+ */
+function withPortfolioSkills(resume: ResumeData): ResumeData {
+  const existing = resume.sections.skills;
+  if (!existing?.items?.length) return resume;
+  const discovered = getPortfolioSkillsByCategory();
+  const items = existing.items.map((item) => {
+    const additions = item.name ? discovered[item.name] : undefined;
+    if (!additions?.length) return item;
+    const merged: string[] = [];
+    const seen = new Set<string>();
+    for (const kw of [...(item.keywords ?? []), ...additions]) {
+      const clean = kw.trim();
+      if (!clean) continue;
+      const low = clean.toLowerCase();
+      if (seen.has(low)) continue;
+      seen.add(low);
+      merged.push(clean);
+    }
+    return { ...item, keywords: merged };
+  });
+  return {
+    ...resume,
+    sections: {
+      ...resume.sections,
+      skills: { ...existing, items },
+    },
+  };
 }
 
 /**
