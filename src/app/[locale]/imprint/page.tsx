@@ -25,21 +25,26 @@ export default async function ImprintPage({ params }: Props) {
     email: siteConfig.person.email,
   };
 
+  const hasStreet = values.street.trim().length > 0;
+  const hasPhone = values.phone.trim().length > 0;
+
   const section1Content = [
     t("section1_content.name", values),
-    t("section1_content.street", values),
+    ...(hasStreet ? [t("section1_content.street", values)] : []),
     t("section1_content.city", values),
     t("section1_content.country", values),
   ];
 
   const section2Content = [
-    t("section2_content.phone", values),
+    ...(hasPhone ? [t("section2_content.phone", values)] : []),
     t("section2_content.email", values),
   ];
 
   const section3Content = [
     t("section3_content.name", values),
-    t("section3_content.address", values),
+    hasStreet
+      ? t("section3_content.address", values)
+      : [values.city, values.country].filter(Boolean).join(", "),
   ];
 
   const ContentBlock = ({
